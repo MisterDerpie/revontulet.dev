@@ -6,7 +6,8 @@ date: 2021-12-04 19:00:00+0000
 categories:
     - Tech
 tags:
-    - Linux, Windows
+    - Linux
+    - Windows
 weight: 1
 ---
 
