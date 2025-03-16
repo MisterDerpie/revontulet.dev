@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Linux on revontulet.dev</title><link>https://revontulet.dev/tags/linux/</link><description>Recent content in Linux on revontulet.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 04 Dec 2021 19:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>Ubuntu with WSL2 and i3 Window Manager GUI</title><link>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</link><pubDate>Sat, 04 Dec 2021 19:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</guid><description>&lt;p>Using &lt;code>i3&lt;/code> and &lt;code>Ubuntu&lt;/code> native is probably best, but you may not get the choice to do so, in case your working machine is running Windows.
+I looked through several guides how to set up Ubuntu with &lt;code>i3&lt;/code> on WSL2, but it took me several hours to get the setup I looked for because things did not work as expected.
+Therefore I&amp;rsquo;m writing this guide.&lt;/p>
+&lt;h2 id="installing-ubuntu-on-wsl2">Installing Ubuntu on WSL2
+&lt;/h2>&lt;p>There are plenty of tutorials and videos to do so.
+I will refer to the very one that I used to set up the bare, GUIless minimum,
+&lt;a class="link" href="https://www.youtube.com/watch?v=IL7Jd9rjgrM" target="_blank" rel="noopener"
+>WSL2 Ubuntu GUI&lt;/a> by David Bombai.
+Reproduce the steps until &lt;code>Install Ubuntu GUI&lt;/code> (7:25) to get the headless Ubuntu on WSL2 up and running.&lt;/p>
+&lt;h2 id="installing-i3-and-vcxsrv">Installing i3 and VcXsrv
+&lt;/h2>&lt;p>Once you set up your Ubuntu, created a user and are prompted with the shell, update the package index.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Next, install &lt;code>lxdm&lt;/code> and &lt;code>i3&lt;/code>.
+We also need to provide the information where Xserver sends its signals to.
+This is done by specifying the &lt;code>DISPLAY&lt;/code> environment variable in &lt;code>.bashrc&lt;/code>.
+The echo command adds this.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install -y lxdm i3
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;export DISPLAY=\$(cat /etc/resolv.conf | grep nameserver | awk &amp;#39;{print \$2; exit;}&amp;#39;):0.0&amp;#34;&lt;/span> &amp;gt;&amp;gt; ~/.bashrc
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>After you setup all this, restart Ubuntu (e.g. run &lt;code>exit&lt;/code> and then start it again).&lt;/p>
+&lt;p>Next, install &lt;a class="link" href="https://sourceforge.net/projects/vcxsrv/" target="_blank" rel="noopener"
+>VcXsrv&lt;/a>.
+Once installed, in your installation directory (default: &lt;code>C:\Program Files\VcXsrv&lt;/code>) start &lt;code>xlaunch.exe&lt;/code>.
+Launch it with the parameters provided in the screenshots.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-1.png"
+width="495"
+height="391"
+srcset="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-1_hu_27cd5299b266b01f.png 480w, https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-1_hu_a8cc7ee633f28e9c.png 1024w"
+loading="lazy"
+alt="vcxsrv-fullscreen"
+class="gallery-image"
+data-flex-grow="126"
+data-flex-basis="303px"
+>&lt;/p>
+&lt;p>Select &lt;code>Fullscreen&lt;/code>, then click &lt;code>Next&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-2.png"
+width="497"
+height="389"
+srcset="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-2_hu_d09a75a888d18d1.png 480w, https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-2_hu_883bb0ca046c4766.png 1024w"
+loading="lazy"
+alt="vcxsrv-fullscreen"
+class="gallery-image"
+data-flex-grow="127"
+data-flex-basis="306px"
+>&lt;/p>
+&lt;p>Select the option &lt;code>Start no client&lt;/code> and click &lt;code>Next&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-3.png"
+width="492"
+height="387"
+srcset="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-3_hu_6f768f9bcedb14e0.png 480w, https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-3_hu_991e9688bc019d23.png 1024w"
+loading="lazy"
+alt="vcxsrv-fullscreen"
+class="gallery-image"
+data-flex-grow="127"
+data-flex-basis="305px"
+>&lt;/p>
+&lt;p>In &lt;code>Extra Settings&lt;/code>, select &lt;code>Disable access control&lt;/code> and click &lt;code>Next&lt;/code>.&lt;/p>
+&lt;p>You will be presented with the final setup screen and don&amp;rsquo;t need to do anything here.
+Click &lt;code>Finish&lt;/code> and your screen should turn black, because VcXsrv opened a fullscreen window with no clients attached.
+Press &lt;code>Alt-Tab&lt;/code> to tab out the window, and go back to your Ubuntu terminal.&lt;/p>
+&lt;p>In your Ubuntu terminal, run &lt;code>i3&lt;/code> (i.e. type &lt;code>i3&lt;/code> and press enter) and you should start seeing some log (maybe including error messages).
+When you now tab back into the black fullscreen, after waiting a short time you should be able to select your i3 config.
+It doesn&amp;rsquo;t matter whether you run the config setup or not, for some reason it won&amp;rsquo;t be properly persisted.
+Thus, we need to &amp;ldquo;restore&amp;rdquo; the original config.
+Exit VcXsrv and go back to the Ubuntu console.
+If i3 hasn&amp;rsquo;t terminated, press &lt;code>CTRL+C&lt;/code> to close it.&lt;/p>
+&lt;p>Run the contents of this &lt;a class="link" href="https://gist.github.com/MisterDerpie/ddc2fa34ed76a65141a5913e0a2c9365" target="_blank" rel="noopener"
+>MisterDerpie/i3-default-config-alt-key&lt;/a> gist in your Ubuntu shell.
+This you can do by copying the content and right-click into the Ubuntu window.
+It will create the proper i3 configuration needed for your next connection.&lt;/p>
+&lt;p>Restart Ubuntu and restart VcXsrv (with the previous parameters).
+When you now run &lt;code>i3&lt;/code> again, go to &lt;code>VcXsrv&lt;/code> you should see everything working.&lt;/p>
+&lt;h2 id="extra-oh-my-zsh">Extra: Oh My Zsh
+&lt;/h2>&lt;p>As I&amp;rsquo;m a very happy user of &lt;a class="link" href="https://github.com/ohmyzsh/ohmyzsh" target="_blank" rel="noopener"
+>Oh My Zsh&lt;/a>, and you may use it too, installing and making it the default shell would cause the &lt;code>DISPLAY&lt;/code> variable to stop being defined.
+This is because it&amp;rsquo;s part of &lt;code>.bashrc&lt;/code> and not &lt;code>.zshrc&lt;/code>.&lt;/p>
+&lt;p>Assuming you don&amp;rsquo;t have Oh My Zsh installed yet, below script will do the job.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install -y git zsh
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sh -c &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="k">$(&lt;/span>curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh&lt;span class="k">)&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Once installed, issue below command to reenable the proper definition of the &lt;code>DISPLAY&lt;/code> environment variable.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;export DISPLAY=\$(cat /etc/resolv.conf | grep nameserver | awk &amp;#39;{print &lt;/span>&lt;span class="nv">$2&lt;/span>&lt;span class="s2">; exit;}&amp;#39;):0.0&amp;#34;&lt;/span> &amp;gt;&amp;gt; ~/.zshrc
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item><item><title>Ubuntu and i3 on Lenovo Legion 5 Pro</title><link>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</link><pubDate>Sun, 22 Aug 2021 15:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</guid><description>&lt;p>During my summer vacation, I got myself a Lenovo Legion 5 Pro, powered by an AMD Ryzen 7 5800H and an Nvidia RTX3070.
+Though this post is not about the legion, I have to say it is an awesome laptop.
+What this post is about is how to make Ubuntu with &lt;a class="link" href="https://i3wm.org/" target="_blank" rel="noopener"
+>i3wm&lt;/a> run on the Lenovo Legion.&lt;/p>
+&lt;h2 id="installing-ubuntu">Installing Ubuntu
+&lt;/h2>&lt;h3 id="create-bootable-usb-media">Create Bootable USB Media
+&lt;/h3>&lt;p>You need a USB stick as well as a Ubuntu ISO image.
+Plenty of tutorials exist on the web to create a bootable Ubuntu USB stick.
+Ubuntu.com provides official documentation, coming from a device running
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-windows#1-overview" target="_blank" rel="noopener"
+>Windows&lt;/a>,
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-ubuntu#1-overview" target="_blank" rel="noopener"
+>Ubuntu&lt;/a> or &lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview" target="_blank" rel="noopener"
+>Mac OS X&lt;/a>.&lt;/p>
+&lt;h3 id="boot-usb-media">Boot USB Media
+&lt;/h3>&lt;p>Once you created your boot device, boot up the Legion and press &lt;code>F12&lt;/code> to get into the boot menu.
+From there, select the USB stick.&lt;/p>
+&lt;p>Next you are presented with the GRUB interface, where you have to select &lt;code>Ubuntu (safe graphics)&lt;/code> and then press &lt;code>RETURN&lt;/code>.
+After a while (length of the while depends on the speed of your USB stick) you should see a window asking whether you want to &lt;code>Try&lt;/code> or &lt;code>Install&lt;/code> Ubuntu.
+Select &lt;code>Install Ubuntu&lt;/code>.&lt;/p>
+&lt;p>There is only one part in the installer you need to select a certain option to not run into issues.
+At some point you should be asked whether you want to have a &lt;code>Normal Installation&lt;/code> or &lt;code>Minimal Installation&lt;/code>.
+See &lt;a class="link" href="https://ubuntu.com/tutorials/install-ubuntu-desktop#5-prepare-to-install-ubuntu" target="_blank" rel="noopener"
+>this image&lt;/a> in the official guide.
+In the bottom of the window, below &lt;code>Other options&lt;/code>, you have to select &lt;code>Install third-party software&lt;/code>.
+This is necessary to install the proprietary Nvidia driver.
+If you don&amp;rsquo;t, you will most likely be presented a black screen after booting into Ubuntu.&lt;/p>
+&lt;p>Finish the installation and reboot into Ubuntu.&lt;/p>
+&lt;h2 id="i3">i3
+&lt;/h2>&lt;h3 id="install-i3">Install i3
+&lt;/h3>&lt;p>Once you booted to your freshly installed Ubuntu, it is very straightforward to install i3.
+Run this command in your &lt;code>Terminal&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install i3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>That&amp;rsquo;s already it.&lt;/p>
+&lt;h3 id="replace-gdm">Replace gdm
+&lt;/h3>&lt;p>The next step is to replace &lt;a class="link" href="https://wiki.gnome.org/Projects/GDM" target="_blank" rel="noopener"
+>GNOME Display Manager&lt;/a>, abbreviated &lt;code>gdm&lt;/code>.
+We will replace it with &lt;a class="link" href="https://github.com/canonical/lightdm" target="_blank" rel="noopener"
+>LightDM&lt;/a>.
+It is as easy as installing i3.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install lightdm
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>At some point during the installation, a window pops up in your terminal, asking you to select your display manager.
+In the list, use the arrow keys to navigate to &lt;code>lightdm&lt;/code> and hit &lt;code>RETURN&lt;/code> to confirm.&lt;/p>
+&lt;p>If you ever want to go back to gdm, you can do so by running below command.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo dpkg-reconfigure gdm3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="why-replace-gdm">Why replace gdm?
+&lt;/h3>&lt;p>This is the part where I ran into a problem that may only be with my setup.
+When having multiple screens connected (1 over HDMI, 1 over Lenovo Dock), I could login to i3 but then everything was frozen.
+But it was not Linux that froze, as I could tell from the clock continuing to run.
+Logging into Gnome worked though.
+Also, logging into Gnome before logging into i3 made it work.
+But neither do I want to use Gnome nor do I want to take extra steps every time I boot Linux.
+So I tried back and forth, and the only way I got this to work is to use lightdm over gdm.&lt;/p>
+&lt;p>The fact that I wasted quite some time on this motivated me sharing a short blog post.
+Using a different display manager might not suit everyone, but probably for most users this does the job.&lt;/p></description></item></channel></rss>
