@@ -16,7 +16,7 @@ weight: 1
 
 ~~This blog is created using [Jekyll](https://jekyllrb.com/).~~
 
-The striket through sentence above used to be true for the old version of this blog, hosted on [misterderpie.com].
+The striked through sentence above used to be true for the old version of this blog, hosted on [misterderpie.com].
 However, the version at [revontulet.dev] uses GitHub pages and Hugo.
 
 ## Original Post

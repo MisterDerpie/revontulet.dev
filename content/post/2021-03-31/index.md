@@ -148,10 +148,10 @@ docker container run --device /dev/gpiomem -it dht-image /bin/ash
 
 #### Download dht script
 
-Download the [dht.py](https://misterderpie.com/assets/scripts/2021-03-21-raspberry-four-dht/dht.py) script via
+Download the [dht.py](https://revontulet.dev/p/2021-raspberry-pi-four-dht/dht.py) script via
 
 ```bash
-wget https://misterderpie.com/assets/scripts/2021-03-21-raspberry-four-dht/dht.py
+wget https://revontulet.dev/p/2021-raspberry-pi-four-dht/dht.py
 ```
 
 #### Adjust dht script to wiring
