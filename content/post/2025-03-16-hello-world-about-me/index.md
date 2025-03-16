@@ -1,7 +1,7 @@
 ---
 title: Hello World
 description: Welcome to revontulet.dev!
-slug: hello-world
+slug: 2025-hello-world
 date: 2025-03-16 00:00:00+0000
 image: cover-min.jpg
 categories:
@@ -40,4 +40,4 @@ Revontulet ([Wikipedia](https://fi.wikipedia.org/wiki/Revontulet)) is the Finnis
 I found that a unique enough name for a website, as well as coupling it close to where I am situated these days.
 
 The cover photo is taken in Northern Lapland, Finland, in June 2024.
-You can find the exact locaction [here (Google Maps)](https://www.google.com/maps?q=loc:67.8919639,23.9835194).
+You can find the exact location [here (Google Maps)](https://www.google.com/maps?q=loc:67.8919639,23.9835194).
