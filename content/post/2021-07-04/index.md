@@ -18,7 +18,7 @@ The concept of [Covariance and Contravariance](https://en.wikipedia.org/wiki/Cov
 This post, though categorized Kotlin, focuses more on the concepts in general, yet will demonstrate them in Kotlin.
 I assume the reader has a basic understanding of generics and inheritance.
 
-# Inheritance for normal Classes
+## Inheritance for normal Classes
 
 Before we get into generics, let us look into inheritance for normal classes.
 For that, consider the following class hierarchy.
@@ -53,11 +53,11 @@ printPrice(Shoe(5f, 33.5f))
 printPrice(Jacket(20f, false))
 ```
 
-# Covariance
+## Covariance
 
 To explain how inheritance in generics works, and the word "covariance", I want to do that by an example.
 
-## Domain Model
+### Domain Model
 
 We create a `Basket` where we can put exactly 2 of any clothing item.
 Also we define a function to print the total price of the items in the basket.
@@ -83,7 +83,7 @@ printPrice(shoeBasket)
 
 When we try to run this, it won't compile, because the types are not matching.
 
-## Basket\<Shoe\> not is-a Basket\<ClothingItem\>
+### Basket\<Shoe\> not is-a Basket\<ClothingItem\>
 
 This is strange.
 We know that Shoe is-a ClothingItem, and wherever we expect the latter, we could actually provide the former.
@@ -127,7 +127,7 @@ fun printBasketPrice(basket: Basket<ClothingItem>) {
 If we would not be able to do that, we would have to create the same function for each type of clothing.
 That may be possible, but neither keeps your code [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) nor would it be feasible if you had hundreds of items.
 
-## Definition of Covariance
+### Definition of Covariance
 
 The previous can be achieved with covariance.
 Formally defined:
@@ -142,7 +142,7 @@ Thus the covariant basket inheritance diagram looks like the following.
 
 ![basket-not-is](covariance.png)
 
-## Covariance in Code
+### Covariance in Code
 
 Covariance exactly solves our problem.
 But how do we achieve that in code?
@@ -172,12 +172,12 @@ The operation to write is a receiving operation, thus not an out operation.
 This is also the reason we have to define the items as `val` instead of `var`.
 As `var` provides setters, it wouldn't compile.
 
-# Contravariance
+## Contravariance
 
 Covariance is a concept that is quite natural, because it follows the "normal flow" of inheritance.
 What is way less natural is the concept of contravariance, because it allows you to walk "upwards" in the inheritance tree - kind of.
 
-## Adding an Action Object
+### Adding an Action Object
 
 Let's create an abstract base class that supports a single function, provided two objects, and returns nothing.
 
@@ -202,7 +202,7 @@ class JacketAction : Action<Jacket>() {
 }
 ```
 
-## Call Action on printing
+### Call Action on printing
 
 Let's create a method that takes a basket full of jackets and an action for jackets.
 Also we create a jacket basket and call the method with it and the previously defined jacket action.
@@ -224,7 +224,7 @@ You have at least one non-zipper jacket.
 */
 ```
 
-## More general action
+### More general action
 
 Say we want to have an action we can perform on any clothing item.
 That is a common use-case.
@@ -260,7 +260,7 @@ So what we want to do is shown in below diagram.
 
 ![not-covariant-action](not-contravariant-action.png)
 
-## Definition of Contravariance
+### Definition of Contravariance
 
 It is possible to achieve previous diagram by contravariance.
 
@@ -279,7 +279,7 @@ When I read about contravariance the first time, I was confused.
 My confusion came from that I thought we are actually allowing the `Action<ClothingItem>` to perform methods on `Jacket`.
 This is obviously not the case, the clothing item action only sees a clothing item.
 
-## Contravariance in Code
+### Contravariance in Code
 
 For covariance there is `out`, and contravariance is more or less the opposite of covariance.
 It's not a big surprise that the keyword for contravariance is `in`.
@@ -326,7 +326,7 @@ fun printComplimentAndPerformAction(basket: Basket<Jacket>, action: Action<Jacke
 }
 ```
 
-# Invariance
+## Invariance
 
 Now that covariance and contravariance are covered, the last piece is the default mode: Invariance.
 
@@ -362,7 +362,7 @@ fun main(args: Array<String>) {
 }
 ```
 
-# Bottom Line
+## Bottom Line
 
 Covariance and contravariance enable us to provide compile time guarantee for runtime safety.
 The most prominent example for covariance is the `Collection` interface.

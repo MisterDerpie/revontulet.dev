@@ -14,7 +14,7 @@ weight: 1
 
 The sourcecode of this post is available on [github/MisterDerpie/spring-boot-with-mongodb](https://github.com/MisterDerpie/spring-boot-with-mongodb).
 
-# Foreword
+## Foreword
 
 For a small application to store receipts I wanted to use [Spring Boot](https://spring.io/projects/spring-boot) and NoSQL database [MongoDB](https://www.mongodb.com/).
 As with many basic topics in the spring world, there is a [Getting Started guide](https://spring.io/guides/gs/accessing-data-mongodb/) on [spring.io](https://spring.io), with the specific title "Accessing Data with MongoDB".
@@ -33,7 +33,7 @@ The list explains what is covered in this post.
 * Integration test with an embedded MongoDB
 * Use [JavaMoney](https://javamoney.github.io/) with MongoDB
 
-# Setup MongoDB
+## Setup MongoDB
 
 First we need an instance of MongoDB.
 I will - as usual - use [Docker](https://www.docker.com/).
@@ -50,14 +50,14 @@ docker container run -d \
     mongo:latest
 ```
 
-# Setup Spring Boot Project
+## Setup Spring Boot Project
 
-## Create Spring Project
+### Create Spring Project
 
 This section is about creating the Spring project. 
 After you created the project, don't forget to add the additional dependencies (next section).
 
-### Create project with Spring Initializr
+#### Create project with Spring Initializr
 
 The easiest way to create the project is using [Spring Initializr](https://start.spring.io/).
 I will use [Gradle](https://gradle.org/) as the build automation tool, but it doesn't matter and you can well select Maven.
@@ -76,7 +76,7 @@ Then click `Generate` and you should get a `.zip` containing your project.
 Unzip this anywhere and open it in the IDE of your choice.
 I prefer [IntelliJ](https://www.jetbrains.com/idea/).
 
-### Create project with Gradle
+#### Create project with Gradle
 
 In case you want to create your Gradle project from scratch, you can follow [docs.gradle.org - Building Java Applications Sample](https://docs.gradle.org/current/samples/sample_building_java_applications.html).
 Add below dependencies to your `dependencies` block in the `build.gradle` file.
@@ -89,7 +89,7 @@ annotationProcessor 'org.projectlombok:lombok'
 testImplementation 'org.springframework.boot:spring-boot-starter-test'
 ```
 
-## Additional Dependencies
+### Additional Dependencies
 
 To show how to integration test and how to use JavaMoney with MongoDB, we add two dependencies, namely [Flapdoodle Embedded MongoDB](https://github.com/flapdoodle-oss/de.flapdoodle.embed.mongo) and [JavaMoney](https://javamoney.github.io/).
 Add
@@ -110,7 +110,7 @@ dependencies {
 }
 ```
 
-# Connect Application to MongoDB
+## Connect Application to MongoDB
 
 This part only covers how to configure your application to be able to connect with MongoDB.
 I assume you have a MongoDB instance running configured the same way as I did with the docker image.
@@ -137,7 +137,7 @@ This enables Spring's MongoDB repository to
 * and selected database `testdatabase`
 * and authentication database `admin` (default in the docker container)
 
-## Why not the default application.properties? 
+### Why not the default application.properties? 
 
 You may wonder why we don't use the default properties file.
 The reason is that the embedded MongoDB for some reason does not override these values.
@@ -149,7 +149,7 @@ For the sake of completion, before your tests even start you would see this erro
 org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'embeddedMongoServer'
 ```
 
-# Create Mongo Document in Application
+## Create Mongo Document in Application
 
 The next part is to create a [MongoDB document](https://docs.mongodb.com/manual/core/document) representation class.
 Simply put, this is the entity you are going to persist in the database.
@@ -192,7 +192,7 @@ With the latter we automatically create getters and setters.
 
 * `@Id` marks this field as the primary key to use in the database.
 
-# Use MongoRepository to access Document
+## Use MongoRepository to access Document
 
 The next step is that we want to store our document in the database.
 Spring provides a very easy to use interface for that.
@@ -213,12 +213,12 @@ As our `Item` is the entity, we put this there.
 To identify items, we set the primary key of type `UUID`.
 Therefore we put the ID type as the second generic parameter.
 
-# Integration Test MongoDB
+## Integration Test MongoDB
 
 We are done, almost.
 Let us test our `MongoRepository` whether it works as expected (hint, it doesn't, but we will get to that).
 
-## Create the test
+### Create the test
 
 Create a test class `ItemRepositoryTest` with the following content
 
@@ -263,7 +263,7 @@ The test itself then is pretty simple.
 We create an Item with a random UUID, value of 1 euro and the name "Test Item".
 Then we store this in the database and try to query the database for the item ID, asserting that the retrieved item is equal to the initial item.
 
-## Run the test
+### Run the test
 
 When we try to run the test, it will even fail before the first assertion is reached.
 Looking at the logs, we can see the following error.
@@ -285,9 +285,9 @@ but like
 But FastMoney does only have a constructor that accepts these very two parameters.
 The solution is to provide a custom converter, that would store our money representation exactly as what the constructor expects.
 
-# MongoDB Converter
+## MongoDB Converter
 
-## Create Converters
+### Create Converters
 
 To successfully save and load our Item from the database, we need to convert the price.
 This is done by creating a `ReadingConverter` and a `WritingConverter`.
@@ -335,7 +335,7 @@ What the converters do is very straightforward.
 We take the values from the Money, concatenate them with a placeholder of three hashtags and then save this entire string to the database.
 On reading from the database, we revert that operation by splitting them at the three hashtags and creating a FastMoney instance of the two obtained values.
 
-## Create Converter Config
+### Create Converter Config
 
 We created our converters but need to make the MongoRepository aware of using them when storing/loading documents from MongoDB.
 For that, we simply create a configuration and provide a list of `MongoCustomConversions`.
@@ -362,7 +362,7 @@ public class ConverterConfig {
 `@Bean` tells Spring to get an instance of the return type (here: `MongoCustomConversions`) by calling this method.
 In the `mongoCustomConversion` method we pass a list of our converters to the constructor of `MongoCustomConversions` and return that.
 
-# Integration Tests Revisited
+## Integration Tests Revisited
 
 Let's try running our integration tests again.
 Now that we have the converters in place, we should be good to go, right?

@@ -21,9 +21,9 @@ One concept that fascinates me and I really see a lot of value in is [Extensions
 Especially for tests I find that concept very useful, because it enables us to provide test related logic to our classes without actually adding this in the real production code.
 Let's have a look at how we can utilize extensions to create stubs of business classes.
 
-# Problem statement in Java
+## Problem statement in Java
 
-## Test Utils to Stub Classes
+### Test Utils to Stub Classes
 
 A problem that often arises in Java projects is that you need to provide stubs for using e.g. the same customer in multiple tests.
 Suppose you have a class `Customer.java` that looks like this
@@ -65,7 +65,7 @@ I have seen such classes having hundreds of lines of code, with many different, 
 A first attempt to improve that would be to create `TestUtilsCustomer.java`, `TestUtilsAddress.java`, ...
 That would leave us with a better, yet still not the best solution.
 
-## Test Code meets Production Code
+### Test Code meets Production Code
 
 Wouldn't it be nice to provide `stubCustomer` directly in the `Customer` itself?
 With Java, you would have to include such method in your production code.
@@ -89,7 +89,7 @@ public class Customer {
 Testcode should never, **never** reside in production code.
 With Kotlin, we can actually do that, but without production code ever knowing about this `stubFullAgeCustomer` method.
 
-# Solution in Kotlin
+## Solution in Kotlin
 
 Before continue reading, think about why it would be nice to have a preconfigured Customer provided by the `Customer` object itself.
 When implementing the [Builder Pattern](https://en.wikipedia.org/wiki/Builder_pattern), you configure each property by a callchain of functions with the properties' names.
@@ -98,7 +98,7 @@ So why not getting a fully preset instance as part of this object, too?
 
 This can be achieved in Kotlin.
 
-## Setup
+### Setup
 
 We define a `Customer` data class and an `AgeCheckService` (the latter is purely to have something to test, so that I can show how our extension works).
 
@@ -137,7 +137,7 @@ class AgeCheckService {
 This services only functionality is to return `true` when the customer is of full age, and `false` when they're minor.
 As initially stated, this is for the sole purpose of having something to test.
 
-## Extend Customer
+### Extend Customer
 
 In our test, we would like to call the following:
 
@@ -168,7 +168,7 @@ fun Customer.Companion.stubMinorAgeCustomer(): Customer {
 Note that when you do not define a name for the companion object in the class, it will be accessible by `Companion`.
 Congratulations, you just added extensions which you can use in your tests.
 
-## Test AgeCheckService using Extension Stub
+### Test AgeCheckService using Extension Stub
 
 The last step is to import your Extensions into your test.
 They are not automatically applied globally to your Customer, which is the reason why you explicitly have to import them.
