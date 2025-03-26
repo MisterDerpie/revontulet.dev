@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blog on revontulet.dev</title><link>https://revontulet.dev/tags/blog/</link><description>Recent content in Blog on revontulet.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 24 Apr 2021 20:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Create a blog using Jekyll and Docker</title><link>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</link><pubDate>Sat, 24 Apr 2021 20:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</guid><description>&lt;h2 id="foreword">Foreword
+&lt;/h2>&lt;p>&lt;del>This blog is created using &lt;a class="link" href="https://jekyllrb.com/" target="_blank" rel="noopener"
+>Jekyll&lt;/a>.&lt;/del>&lt;/p>
+&lt;p>The striked through sentence above used to be true for the old version of this blog, hosted on [misterderpie.com].
+However, the version at [revontulet.dev] uses GitHub pages and Hugo.&lt;/p>
+&lt;h2 id="original-post">Original Post
+&lt;/h2>&lt;p>I really like Jekyll, as I don&amp;rsquo;t like frontend development.
+One problem is though, that I currently only have Jekyll installed on one single machine.
+So when I&amp;rsquo;m not at home but want to add a blog post, I would have to install Jekyll on the machine I&amp;rsquo;m travelling with.
+Luckily there is Docker and the &lt;a class="link" href="https://github.com/envygeeks/jekyll-docker" target="_blank" rel="noopener"
+>envygeeks/jekyll-docker&lt;/a> Jekyll Image.
+As I&amp;rsquo;m adding blogposts very rarely, I do not need to have a full build and delivery pipeline for it (despite the fact that at the time of writing I wouldn&amp;rsquo;t even be able to create such).
+A simple container to build the latest version of the site suits my needs.&lt;/p>
+&lt;p>The reason I made a small script for that is the following.&lt;/p>
+&lt;ol>
+&lt;li>Obviously I&amp;rsquo;m lazy, and want to have an out-of-the-box command for every machine.&lt;/li>
+&lt;li>Creating the container with &lt;code>docker run --rm&lt;/code> will always create a new container installing all dependencies.
+This process can take a while.&lt;/li>
+&lt;li>Persisting the container after first creation enables to rerun it after adding a new post.
+No need to install dependencies again.&lt;/li>
+&lt;/ol>
+&lt;p>The script is nothing special, but I thought it&amp;rsquo;s been a while since I added a post.
+Maybe you can find some use in it.&lt;/p>
+&lt;p>Simply create an executable script in your GitHub Repo and put the following content in it (I named it &lt;code>build.sh&lt;/code>):&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#!/bin/bash
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>&lt;span class="nv">BUILDER_NAME&lt;/span>&lt;span class="o">=&lt;/span>jekyll_builder
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">JEKYLL_VERSION&lt;/span>&lt;span class="o">=&lt;/span>3.8
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="o">[&lt;/span> ! &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="k">$(&lt;/span>docker ps -a -q -f &lt;span class="nv">name&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="nv">$BUILDER_NAME&lt;/span>&lt;span class="k">)&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> &lt;span class="o">]&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="k">then&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> docker container run &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --name &lt;span class="nv">$BUILDER_NAME&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --env &lt;span class="nv">JEKYLL_ENV&lt;/span>&lt;span class="o">=&lt;/span>production &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --volume&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="k">$(&lt;/span>&lt;span class="nb">pwd&lt;/span>&lt;span class="k">)&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>:/srv/jekyll &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --entrypoint &lt;span class="s2">&amp;#34;/bin/bash&amp;#34;&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> jekyll/jekyll:&lt;span class="nv">$JEKYLL_VERSION&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> jekyll build
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">else&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> docker container start -i &lt;span class="nv">$BUILDER_NAME&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">fi&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>When then running &lt;code>./build.sh&lt;/code> on first startup it will create a container &lt;code>jekyll_builder&lt;/code>.
+Whenever you run this again after adding a blog post (or removing one), this will build the latest version of your site.
+The output is in &lt;code>_site/&lt;/code> directory (relative to your repositories root), so the same as without using Docker at all.&lt;/p>
+&lt;p>One downside to this approach is that as soon as you move the repository on your machine, this would not work as expected anymore.
+To make it work again you could simply remove the container &lt;code>docker container rm jekyll_builder&lt;/code>.&lt;/p></description></item></channel></rss>
