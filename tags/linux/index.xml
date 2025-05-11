@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Linux on revontulet.dev</title><link>https://revontulet.dev/tags/linux/</link><description>Recent content in Linux on revontulet.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 11 May 2025 08:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>iPhone Ethernet bridge on RaspberryPi with Ubuntu Server</title><link>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</link><pubDate>Sun, 11 May 2025 08:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</guid><description>&lt;p>This post covers how to tether your iPhone via USB to your RaspberryPi, and share the iPhone&amp;rsquo;s network on &lt;code>eth0&lt;/code>.
+Eventually, the RaspberryPi will be connected to a router via ethernet, making the router use the iPhone&amp;rsquo;s internet connection.
+A RaspberryPi 4B is used, but this guide &lt;em>should&lt;/em> work on other models too.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup.webp"
+width="411"
+height="241"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_117e63e1bc3d7006.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_1c320d6ae2011933.webp 1024w"
+loading="lazy"
+alt="iphone-connected-to-rpi-connected-to-router"
+class="gallery-image"
+data-flex-grow="170"
+data-flex-basis="409px"
+>&lt;/p>
+&lt;p>One may wonder why this setup is needed.
+Routing at least DNS traffic through the Pi with the &lt;a class="link" href="https://pi-hole.net/" target="_blank" rel="noopener"
+>Pi-hole&lt;/a> is a common use-case, but all traffic less so.&lt;/p>
+&lt;p>My connection to the world is through the iPhone&amp;rsquo;s hotspot.
+Said hotspot turns invisible after a period of time.
+It is not the classic hidden SSID invisible, but connecting to it once invisible is impossible, only connected devices stay.&lt;/p>
+&lt;p>Still, why use a router, when the RaspberryPi comes with a WLAN chip?
+About a month ago, I attempted a similar setup and had the Pi directly as a WiFi hotspot.
+Unfortuantely, the throughput was only about 40 Mbit, defeating the purpose of the iPhone&amp;rsquo;s 300 Mbit 5G connection.&lt;/p>
+&lt;p>Given the fact that my RaspberyPi was collecting dust, it was perfectly suited.
+Moreover does my router at hand not support a USB connection, hence the need.&lt;/p>
+&lt;h2 id="installing-ubuntu-server">Installing Ubuntu Server
+&lt;/h2>&lt;p>To install Ubuntu Server, you may use the RaspberryPi Imager.
+It can be downloaded from &lt;a class="link" href="https://www.raspberrypi.com/software/" target="_blank" rel="noopener"
+>raspberrypi.com/software&lt;/a>.&lt;/p>
+&lt;p>During the installation, it will ask you to provide a custom configuration.
+Choose yes and provide a username and a password to be able to SSH into it during the next steps.
+Then install it.&lt;/p>
+&lt;p>Once done, start your RaspberryPi and connect it via ethernet to your router.&lt;/p>
+&lt;h2 id="raspberrypi-internet-setup">RaspberryPi Internet Setup
+&lt;/h2>&lt;p>Find the RaspberryPi&amp;rsquo;s IP Address from your router.
+Usually, it is listed under connected devices.
+Then ssh into it, e.g.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">ssh name-you-chose@192.168.X.Y
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>SSH probably asks you to trust the fingerprint, and you may select yes.
+Note: In case you need to factory reset your Pi, and it gets assigned the same IP, you will see an error from ssh.
+That is due to not matching fingerprints.
+Remove the entries of that IP from &lt;code>~/.ssh/known_hosts&lt;/code>.&lt;/p>
+&lt;h3 id="connect-to-the-iphone">Connect to the iPhone
+&lt;/h3>&lt;p>Install the packages&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://github.com/libimobiledevice/usbmuxd" target="_blank" rel="noopener"
+>usbmuxd&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://github.com/libimobiledevice/libimobiledevice" target="_blank" rel="noopener"
+>libimobiledevice-utils&lt;/a>&lt;/li>
+&lt;li>&lt;code>ipeth-utils&lt;/code> (this may be optional, I didn&amp;rsquo;t try it without)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo apt install -y &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> usbmuxd &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> ipheth-utils &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> libimobiledevice-utils
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Now it is time to connect our iPhone.
+With Mobile Hotspot enabled, it will show a dialog to Trust/Not trust the RaspberryPi.
+Trust it, and you may be required to enter your password.&lt;/p>
+&lt;p>We can see that it&amp;rsquo;s connected on the RaspberryPi running&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">networkctl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl">IDX LINK TYPE OPERATIONAL SETUP
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 1 lo loopback carrier unmanaged
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 2 eth0 ether routable configured
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 3 wlan0 wlan off unmanaged
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 4 enxfae5ce082148 ether off unmanaged
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>Important: Your iPhone will have a different ID, and in the steps from here on you need to replace it in the provided snippets.&lt;/strong>&lt;/p>
+&lt;p>The iPhone is &lt;code>enx...&lt;/code>, and the next step is to have it managed, so it gets an IP assigned and we can route traffic through that interface.
+At this point, the guide deviates slightly from &lt;a class="link" href="https://wiki.archlinux.org/title/IPhone_tethering#Using_systemd-networkd" target="_blank" rel="noopener"
+>Arch Wiki&amp;rsquo;s setup using systemd-networkd&lt;/a>.
+Although one may set it up that way, Ubuntu Server ships with netplan, which we take advantage of.
+That way, we only need to configure netplan.&lt;/p>
+&lt;p>There should already be an entry for &lt;code>eth0&lt;/code>, so you may only add the part for the iPhone.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo vim /etc/netplan/50-cloud-init.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">network&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">renderer&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">networkd&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ethernets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">enxfae5ce082148&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">// Add this&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">// Add this&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="l">// ... keep eth0 unchanged for now&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Apply the new network config.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">netplan apply
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>We can confirm it using the ip command.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">ip a
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">4: enxfae5ce082148: &amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> link/ether aa:bb:cc:dd:ff:gg brd ff:ff:ff:ff:ff:ff
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inet 123.12.10.4/28 metric 100 brd 123.12.10.15 scope global dynamic enxfae5ce082148
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> valid_lft 86357sec preferred_lft 86357sec
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inet6 1111:1222:333:4444:5555:6666:7777:8888/64 scope global mngtmpaddr noprefixroute
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> valid_lft forever preferred_lft forever
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inet6 1111::2222:3333:4444:2148/64 scope link proto kernel_ll
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> valid_lft forever preferred_lft forever
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>To test the connection, curl provides the option to set an interface through which to connect.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">curl&lt;/span> &lt;span class="o">--&lt;/span>&lt;span class="n">interface&lt;/span> &lt;span class="n">enxfae5ce082148&lt;/span> \
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">https&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="o">//&lt;/span>&lt;span class="n">example&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">com&lt;/span> \
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">-&lt;/span>&lt;span class="n">w&lt;/span> &lt;span class="s1">&amp;#39;%{speed_download}&amp;#39;&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="o">/&lt;/span>&lt;span class="n">dev&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">null&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Great, now you could use the iPhone&amp;rsquo;s USB tethered network to connect to the internet.&lt;/p>
+&lt;h3 id="route-traffic-through-the-iphone">Route traffic through the iPhone
+&lt;/h3>&lt;p>The second part is to tell iptables to route traffic through our iPhone&amp;rsquo;s interface.
+It is done with adding this entry using the iptables command.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">iptables -t nat -A POSTROUTING -o enxfae5ce082148 -j MASQUERADE
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Note that the newly created entry is not persisted on reboot.
+To persist it, one solution is to use &lt;code>iptables-persistent&lt;/code>.
+Whilst installing, it asks you to back up existing configurations.
+Answer &amp;ldquo;Yes&amp;rdquo;.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo apt install -y iptables-persistent
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>You will be able to confirm a &lt;code>MASQUERADE&lt;/code> entry running&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat /etc/iptables/rules.v4
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>In case the entry is not present, rerun the steps and the persistence&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">sudo iptables-save &amp;gt; /etc/iptables/rules.v4
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>We still need to enable IP forwarding between interfaces.
+This is achieved adding the following configuration.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo vim /etc/sysctl.d/30-ipforward.conf
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl">net.ipv4.ip_forward = 1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Last but not least, we must be able to connect on eth0.
+I did not get into the steps of setting up DHCP on it, so you may do that yourself.
+After this step, it will be assigned &lt;code>192.168.42.1&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo vim /etc/netplan/50-cloud-init.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">network&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">renderer&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">networkd&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ethernets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">enxfae5ce082148&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">eth0&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">addresses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="m">192.168.42.1&lt;/span>&lt;span class="l">/24&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>From here on, for connecting to your RaspberryPi on &lt;code>eth0&lt;/code>, you will need to assign the external device (e.g. a Laptop) a correct IP address, the right net mask and the right gateway.
+Note that the IP address suffix must be a value between 2 and 254.&lt;/p>
+&lt;p>Given our setup, the configuration is&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Type&lt;/th>
+&lt;th>Value&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>IP Address&lt;/td>
+&lt;td>192.168.42.X&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Gateway&lt;/td>
+&lt;td>192.168.42.1&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Netmask&lt;/td>
+&lt;td>24 or 255.255.255.0&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Reboot the RaspberryPi, and the changes take effect.
+Keep in mind that you &lt;u>must&lt;/u> assign the IP on your external device like above table, otherwise you will not see the RPi.&lt;/p>
+&lt;p>The Pi can be accessed at &lt;code>ssh your-name@192.168.42.1&lt;/code> thereafter.&lt;/p>
+&lt;h2 id="using-the-raspberrypi-with-a-router">Using the RaspberryPi with a Router
+&lt;/h2>&lt;p>The final step of this setup is to use the RaspberryPi as the internet provider for a router.
+Across most routers, these steps are almost identical, and you may consult your router&amp;rsquo;s documentation on where to find the right setuppage.&lt;/p>
+&lt;p>First, you need to connect your RaspberryPi to the port of the router that says &amp;ldquo;WAN&amp;rdquo;.&lt;/p>
+&lt;p>Then you need to find out where you can set the Conenction Mode/Internet Connection type of your router.
+Provide the values as below, and your router should be able to connect to the RaspberryPi, and use its network.&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Type&lt;/th>
+&lt;th>Value&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Connection Mode&lt;/td>
+&lt;td>Static IP&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>IP address&lt;/td>
+&lt;td>192.168.42.77&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Subnet Mask&lt;/td>
+&lt;td>255.255.255.0&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Default Gateway&lt;/td>
+&lt;td>192.168.42.1&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Primary DNS server&lt;/td>
+&lt;td>9.9.9.9&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Secondary DNS server&lt;/td>
+&lt;td>8.8.8.8&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;hr>
+&lt;p>The resulting speed with this setup is ~190 Mbit downloading, and 22 Mbit uploading.
+With a different USB cable, I only achieved 120 Mbit, so the remaining 110 Mbit may be due to the USB cable.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/speedtest.webp"
+width="412"
+height="122"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/speedtest_hu_b9cd19f0c84d0d6d.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/speedtest_hu_aee8f617dd64fe2c.webp 1024w"
+loading="lazy"
+alt="speedtest-result"
+class="gallery-image"
+data-flex-grow="337"
+data-flex-basis="810px"
+>&lt;/p>
+&lt;p>Connecting to the iPhone directly gives me almost 300 Mbit, so there is definitely a loss of performance somewhere.&lt;/p></description></item><item><title>Arch and i3 - Hello, Sway! - Install Arch and Sway</title><link>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</link><pubDate>Wed, 26 Mar 2025 18:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</guid><description>&lt;p>Welcome to part one of the three-part series &amp;ldquo;Hello, Sway!&amp;rdquo;
+The series is split into&lt;/p>
+&lt;ol>
+&lt;li>&lt;i>Arch &amp;amp; Sway setup using &lt;code>archinstall&lt;/code>&lt;/i>&lt;/li>
+&lt;li>Sway Configuration&lt;/li>
+&lt;li>Linux QoL Tools&lt;/li>
+&lt;/ol>
+&lt;h2 id="motivation">Motivation
+&lt;/h2>&lt;p>For a while already, there has been no real reason for me to keep Windows.
+The doubt started about two years ago, in January 2023, when I got myself a Steam Deck.
+Although the purchase was mostly to emulate console and handheld games, of course the question was
+&amp;ldquo;&lt;a class="link" href="https://knowyourmeme.com/memes/but-can-it-run-crysis" target="_blank" rel="noopener"
+>But Can It Run Crysis?&lt;/a>&amp;rdquo;
+To my surprise, the games I tried performed incredibly well, almost all of them out of the box.
+Thanks to ProtonDB, if there was a title that needed some extra configuration, it is usually there.&lt;/p>
+&lt;p>Besides gaming, my work is either on a Mac or (used to be) on a Linux machine.
+When using Linux at work, the default for me was to set up Arch and i3wm (I use Arch btw).
+Moreover, after being a nano user for quite a while, it was time to move to vim.
+It&amp;rsquo;s a nice coincidence that Sway uses vim keybinds for moving windows, although one could easily configure that in i3wm.&lt;/p>
+&lt;p>Given the circumstances, let&amp;rsquo;s move to Linux!&lt;/p>
+&lt;h2 id="arch--sway-setup-using-archinstall">Arch &amp;amp; Sway setup using &lt;code>archinstall&lt;/code>
+&lt;/h2>&lt;p>&lt;a class="link" href="https://github.com/archlinux/archinstall" target="_blank" rel="noopener"
+>archinstall&lt;/a> is a guided installer to setup Arch.
+There are many posts on how to create a bootable USB stick with Arch, and how to run archinstall.
+Thus, instead of providing all the steps here, you may want to follow e.g. this one on debugpoint.com:
+&lt;a class="link" href="https://www.debugpoint.com/archinstall-guide/" target="_blank" rel="noopener"
+>Installing Arch Linux Using archinstall Automated Script&lt;/a>
+&lt;strong>up to the point of installing the Desktop Environment&lt;/strong>.&lt;/p>
+&lt;p>Before looking into what to select, first comes two common issues, one often faced on laptops and the other may faced when running on an Nvidia card.
+Scroll past that to &lt;a class="link" href="./#sway-graphics-driver-and-ly" >Sway, Ly Greeter and Graphics Driver&lt;/a> in case you don&amp;rsquo;t encounter any issues.&lt;/p>
+&lt;h3 id="issues-during-archinstall">Issues During Archinstall
+&lt;/h3>&lt;h4 id="archinstall-boots-into-a-blackscreen-on-nvidia">Archinstall boots into a Blackscreen on Nvidia
+&lt;/h4>&lt;p>It may happen that with Nvidia Graphics Cards, once you select Arch Linux Install from the bootmedium, you only see a blank black screen.
+In that case, try to add &lt;code>nomodeset&lt;/code>.&lt;/p>
+&lt;ol>
+&lt;li>Select the entry on the USB stick you want to boot from, then press &lt;code>e&lt;/code>.&lt;/li>
+&lt;li>Navigate your cursor to the end of the line, and append &lt;code> nomodeset&lt;/code>.&lt;/li>
+&lt;/ol>
+&lt;p>This should resolve the issue.
+If you&amp;rsquo;re curious what exactly this does, feel free to read this post on ubuntuforums.com:
+&lt;a class="link" href="https://ubuntuforums.org/showthread.php?t=1613132" target="_blank" rel="noopener"
+>How to set NOMODESET ant other kernel boot options in grub2&lt;/a>&lt;/p>
+&lt;h4 id="cannot-connect-to-wifi">Cannot connect to Wifi
+&lt;/h4>&lt;p>This issue is common on Laptops.
+To connect to the WiFi, one may use &lt;code>iwctl&lt;/code> (as suggested).
+Trying to turn on the WiFi could result in &lt;code>operation failed&lt;/code>.&lt;/p>
+&lt;p>To fix this, run&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">rfkill unblock all
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>and then retry.&lt;/p>
+&lt;p>For further reading on why and how, see &lt;a class="link" href="https://wiki.archlinux.org/title/Network_configuration/Wireless#Rfkill_caveat" target="_blank" rel="noopener"
+>rfkill caveat (ArchWiki/NetworkConfiguration)&lt;/a>.&lt;/p>
+&lt;h3 id="sway-graphics-driver-and-ly">Sway, Graphics Driver and Ly
+&lt;/h3>&lt;p>On the desktop environment installation, select the following&lt;/p>
+&lt;h4 id="desktop---sway">Desktop - Sway
+&lt;/h4>&lt;p>This one goes without saying.&lt;/p>
+&lt;h4 id="graphics-driver">Graphics Driver
+&lt;/h4>&lt;p>For the Graphics Driver, it depends on your Graphics Card.
+As my laptop has an RTX 3070, which is newer than Turing, I chose the &amp;ldquo;Nvidia (open kernel &amp;hellip;)&amp;rdquo;.
+To find which Nvidia driver you need, please consult &lt;a class="link" href="https://wiki.archlinux.org/title/NVIDIA" target="_blank" rel="noopener"
+>ArchWiki/NVIDIA&lt;/a>.&lt;/p>
+&lt;h4 id="greeter---ly">Greeter - Ly
+&lt;/h4>&lt;p>My setup uses Ly as the greeter.
+This greeter takes you to the next level.
+Check it out on &lt;a class="link" href="https://github.com/fairyglade/ly" target="_blank" rel="noopener"
+>github.com/fairyglade/ly&lt;/a>.&lt;/p>
+&lt;p>Now, finish up the installation, and boot into your system.&lt;/p>
+&lt;h3 id="start-sway---nvidia-unsupported-gpu">Start Sway - Nvidia Unsupported GPU
+&lt;/h3>&lt;p>As mentioned in the Arch Wiki, to start Sway with Nvidia drivers, one must explicitly state that this is an unspported GPU
+(&lt;a class="link" href="https://wiki.archlinux.org/title/Sway" target="_blank" rel="noopener"
+>ref&lt;/a>).
+Edit the Sway Desktop file&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">vim /usr/share/wayland-sessions/sway.desktop
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>and change the Exec line to&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-txt" data-lang="txt">&lt;span class="line">&lt;span class="cl">Exec=sway --unsupported-gpu
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Logout, select Sway, and start it &amp;hellip; aaand you may see a black screen.
+At least that happened when I did this, and I don&amp;rsquo;t have an explanation for this, as in, why it is fixed after a reboot.
+In case that doesn&amp;rsquo;t happen: Great.
+If it happens though, reboot, and then - at least on my machine™ - it worked.&lt;/p>
+&lt;hr>
+&lt;p>Congratulations.
+You most likely have an Arch &amp;amp; Sway setup with a fancy login screen now.
+In the next post, we&amp;rsquo;ll look into some tools to get simple Sway configuration with most important things sorted.&lt;/p></description></item><item><title>Ubuntu with WSL2 and i3 Window Manager GUI</title><link>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</link><pubDate>Sat, 04 Dec 2021 19:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</guid><description>&lt;p>Using &lt;code>i3&lt;/code> and &lt;code>Ubuntu&lt;/code> native is probably best, but you may not get the choice to do so, in case your working machine is running Windows.
+I looked through several guides how to set up Ubuntu with &lt;code>i3&lt;/code> on WSL2, but it took me several hours to get the setup I looked for because things did not work as expected.
+Therefore I&amp;rsquo;m writing this guide.&lt;/p>
+&lt;h2 id="installing-ubuntu-on-wsl2">Installing Ubuntu on WSL2
+&lt;/h2>&lt;p>There are plenty of tutorials and videos to do so.
+I will refer to the very one that I used to set up the bare, GUIless minimum,
+&lt;a class="link" href="https://www.youtube.com/watch?v=IL7Jd9rjgrM" target="_blank" rel="noopener"
+>WSL2 Ubuntu GUI&lt;/a> by David Bombai.
+Reproduce the steps until &lt;code>Install Ubuntu GUI&lt;/code> (7:25) to get the headless Ubuntu on WSL2 up and running.&lt;/p>
+&lt;h2 id="installing-i3-and-vcxsrv">Installing i3 and VcXsrv
+&lt;/h2>&lt;p>Once you set up your Ubuntu, created a user and are prompted with the shell, update the package index.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Next, install &lt;code>lxdm&lt;/code> and &lt;code>i3&lt;/code>.
+We also need to provide the information where Xserver sends its signals to.
+This is done by specifying the &lt;code>DISPLAY&lt;/code> environment variable in &lt;code>.bashrc&lt;/code>.
+The echo command adds this.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install -y lxdm i3
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;export DISPLAY=\$(cat /etc/resolv.conf | grep nameserver | awk &amp;#39;{print \$2; exit;}&amp;#39;):0.0&amp;#34;&lt;/span> &amp;gt;&amp;gt; ~/.bashrc
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>After you setup all this, restart Ubuntu (e.g. run &lt;code>exit&lt;/code> and then start it again).&lt;/p>
+&lt;p>Next, install &lt;a class="link" href="https://sourceforge.net/projects/vcxsrv/" target="_blank" rel="noopener"
+>VcXsrv&lt;/a>.
+Once installed, in your installation directory (default: &lt;code>C:\Program Files\VcXsrv&lt;/code>) start &lt;code>xlaunch.exe&lt;/code>.
+Launch it with the parameters provided in the screenshots.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-1.png"
+width="495"
+height="391"
+srcset="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-1_hu_27cd5299b266b01f.png 480w, https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-1_hu_a8cc7ee633f28e9c.png 1024w"
+loading="lazy"
+alt="vcxsrv-fullscreen"
+class="gallery-image"
+data-flex-grow="126"
+data-flex-basis="303px"
+>&lt;/p>
+&lt;p>Select &lt;code>Fullscreen&lt;/code>, then click &lt;code>Next&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-2.png"
+width="497"
+height="389"
+srcset="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-2_hu_d09a75a888d18d1.png 480w, https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-2_hu_883bb0ca046c4766.png 1024w"
+loading="lazy"
+alt="vcxsrv-fullscreen"
+class="gallery-image"
+data-flex-grow="127"
+data-flex-basis="306px"
+>&lt;/p>
+&lt;p>Select the option &lt;code>Start no client&lt;/code> and click &lt;code>Next&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-3.png"
+width="492"
+height="387"
+srcset="https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-3_hu_6f768f9bcedb14e0.png 480w, https://revontulet.dev/p/2021-ubuntu-gui-wsl2/vcxsrv-3_hu_991e9688bc019d23.png 1024w"
+loading="lazy"
+alt="vcxsrv-fullscreen"
+class="gallery-image"
+data-flex-grow="127"
+data-flex-basis="305px"
+>&lt;/p>
+&lt;p>In &lt;code>Extra Settings&lt;/code>, select &lt;code>Disable access control&lt;/code> and click &lt;code>Next&lt;/code>.&lt;/p>
+&lt;p>You will be presented with the final setup screen and don&amp;rsquo;t need to do anything here.
+Click &lt;code>Finish&lt;/code> and your screen should turn black, because VcXsrv opened a fullscreen window with no clients attached.
+Press &lt;code>Alt-Tab&lt;/code> to tab out the window, and go back to your Ubuntu terminal.&lt;/p>
+&lt;p>In your Ubuntu terminal, run &lt;code>i3&lt;/code> (i.e. type &lt;code>i3&lt;/code> and press enter) and you should start seeing some log (maybe including error messages).
+When you now tab back into the black fullscreen, after waiting a short time you should be able to select your i3 config.
+It doesn&amp;rsquo;t matter whether you run the config setup or not, for some reason it won&amp;rsquo;t be properly persisted.
+Thus, we need to &amp;ldquo;restore&amp;rdquo; the original config.
+Exit VcXsrv and go back to the Ubuntu console.
+If i3 hasn&amp;rsquo;t terminated, press &lt;code>CTRL+C&lt;/code> to close it.&lt;/p>
+&lt;p>Run the contents of this &lt;a class="link" href="https://gist.github.com/MisterDerpie/ddc2fa34ed76a65141a5913e0a2c9365" target="_blank" rel="noopener"
+>MisterDerpie/i3-default-config-alt-key&lt;/a> gist in your Ubuntu shell.
+This you can do by copying the content and right-click into the Ubuntu window.
+It will create the proper i3 configuration needed for your next connection.&lt;/p>
+&lt;p>Restart Ubuntu and restart VcXsrv (with the previous parameters).
+When you now run &lt;code>i3&lt;/code> again, go to &lt;code>VcXsrv&lt;/code> you should see everything working.&lt;/p>
+&lt;h2 id="extra-oh-my-zsh">Extra: Oh My Zsh
+&lt;/h2>&lt;p>As I&amp;rsquo;m a very happy user of &lt;a class="link" href="https://github.com/ohmyzsh/ohmyzsh" target="_blank" rel="noopener"
+>Oh My Zsh&lt;/a>, and you may use it too, installing and making it the default shell would cause the &lt;code>DISPLAY&lt;/code> variable to stop being defined.
+This is because it&amp;rsquo;s part of &lt;code>.bashrc&lt;/code> and not &lt;code>.zshrc&lt;/code>.&lt;/p>
+&lt;p>Assuming you don&amp;rsquo;t have Oh My Zsh installed yet, below script will do the job.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install -y git zsh
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sh -c &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="k">$(&lt;/span>curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh&lt;span class="k">)&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Once installed, issue below command to reenable the proper definition of the &lt;code>DISPLAY&lt;/code> environment variable.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;export DISPLAY=\$(cat /etc/resolv.conf | grep nameserver | awk &amp;#39;{print &lt;/span>&lt;span class="nv">$2&lt;/span>&lt;span class="s2">; exit;}&amp;#39;):0.0&amp;#34;&lt;/span> &amp;gt;&amp;gt; ~/.zshrc
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item><item><title>Ubuntu and i3 on Lenovo Legion 5 Pro</title><link>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</link><pubDate>Sun, 22 Aug 2021 15:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</guid><description>&lt;p>During my summer vacation, I got myself a Lenovo Legion 5 Pro, powered by an AMD Ryzen 7 5800H and an Nvidia RTX3070.
+Though this post is not about the legion, I have to say it is an awesome laptop.
+What this post is about is how to make Ubuntu with &lt;a class="link" href="https://i3wm.org/" target="_blank" rel="noopener"
+>i3wm&lt;/a> run on the Lenovo Legion.&lt;/p>
+&lt;h2 id="installing-ubuntu">Installing Ubuntu
+&lt;/h2>&lt;h3 id="create-bootable-usb-media">Create Bootable USB Media
+&lt;/h3>&lt;p>You need a USB stick as well as a Ubuntu ISO image.
+Plenty of tutorials exist on the web to create a bootable Ubuntu USB stick.
+Ubuntu.com provides official documentation, coming from a device running
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-windows#1-overview" target="_blank" rel="noopener"
+>Windows&lt;/a>,
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-ubuntu#1-overview" target="_blank" rel="noopener"
+>Ubuntu&lt;/a> or &lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview" target="_blank" rel="noopener"
+>Mac OS X&lt;/a>.&lt;/p>
+&lt;h3 id="boot-usb-media">Boot USB Media
+&lt;/h3>&lt;p>Once you created your boot device, boot up the Legion and press &lt;code>F12&lt;/code> to get into the boot menu.
+From there, select the USB stick.&lt;/p>
+&lt;p>Next you are presented with the GRUB interface, where you have to select &lt;code>Ubuntu (safe graphics)&lt;/code> and then press &lt;code>RETURN&lt;/code>.
+After a while (length of the while depends on the speed of your USB stick) you should see a window asking whether you want to &lt;code>Try&lt;/code> or &lt;code>Install&lt;/code> Ubuntu.
+Select &lt;code>Install Ubuntu&lt;/code>.&lt;/p>
+&lt;p>There is only one part in the installer you need to select a certain option to not run into issues.
+At some point you should be asked whether you want to have a &lt;code>Normal Installation&lt;/code> or &lt;code>Minimal Installation&lt;/code>.
+See &lt;a class="link" href="https://ubuntu.com/tutorials/install-ubuntu-desktop#5-prepare-to-install-ubuntu" target="_blank" rel="noopener"
+>this image&lt;/a> in the official guide.
+In the bottom of the window, below &lt;code>Other options&lt;/code>, you have to select &lt;code>Install third-party software&lt;/code>.
+This is necessary to install the proprietary Nvidia driver.
+If you don&amp;rsquo;t, you will most likely be presented a black screen after booting into Ubuntu.&lt;/p>
+&lt;p>Finish the installation and reboot into Ubuntu.&lt;/p>
+&lt;h2 id="i3">i3
+&lt;/h2>&lt;h3 id="install-i3">Install i3
+&lt;/h3>&lt;p>Once you booted to your freshly installed Ubuntu, it is very straightforward to install i3.
+Run this command in your &lt;code>Terminal&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install i3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>That&amp;rsquo;s already it.&lt;/p>
+&lt;h3 id="replace-gdm">Replace gdm
+&lt;/h3>&lt;p>The next step is to replace &lt;a class="link" href="https://wiki.gnome.org/Projects/GDM" target="_blank" rel="noopener"
+>GNOME Display Manager&lt;/a>, abbreviated &lt;code>gdm&lt;/code>.
+We will replace it with &lt;a class="link" href="https://github.com/canonical/lightdm" target="_blank" rel="noopener"
+>LightDM&lt;/a>.
+It is as easy as installing i3.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install lightdm
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>At some point during the installation, a window pops up in your terminal, asking you to select your display manager.
+In the list, use the arrow keys to navigate to &lt;code>lightdm&lt;/code> and hit &lt;code>RETURN&lt;/code> to confirm.&lt;/p>
+&lt;p>If you ever want to go back to gdm, you can do so by running below command.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo dpkg-reconfigure gdm3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="why-replace-gdm">Why replace gdm?
+&lt;/h3>&lt;p>This is the part where I ran into a problem that may only be with my setup.
+When having multiple screens connected (1 over HDMI, 1 over Lenovo Dock), I could login to i3 but then everything was frozen.
+But it was not Linux that froze, as I could tell from the clock continuing to run.
+Logging into Gnome worked though.
+Also, logging into Gnome before logging into i3 made it work.
+But neither do I want to use Gnome nor do I want to take extra steps every time I boot Linux.
+So I tried back and forth, and the only way I got this to work is to use lightdm over gdm.&lt;/p>
+&lt;p>The fact that I wasted quite some time on this motivated me sharing a short blog post.
+Using a different display manager might not suit everyone, but probably for most users this does the job.&lt;/p></description></item></channel></rss>
