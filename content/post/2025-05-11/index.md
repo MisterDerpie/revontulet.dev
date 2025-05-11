@@ -2,7 +2,7 @@
 ---
 title: iPhone Ethernet bridge on RaspberryPi with Ubuntu Server
 description: >
-    This guide shows how to set up an iPhone to Ethernet bridge on the Raspberry Pi.
+    This guide shows how to set up an iPhone USB to Ethernet bridge on the Raspberry Pi.
     Instead of Raspbian, this is a guide for Ubuntu Server.
 slug: 2025-iphone-ethernet-bridge-rpi-4-ubuntu
 date: 2025-05-11 08:00:00+0000
@@ -250,7 +250,7 @@ Provide the values as below, and your router should be able to connect to the Ra
 ---
 
 The resulting speed with this setup is ~190 Mbit downloading, and 22 Mbit uploading.
-With a different USB cable, I only achieved 120 Mbit, so the last 120 Mbit may be due to the USB cable.
+With a different USB cable, I only achieved 120 Mbit, so the remaining 110 Mbit may be due to the USB cable.
 
 ![speedtest-result](speedtest.webp)
 
