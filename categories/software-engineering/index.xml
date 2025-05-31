@@ -1,0 +1,1399 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Software Engineering on revontulet.dev</title><link>https://revontulet.dev/categories/software-engineering/</link><description>Recent content in Software Engineering on revontulet.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 04 Jul 2021 22:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/categories/software-engineering/index.xml" rel="self" type="application/rss+xml"/><item><title>Generics - Invariance, Covariance and Contravariance</title><link>https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/</link><pubDate>Sun, 04 Jul 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/</guid><description>&lt;p>In my previous post I stated that I am currently reading &lt;a class="link" href="https://www.manning.com/books/kotlin-in-action" target="_blank" rel="noopener"
+>Kotlin in Action&lt;/a> (2017, Manning).
+In chapter 9, the authors introduce generics in Kotlin.
+My overall experience with generics in Java is good, but apparently that book taught me something completely new.
+The concept of &lt;a class="link" href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_%28computer_science%29" target="_blank" rel="noopener"
+>Covariance and Contravariance&lt;/a> was something unknown to me.
+This post, though categorized Kotlin, focuses more on the concepts in general, yet will demonstrate them in Kotlin.
+I assume the reader has a basic understanding of generics and inheritance.&lt;/p>
+&lt;h2 id="inheritance-for-normal-classes">Inheritance for normal Classes
+&lt;/h2>&lt;p>Before we get into generics, let us look into inheritance for normal classes.
+For that, consider the following class hierarchy.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/class-hierarchy.png"
+width="294"
+height="212"
+srcset="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/class-hierarchy_hu_afd2e7bd6d8d9f49.png 480w, https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/class-hierarchy_hu_1ad5e3402b3f522e.png 1024w"
+loading="lazy"
+alt="class-hierarchy"
+class="gallery-image"
+data-flex-grow="138"
+data-flex-basis="332px"
+>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">abstract&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="nc">ClothingItem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">val&lt;/span> &lt;span class="py">price&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Float&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Float&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">val&lt;/span> &lt;span class="py">size&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Float&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Jacket&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Float&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">val&lt;/span> &lt;span class="py">hasZipper&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Boolean&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Between &lt;code>Shoe&lt;/code> and &lt;code>Jacket&lt;/code> there is no relationship in terms of &amp;ldquo;Shoe &lt;em>is-a&lt;/em> Jacket&amp;rdquo; or &amp;ldquo;Jacket &lt;em>is-a&lt;/em> Shoe&amp;rdquo;.
+Thus, whenever we expect a shoe, we cannot treat it as a jacket and vice versa.
+But between &lt;code>ClothingItem&lt;/code> and &lt;code>Shoe&lt;/code>/&lt;code>Jacket&lt;/code>, there is in fact an &lt;em>is-a&lt;/em> relationship.
+Shoes and jackets are both clothing items.
+Hence we can always use a &lt;code>Shoe&lt;/code> or &lt;code>Jacket&lt;/code> in code when we expect a &lt;code>ClothingItem&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">fun&lt;/span> &lt;span class="nf">printPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;The item costs &lt;/span>&lt;span class="si">${item.price}&lt;/span>&lt;span class="s2">.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>We can call that with either shoe or jacket.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// The item costs 5.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">printPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">5f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">33.5f&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// The item costs 20.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">printPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Jacket&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">20f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">false&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="covariance">Covariance
+&lt;/h2>&lt;p>To explain how inheritance in generics works, and the word &amp;ldquo;covariance&amp;rdquo;, I want to do that by an example.&lt;/p>
+&lt;h3 id="domain-model">Domain Model
+&lt;/h3>&lt;p>We create a &lt;code>Basket&lt;/code> where we can put exactly 2 of any clothing item.
+Also we define a function to print the total price of the items in the basket.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">T&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;(&lt;/span>&lt;span class="k">val&lt;/span> &lt;span class="py">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">val&lt;/span> &lt;span class="py">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">fun&lt;/span> &lt;span class="nf">printBasketPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">basket&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">firstPrice&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">secondPrice&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">secondItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">total&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span> &lt;span class="p">+&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">secondItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;The total price of &lt;/span>&lt;span class="si">$firstPrice&lt;/span>&lt;span class="s2"> + &lt;/span>&lt;span class="si">$secondPrice&lt;/span>&lt;span class="s2"> = &lt;/span>&lt;span class="si">$total&lt;/span>&lt;span class="s2">.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Now, assume we only want to buy shoes, so we create a basket only containing shoes.
+This saves us from accidently putting a jacket into the basket.
+We then want to print its price, using the previously defined function.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">val&lt;/span> &lt;span class="py">shoeBasket&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Shoe&lt;/span>&lt;span class="p">&amp;gt;(&lt;/span>&lt;span class="n">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">5.5f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">37.5f&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">printPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">shoeBasket&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>When we try to run this, it won&amp;rsquo;t compile, because the types are not matching.&lt;/p>
+&lt;h3 id="basketshoe-not-is-a-basketclothingitem">Basket&amp;lt;Shoe&amp;gt; not is-a Basket&amp;lt;ClothingItem&amp;gt;
+&lt;/h3>&lt;p>This is strange.
+We know that Shoe is-a ClothingItem, and wherever we expect the latter, we could actually provide the former.
+It turns out that &lt;code>Basket&amp;lt;Shoe&amp;gt;&lt;/code> is not a &lt;code>Basket&amp;lt;ClothingItem&amp;gt;&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/basket-not-is.png"
+width="182"
+height="212"
+srcset="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/basket-not-is_hu_123f0fd22c8f4a60.png 480w, https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/basket-not-is_hu_ff800185b29323ea.png 1024w"
+loading="lazy"
+alt="basket-not-is"
+class="gallery-image"
+data-flex-grow="85"
+data-flex-basis="206px"
+>&lt;/p>
+&lt;p>Even though the inner types are in an is-a relationship with each other, in the generic world this does not apply.
+Why is that?&lt;/p>
+&lt;p>It is best shown by changing the basket to be able to replace items, i.e. change &lt;code>val&lt;/code> to &lt;code>var&lt;/code>.
+Now we add a function that is able to replace the first clothing item by one that is provided.
+This won&amp;rsquo;t compile, but if it would, the program would crash at the print.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">T&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;(&lt;/span>&lt;span class="k">var&lt;/span> &lt;span class="py">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">var&lt;/span> &lt;span class="py">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">fun&lt;/span> &lt;span class="nf">replaceFirstItem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">basket&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;,&lt;/span> &lt;span class="n">item&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">firstItem&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">item&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//... called from some other place
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">val&lt;/span> &lt;span class="py">basket&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Shoe&lt;/span>&lt;span class="p">&amp;gt;(&lt;/span>&lt;span class="n">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">1f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">2f&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="n">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">3f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">4f&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">replaceFirstItem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">basket&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">Jacket&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">5f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">false&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// The print causes the program to crash
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// Basket&amp;lt;Shoe&amp;gt; now holds a Jacket, and Jacket has no size property
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;The shoe has size &lt;/span>&lt;span class="si">${basket.firstItem.size}&lt;/span>&lt;span class="s2">.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>And that is the reason why the is-a relationship for generics is not safe to treat the same way as for normal classes.
+It is unsafe for a function that expects a more generic type to pass a more specific one.&lt;/p>
+&lt;p>But if we could not do that, this would limit us by a lot.
+You&amp;rsquo;ve seen the function to print the price of the basket.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">fun&lt;/span> &lt;span class="nf">printBasketPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">basket&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// ...
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>If we would not be able to do that, we would have to create the same function for each type of clothing.
+That may be possible, but neither keeps your code &lt;a class="link" href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself" target="_blank" rel="noopener"
+>DRY&lt;/a> nor would it be feasible if you had hundreds of items.&lt;/p>
+&lt;h3 id="definition-of-covariance">Definition of Covariance
+&lt;/h3>&lt;p>The previous can be achieved with covariance.
+Formally defined:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">Given&lt;/span> &lt;span class="n">a&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="n">with&lt;/span> &lt;span class="n">a&lt;/span> &lt;span class="n">generic&lt;/span> &lt;span class="n">parameter&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">T&lt;/span>&lt;span class="o">&amp;gt;.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">We&lt;/span> &lt;span class="n">say&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">A&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">is&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">a&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">B&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="n">A&lt;/span> &lt;span class="n">is&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">a&lt;/span> &lt;span class="n">B&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="ow">and&lt;/span> &lt;span class="n">that&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">T&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">is&lt;/span> &lt;span class="n">covariant&lt;/span> &lt;span class="n">on&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="o">.&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Informally speaking, the &amp;ldquo;normal object inheritance&amp;rdquo; holds.
+Thus the covariant basket inheritance diagram looks like the following.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/covariance.png"
+width="182"
+height="212"
+srcset="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/covariance_hu_de5696996883913e.png 480w, https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/covariance_hu_9429c88263ed9403.png 1024w"
+loading="lazy"
+alt="basket-not-is"
+class="gallery-image"
+data-flex-grow="85"
+data-flex-basis="206px"
+>&lt;/p>
+&lt;h3 id="covariance-in-code">Covariance in Code
+&lt;/h3>&lt;p>Covariance exactly solves our problem.
+But how do we achieve that in code?
+And, if we enable that, would we run into the same problem that we could maybe override values with the wrong type?&lt;/p>
+&lt;p>In Kotlin, you define covariance on T using the keyword &lt;code>out&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// Note, we use val again
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">class&lt;/span> &lt;span class="nc">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="k">out&lt;/span> &lt;span class="n">T&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;(&lt;/span>&lt;span class="k">val&lt;/span> &lt;span class="py">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">val&lt;/span> &lt;span class="py">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// ... call it
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">val&lt;/span> &lt;span class="py">basket&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Shoe&lt;/span>&lt;span class="p">&amp;gt;(&lt;/span>&lt;span class="n">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">1f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">2f&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="n">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">3f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">4f&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;The shoe has size &lt;/span>&lt;span class="si">${basket.firstItem.size}&lt;/span>&lt;span class="s2">.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>The keyword is not coincidantelly named &lt;code>out&lt;/code>, it actually has a specific reason.
+When you mark the generic parameter as covariant, you can only use an instance of T in out positions.
+This does probably introduce another questionmark, because what are out positions?
+Informally said, an out position is everything that is returning, but never receiving.
+An instance of T could be acquired by getting from the basket, because the getter would &lt;em>return&lt;/em> the instance.
+An operation like setting a variable to an instance would not be allowed, because the setter would &lt;em>receive&lt;/em> the instance.&lt;/p>
+&lt;p>With that said, with a covariant basket, we could never run into overriding an item with a wrong instance.
+How should we?
+The operation to write is a receiving operation, thus not an out operation.
+This is also the reason we have to define the items as &lt;code>val&lt;/code> instead of &lt;code>var&lt;/code>.
+As &lt;code>var&lt;/code> provides setters, it wouldn&amp;rsquo;t compile.&lt;/p>
+&lt;h2 id="contravariance">Contravariance
+&lt;/h2>&lt;p>Covariance is a concept that is quite natural, because it follows the &amp;ldquo;normal flow&amp;rdquo; of inheritance.
+What is way less natural is the concept of contravariance, because it allows you to walk &amp;ldquo;upwards&amp;rdquo; in the inheritance tree - kind of.&lt;/p>
+&lt;h3 id="adding-an-action-object">Adding an Action Object
+&lt;/h3>&lt;p>Let&amp;rsquo;s create an abstract base class that supports a single function, provided two objects, and returns nothing.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">abstract&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="nc">Action&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">T&lt;/span>&lt;span class="p">&amp;gt;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">abstract&lt;/span> &lt;span class="k">fun&lt;/span> &lt;span class="nf">performAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">):&lt;/span> &lt;span class="n">Unit&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>For contravariance we want to work with a basket full of jackets.
+So we create an action specific to jackets.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">JacketAction&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">Action&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Jacket&lt;/span>&lt;span class="p">&amp;gt;()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">override&lt;/span> &lt;span class="k">fun&lt;/span> &lt;span class="nf">performAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Jacket&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Jacket&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">hasZipper&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="n">secondItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">hasZipper&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Both jackets have zippers!!!&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;You have at least one non-zipper jacket.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="call-action-on-printing">Call Action on printing
+&lt;/h3>&lt;p>Let&amp;rsquo;s create a method that takes a basket full of jackets and an action for jackets.
+Also we create a jacket basket and call the method with it and the previously defined jacket action.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">fun&lt;/span> &lt;span class="nf">printComplimentAndPerformAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">basket&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Jacket&lt;/span>&lt;span class="p">&amp;gt;,&lt;/span> &lt;span class="n">action&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Action&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Jacket&lt;/span>&lt;span class="p">&amp;gt;)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Nice jackets!&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">action&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">performAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">secondItem&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// ... in the caller
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">val&lt;/span> &lt;span class="py">jacketBasket&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Jacket&lt;/span>&lt;span class="p">&amp;gt;&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Jacket&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">1f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">false&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="n">Jacket&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">2f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">false&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">val&lt;/span> &lt;span class="py">jacketAction&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">JacketAction&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">printComplimentAndPerformAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">jacketBasket&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">jacketAction&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">/* Output
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">Nice jackets!
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">You have at least one non-zipper jacket.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">*/&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="more-general-action">More general action
+&lt;/h3>&lt;p>Say we want to have an action we can perform on any clothing item.
+That is a common use-case.
+You have a less specific type (in our example: Clothing Item) and want to perform an action based on methods already provided by that type.
+Such action could, for example, be to print the more expensive of the two items.
+If we had to create that for every single item type, we would repeat code all over the place and this would not scale at all.
+Not to mention again that there are many clothing items.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">ClothingActionHighestPrice&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">Action&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">override&lt;/span> &lt;span class="k">fun&lt;/span> &lt;span class="nf">performAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span> &lt;span class="p">&amp;gt;&lt;/span> &lt;span class="n">secondItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;First item is more expensive.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Second item is more expensive&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>We would like to call the &lt;code>printComplimentAndPerformAction&lt;/code> method with the &lt;code>ClothingActionHighestPrice&lt;/code>.
+But this will not compile.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">val&lt;/span> &lt;span class="py">clothingActionHighestPrice&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">ClothingActionHighestPrice&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// This call won&amp;#39;t compile
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">printComplimentAndPerformAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">jacketBasket&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">clothingActionHighestPrice&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>At first glance, this seems to be intuitive.
+We know that &lt;code>Jacket&lt;/code> is-a &lt;code>ClothingItem&lt;/code>, so we cannot pass a &lt;code>ClothingItem&lt;/code> when we want to have a &lt;code>Jacket&lt;/code>.
+So what we want to do is shown in below diagram.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/not-contravariant-action.png"
+width="182"
+height="212"
+srcset="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/not-contravariant-action_hu_4067cf599a6009d8.png 480w, https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/not-contravariant-action_hu_13087bde1f474959.png 1024w"
+loading="lazy"
+alt="not-covariant-action"
+class="gallery-image"
+data-flex-grow="85"
+data-flex-basis="206px"
+>&lt;/p>
+&lt;h3 id="definition-of-contravariance">Definition of Contravariance
+&lt;/h3>&lt;p>It is possible to achieve previous diagram by contravariance.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">Given&lt;/span> &lt;span class="n">a&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="n">with&lt;/span> &lt;span class="n">a&lt;/span> &lt;span class="n">generic&lt;/span> &lt;span class="n">parameter&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">T&lt;/span>&lt;span class="o">&amp;gt;.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">We&lt;/span> &lt;span class="n">say&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">A&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">is&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">a&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">B&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="n">B&lt;/span> &lt;span class="n">is&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">a&lt;/span> &lt;span class="n">A&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="ow">and&lt;/span> &lt;span class="n">that&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">T&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">is&lt;/span> &lt;span class="n">contravariant&lt;/span> &lt;span class="n">on&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="o">.&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Informally speaking, we say that our class with generic parameter &lt;code>A&lt;/code> is a &lt;em>child&lt;/em> of another class with generic parameter &lt;code>B&lt;/code> if &lt;code>B&lt;/code> supersedes &lt;code>A&lt;/code>.
+The diagram shows that we want to do exactly that.
+ClothingItem supersedes Jacket, yet we want the &lt;code>Action&amp;lt;ClothingItem&amp;gt;&lt;/code> to be a &lt;code>Action&amp;lt;Jacket&amp;gt;&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/contravariant-action.png"
+width="182"
+height="212"
+srcset="https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/contravariant-action_hu_599b2038393af2c7.png 480w, https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/contravariant-action_hu_d867558f6c9ac2ba.png 1024w"
+loading="lazy"
+alt="contravariant-action"
+class="gallery-image"
+data-flex-grow="85"
+data-flex-basis="206px"
+>&lt;/p>
+&lt;p>When I read about contravariance the first time, I was confused.
+My confusion came from that I thought we are actually allowing the &lt;code>Action&amp;lt;ClothingItem&amp;gt;&lt;/code> to perform methods on &lt;code>Jacket&lt;/code>.
+This is obviously not the case, the clothing item action only sees a clothing item.&lt;/p>
+&lt;h3 id="contravariance-in-code">Contravariance in Code
+&lt;/h3>&lt;p>For covariance there is &lt;code>out&lt;/code>, and contravariance is more or less the opposite of covariance.
+It&amp;rsquo;s not a big surprise that the keyword for contravariance is &lt;code>in&lt;/code>.
+On the abstract base class, the &lt;code>Action&lt;/code>, we make &lt;code>T&lt;/code> covariant.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">abstract&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="nc">Action&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="k">in&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">&amp;gt;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">abstract&lt;/span> &lt;span class="k">fun&lt;/span> &lt;span class="nf">performAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">):&lt;/span> &lt;span class="n">Unit&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>As with the &lt;code>out&lt;/code> keyword, the &lt;code>in&lt;/code> keyword also specifies where the type is allowed to be placed at.
+You can only place &lt;code>T&lt;/code> on &lt;em>receiving&lt;/em>, not &lt;em>returning&lt;/em> operations.
+Passing the jackets into the &lt;code>performAction&lt;/code> function is &lt;em>receiving&lt;/em>, so we can safely do that.
+Yet we cannot &lt;em>receive&lt;/em> &lt;code>T&lt;/code> from &lt;code>performAction&lt;/code>, because the base type is unknown to that method.
+It could be anything more specific.&lt;/p>
+&lt;p>Assume for contravariance you would allow to also return the type.
+When the &lt;code>printComplimentAndPerformAction&lt;/code> method, defined on jacket, would receive some clothing item, it could also be a shoe.
+This would not be safe anymore.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">abstract&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="nc">Action&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="k">in&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">&amp;gt;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// Having T in the return is not allowed
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">abstract&lt;/span> &lt;span class="k">fun&lt;/span> &lt;span class="nf">performAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">):&lt;/span> &lt;span class="n">T&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// ...
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">NotAllowedReturn&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">Action&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">override&lt;/span> &lt;span class="k">fun&lt;/span> &lt;span class="nf">performAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">):&lt;/span> &lt;span class="n">ClothingItem&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">1f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">1f&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// ...
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">fun&lt;/span> &lt;span class="nf">printComplimentAndPerformAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">basket&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Jacket&lt;/span>&lt;span class="p">&amp;gt;,&lt;/span> &lt;span class="n">action&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Action&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Jacket&lt;/span>&lt;span class="p">&amp;gt;)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Nice jackets!&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">receivedItem&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">action&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">performAction&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">secondItem&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// If firstItem were var, we would put a shoe in here
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// Which violates the contract that there are only jackets
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">firstItem&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">receivedItem&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="invariance">Invariance
+&lt;/h2>&lt;p>Now that covariance and contravariance are covered, the last piece is the default mode: Invariance.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">Given&lt;/span> &lt;span class="n">a&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="n">with&lt;/span> &lt;span class="n">a&lt;/span> &lt;span class="n">generic&lt;/span> &lt;span class="n">parameter&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">T&lt;/span>&lt;span class="o">&amp;gt;.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">We&lt;/span> &lt;span class="n">say&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">A&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">is&lt;/span> &lt;span class="n">invariant&lt;/span> &lt;span class="n">to&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">B&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="n">neither&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">A&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">is&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">a&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">B&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">nor&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">B&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">is&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">a&lt;/span> &lt;span class="n">SomeClass&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">A&lt;/span>&lt;span class="o">&amp;gt;.&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>In simple words: Whenever an instance of &lt;code>SomeClass&amp;lt;A&amp;gt;&lt;/code> is expected, you must provide &lt;code>SomeClass&amp;lt;A&amp;gt;&lt;/code>, and cannot provide a &lt;code>SomeClass&amp;lt;T&amp;gt;&lt;/code> with a &lt;code>T&lt;/code> being higher/lower in the class hierarchy.
+This is the default mode for any generic class in Kotlin.
+That is why the first example didn&amp;rsquo;t work and we had to make it covariant.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">abstract&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="nc">ClothingItem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">val&lt;/span> &lt;span class="py">price&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Float&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Float&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">val&lt;/span> &lt;span class="py">size&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Float&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Jacket&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Float&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">val&lt;/span> &lt;span class="py">hasZipper&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Boolean&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// by default, T is invariant
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">class&lt;/span> &lt;span class="nc">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">T&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;(&lt;/span>&lt;span class="k">val&lt;/span> &lt;span class="py">firstItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">val&lt;/span> &lt;span class="py">secondItem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">T&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// and thus this method only takes a basket of type ClothingItem
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">fun&lt;/span> &lt;span class="nf">printBasketPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">basket&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">ClothingItem&lt;/span>&lt;span class="p">&amp;gt;)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">firstPrice&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">secondPrice&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">secondItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">total&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">firstItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span> &lt;span class="p">+&lt;/span> &lt;span class="n">basket&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">secondItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">price&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;The total price of &lt;/span>&lt;span class="si">$firstPrice&lt;/span>&lt;span class="s2"> + &lt;/span>&lt;span class="si">$secondPrice&lt;/span>&lt;span class="s2"> = &lt;/span>&lt;span class="si">$total&lt;/span>&lt;span class="s2">.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">fun&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Array&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">String&lt;/span>&lt;span class="p">&amp;gt;)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">shoeBasket&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Basket&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">Shoe&lt;/span>&lt;span class="p">&amp;gt;(&lt;/span>&lt;span class="n">Shoe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">5.5f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">37.5f&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// so this will not compile
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">printBasketPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">shoeBasket&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="bottom-line">Bottom Line
+&lt;/h2>&lt;p>Covariance and contravariance enable us to provide compile time guarantee for runtime safety.
+The most prominent example for covariance is the &lt;code>Collection&lt;/code> interface.
+Though contravariance has fewer use cases, you probably have used that one probably already.
+The &lt;code>Comparator&lt;/code> interface is the most prominent candidate where contravariance is used.&lt;/p></description></item><item><title>Teststubs with Kotlin Extensions</title><link>https://revontulet.dev/p/2021-teststubs-with-kotlin-extensions/</link><pubDate>Fri, 25 Jun 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-teststubs-with-kotlin-extensions/</guid><description>&lt;p>The repository with the Kotlin code can be found on &lt;a class="link" href="https://github.com/MisterDerpie/kotlin-data-stubs" target="_blank" rel="noopener"
+>github/MisterDerpie/kotlin-data-stubs&lt;/a>.&lt;/p>
+&lt;p>Currently I&amp;rsquo;m having the great luck that our team started using Kotlin at work.
+For that reason, I decided to learn Kotlin properly and started my journey with &lt;a class="link" href="https://www.manning.com/books/kotlin-in-action" target="_blank" rel="noopener"
+>Kotlin in Action&lt;/a> (2017, Manning).
+This is a bit outdated, considering that Kotlin 1.5 is the current release, but the vast majority of concepts are the same as for 1.0.&lt;/p>
+&lt;p>One concept that fascinates me and I really see a lot of value in is &lt;a class="link" href="https://kotlinlang.org/docs/extensions.html" target="_blank" rel="noopener"
+>Extensions&lt;/a>.
+Especially for tests I find that concept very useful, because it enables us to provide test related logic to our classes without actually adding this in the real production code.
+Let&amp;rsquo;s have a look at how we can utilize extensions to create stubs of business classes.&lt;/p>
+&lt;h2 id="problem-statement-in-java">Problem statement in Java
+&lt;/h2>&lt;h3 id="test-utils-to-stub-classes">Test Utils to Stub Classes
+&lt;/h3>&lt;p>A problem that often arises in Java projects is that you need to provide stubs for using e.g. the same customer in multiple tests.
+Suppose you have a class &lt;code>Customer.java&lt;/code> that looks like this&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@AllArgsConstructor&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="cm">/* Generates constructor with all parameters */&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@Getter&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="cm">/* Generates getters for all properties */&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">Customer&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">private&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">final&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">UUID&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">id&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">private&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">final&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">String&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">private&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">final&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Integer&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">age&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>and you would like to stub the same customer for your tests.
+How would you do that?
+Probably you create some class called &lt;code>TestUtils.java&lt;/code>, that provides a static method &lt;code>stubCustomer&lt;/code>.
+In larger projects, you most likely have many different stubs in it, from Address over Customer to Shopping Cart.
+Thus, you start adding all these stubs in the &lt;code>TestUtils&lt;/code> class.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">TestUtils&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">static&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Customer&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nf">stubCustomer&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">...&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">static&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Address&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nf">stubAddress&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">...&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">...&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>I have seen such classes having hundreds of lines of code, with many different, totally unrelated objects.
+A first attempt to improve that would be to create &lt;code>TestUtilsCustomer.java&lt;/code>, &lt;code>TestUtilsAddress.java&lt;/code>, &amp;hellip;
+That would leave us with a better, yet still not the best solution.&lt;/p>
+&lt;h3 id="test-code-meets-production-code">Test Code meets Production Code
+&lt;/h3>&lt;p>Wouldn&amp;rsquo;t it be nice to provide &lt;code>stubCustomer&lt;/code> directly in the &lt;code>Customer&lt;/code> itself?
+With Java, you would have to include such method in your production code.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@AllArgsConstructor&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="cm">/* Generates constructor with all parameters */&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@Getter&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="cm">/* Generates getters for all properties */&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">Customer&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">private&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">final&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">UUID&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">id&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">private&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">final&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">String&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">private&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">final&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Integer&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">age&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">static&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Customer&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nf">stubFullAgeCustomer&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="k">return&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">new&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Customer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">UUID&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">randomUUID&lt;/span>&lt;span class="p">(),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s">&amp;#34;JavaName&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">18&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Testcode should never, &lt;strong>never&lt;/strong> reside in production code.
+With Kotlin, we can actually do that, but without production code ever knowing about this &lt;code>stubFullAgeCustomer&lt;/code> method.&lt;/p>
+&lt;h2 id="solution-in-kotlin">Solution in Kotlin
+&lt;/h2>&lt;p>Before continue reading, think about why it would be nice to have a preconfigured Customer provided by the &lt;code>Customer&lt;/code> object itself.
+When implementing the &lt;a class="link" href="https://en.wikipedia.org/wiki/Builder_pattern" target="_blank" rel="noopener"
+>Builder Pattern&lt;/a>, you configure each property by a callchain of functions with the properties&amp;rsquo; names.
+It could look like this &lt;code>Customer.name(&amp;quot;Builder&amp;quot;).age(23).uuid(UUID.randomUUID()).build()&lt;/code>.
+So why not getting a fully preset instance as part of this object, too?&lt;/p>
+&lt;p>This can be achieved in Kotlin.&lt;/p>
+&lt;h3 id="setup">Setup
+&lt;/h3>&lt;p>We define a &lt;code>Customer&lt;/code> data class and an &lt;code>AgeCheckService&lt;/code> (the latter is purely to have something to test, so that I can show how our extension works).&lt;/p>
+&lt;p>&lt;code>Customer.kt&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">package&lt;/span> &lt;span class="nn">dto&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">import&lt;/span> &lt;span class="nn">java.util.UUID&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">data&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="nc">Customer&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">id&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">UUID&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">name&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">String&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">age&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Int&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">companion&lt;/span> &lt;span class="k">object&lt;/span> &lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>What enables us to extend the &lt;code>Customer&lt;/code> with new &amp;ldquo;static&amp;rdquo; methods for our test is the &lt;a class="link" href="https://kotlinlang.org/docs/object-declarations.html#companion-objects" target="_blank" rel="noopener"
+>companion object&lt;/a>.
+As this is a pure data class, we don&amp;rsquo;t add anything else.&lt;/p>
+&lt;p>&lt;code>AgeCheckService.kt&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">package&lt;/span> &lt;span class="nn">service&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">import&lt;/span> &lt;span class="nn">dto.Customer&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">AgeCheckService&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">companion&lt;/span> &lt;span class="k">object&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">fun&lt;/span> &lt;span class="nf">isCustomerOfFullAge&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">customer&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Customer&lt;/span>&lt;span class="p">):&lt;/span> &lt;span class="n">Boolean&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">customer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">age&lt;/span> &lt;span class="o">&amp;gt;=&lt;/span> &lt;span class="m">18&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>This services only functionality is to return &lt;code>true&lt;/code> when the customer is of full age, and &lt;code>false&lt;/code> when they&amp;rsquo;re minor.
+As initially stated, this is for the sole purpose of having something to test.&lt;/p>
+&lt;h3 id="extend-customer">Extend Customer
+&lt;/h3>&lt;p>In our test, we would like to call the following:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="nc">Customer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">stubFullAgeCustomer&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nc">Customer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">stubMinorAgeCustomer&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>to retrieve preconfigured customers with &lt;em>some&lt;/em> age greater or equal than 18 or less than 18, respectively.
+This is as easy as doing &lt;a class="link" href="https://kotlinlang.org/docs/extensions.html#companion-object-extensions" target="_blank" rel="noopener"
+>companion object extensions&lt;/a>.&lt;/p>
+&lt;p>To do so, simply place a file in your testpath, and define the functions on &lt;code>Customer.Companion&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">package&lt;/span> &lt;span class="nn">dto&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">import&lt;/span> &lt;span class="nn">java.util.UUID&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">fun&lt;/span> &lt;span class="nf">Customer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nc">Companion&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">stubFullAgeCustomer&lt;/span>&lt;span class="p">():&lt;/span> &lt;span class="n">Customer&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">Customer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nc">UUID&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">nameUUIDFromBytes&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;This is some string for UUID&amp;#34;&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">toByteArray&lt;/span>&lt;span class="p">()),&lt;/span> &lt;span class="s2">&amp;#34;MisterDerpie&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">24&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">fun&lt;/span> &lt;span class="nf">Customer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nc">Companion&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">stubMinorAgeCustomer&lt;/span>&lt;span class="p">():&lt;/span> &lt;span class="n">Customer&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">Customer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nc">UUID&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">nameUUIDFromBytes&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;This is another UUID string&amp;#34;&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">toByteArray&lt;/span>&lt;span class="p">()),&lt;/span> &lt;span class="s2">&amp;#34;MinorPerson&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="m">17&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Note that when you do not define a name for the companion object in the class, it will be accessible by &lt;code>Companion&lt;/code>.
+Congratulations, you just added extensions which you can use in your tests.&lt;/p>
+&lt;h3 id="test-agecheckservice-using-extension-stub">Test AgeCheckService using Extension Stub
+&lt;/h3>&lt;p>The last step is to import your Extensions into your test.
+They are not automatically applied globally to your Customer, which is the reason why you explicitly have to import them.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">package&lt;/span> &lt;span class="nn">service&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">import&lt;/span> &lt;span class="nn">dto.Customer&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">import&lt;/span> &lt;span class="nn">dto.stubFullAgeCustomer&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">import&lt;/span> &lt;span class="nn">dto.stubMinorAgeCustomer&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">import&lt;/span> &lt;span class="nn">org.junit.jupiter.api.Test&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">import&lt;/span> &lt;span class="nn">org.assertj.core.api.Assertions.assertThat&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">AgeCheckServiceTest&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@Test&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">fun&lt;/span> &lt;span class="nf">`should return true when customer is of full age`&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">customer&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="nc">Customer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">stubFullAgeCustomer&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">assertThat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nc">AgeCheckService&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">isCustomerOfFullAge&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">customer&lt;/span>&lt;span class="p">)).&lt;/span>&lt;span class="n">isEqualTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">true&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@Test&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">fun&lt;/span> &lt;span class="nf">`should return false when customer is of minor age`&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="py">customer&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="nc">Customer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">stubMinorAgeCustomer&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">assertThat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nc">AgeCheckService&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">isCustomerOfFullAge&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">customer&lt;/span>&lt;span class="p">)).&lt;/span>&lt;span class="n">isEqualTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">false&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>See the imports at the top.
+I placed the &lt;code>Customer&lt;/code> in a package called &lt;code>dto&lt;/code>.
+The &lt;code>stubFullAgeCustomer&lt;/code> and &lt;code>stubMinorAgeCustomer&lt;/code> are also placed in a package called &lt;code>dto&lt;/code> (but the name doesn&amp;rsquo;t matter, it&amp;rsquo;s just due to the same folder structure in the tests).
+As stated initially, we need to import them to actually apply the extension to the &lt;code>Customer&lt;/code>.&lt;/p>
+&lt;p>The tests are then straightforward: Get the customer and assert that the age service in fact returns &lt;code>true&lt;/code> when they&amp;rsquo;re of full age and &lt;code>false&lt;/code> when they&amp;rsquo;re of minor age.&lt;/p></description></item><item><title>Spring Boot with MongoDB</title><link>https://revontulet.dev/p/2021-spring-boot-with-mongodb/</link><pubDate>Wed, 26 May 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-spring-boot-with-mongodb/</guid><description>&lt;p>The sourcecode of this post is available on &lt;a class="link" href="https://github.com/MisterDerpie/spring-boot-with-mongodb" target="_blank" rel="noopener"
+>github/MisterDerpie/spring-boot-with-mongodb&lt;/a>.&lt;/p>
+&lt;h2 id="foreword">Foreword
+&lt;/h2>&lt;p>For a small application to store receipts I wanted to use &lt;a class="link" href="https://spring.io/projects/spring-boot" target="_blank" rel="noopener"
+>Spring Boot&lt;/a> and NoSQL database &lt;a class="link" href="https://www.mongodb.com/" target="_blank" rel="noopener"
+>MongoDB&lt;/a>.
+As with many basic topics in the spring world, there is a &lt;a class="link" href="https://spring.io/guides/gs/accessing-data-mongodb/" target="_blank" rel="noopener"
+>Getting Started guide&lt;/a> on &lt;a class="link" href="https://spring.io" target="_blank" rel="noopener"
+>spring.io&lt;/a>, with the specific title &amp;ldquo;Accessing Data with MongoDB&amp;rdquo;.&lt;/p>
+&lt;p>Though this guide may suffice for a really straightforward start, it actually misses out two, from my point of view, essential questions.&lt;/p>
+&lt;ol>
+&lt;li>How to connect to a MongoDB instance?&lt;/li>
+&lt;li>How to integration test MongoDB?&lt;/li>
+&lt;/ol>
+&lt;p>Therefore I wrote this post.
+As I want to use JavaMoney, I also cover Mongo Converters.
+The list explains what is covered in this post.&lt;/p>
+&lt;ul>
+&lt;li>Use MongoDB as a data store in Spring&lt;/li>
+&lt;li>Connect to a MongoDB instance with your provided credentials&lt;/li>
+&lt;li>Integration test with an embedded MongoDB&lt;/li>
+&lt;li>Use &lt;a class="link" href="https://javamoney.github.io/" target="_blank" rel="noopener"
+>JavaMoney&lt;/a> with MongoDB&lt;/li>
+&lt;/ul>
+&lt;h2 id="setup-mongodb">Setup MongoDB
+&lt;/h2>&lt;p>First we need an instance of MongoDB.
+I will - as usual - use &lt;a class="link" href="https://www.docker.com/" target="_blank" rel="noopener"
+>Docker&lt;/a>.
+Therefore I assume you have docker installed, if not, there are plenty of guides how to do that available online.
+We use the &lt;a class="link" href="https://hub.docker.com/_/mongo" target="_blank" rel="noopener"
+>Docker-Mongo&lt;/a> image.
+To start a MongoDB instance that is running in the background, run below code from the shell.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker container run -d &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --name mongodb &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> -e &lt;span class="nv">MONGO_INITDB_ROOT_USERNAME&lt;/span>&lt;span class="o">=&lt;/span>admin &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> -e &lt;span class="nv">MONGO_INITDB_ROOT_PASSWORD&lt;/span>&lt;span class="o">=&lt;/span>admin &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> -p 27017-27019:27017-27019 &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> mongo:latest
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="setup-spring-boot-project">Setup Spring Boot Project
+&lt;/h2>&lt;h3 id="create-spring-project">Create Spring Project
+&lt;/h3>&lt;p>This section is about creating the Spring project.
+After you created the project, don&amp;rsquo;t forget to add the additional dependencies (next section).&lt;/p>
+&lt;h4 id="create-project-with-spring-initializr">Create project with Spring Initializr
+&lt;/h4>&lt;p>The easiest way to create the project is using &lt;a class="link" href="https://start.spring.io/" target="_blank" rel="noopener"
+>Spring Initializr&lt;/a>.
+I will use &lt;a class="link" href="https://gradle.org/" target="_blank" rel="noopener"
+>Gradle&lt;/a> as the build automation tool, but it doesn&amp;rsquo;t matter and you can well select Maven.&lt;/p>
+&lt;p>We will include the 2 starters&lt;/p>
+&lt;ul>
+&lt;li>Lombok&lt;/li>
+&lt;li>Spring Data MongoDB&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-spring-boot-with-mongodb/spring-initializr.png"
+width="1080"
+height="754"
+srcset="https://revontulet.dev/p/2021-spring-boot-with-mongodb/spring-initializr_hu_761c5f879caf4615.png 480w, https://revontulet.dev/p/2021-spring-boot-with-mongodb/spring-initializr_hu_b64531050592dba9.png 1024w"
+loading="lazy"
+alt="spring-initializr"
+class="gallery-image"
+data-flex-grow="143"
+data-flex-basis="343px"
+>&lt;/p>
+&lt;p>To do so, click on &lt;code>Add Dependencies&lt;/code> (top right corner) and search for &lt;code>Spring Data Mongo DB&lt;/code> (don&amp;rsquo;t use the reactive one) and &lt;code>Lombok&lt;/code>.&lt;/p>
+&lt;p>Select that you want to have a &lt;code>Gradle Project&lt;/code>, use &lt;code>Java&lt;/code>, fill out the &lt;code>Project Metadata&lt;/code>, select &lt;code>Packaging Jar&lt;/code> and &lt;code>Java 11&lt;/code>.
+Then click &lt;code>Generate&lt;/code> and you should get a &lt;code>.zip&lt;/code> containing your project.
+Unzip this anywhere and open it in the IDE of your choice.
+I prefer &lt;a class="link" href="https://www.jetbrains.com/idea/" target="_blank" rel="noopener"
+>IntelliJ&lt;/a>.&lt;/p>
+&lt;h4 id="create-project-with-gradle">Create project with Gradle
+&lt;/h4>&lt;p>In case you want to create your Gradle project from scratch, you can follow &lt;a class="link" href="https://docs.gradle.org/current/samples/sample_building_java_applications.html" target="_blank" rel="noopener"
+>docs.gradle.org - Building Java Applications Sample&lt;/a>.
+Add below dependencies to your &lt;code>dependencies&lt;/code> block in the &lt;code>build.gradle&lt;/code> file.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">implementation &amp;#39;org.springframework.boot:spring-boot-starter-data-mongodb&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">implementation &amp;#39;org.springframework.boot:spring-boot-starter-web&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">compileOnly &amp;#39;org.projectlombok:lombok&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">annotationProcessor &amp;#39;org.projectlombok:lombok&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">testImplementation &amp;#39;org.springframework.boot:spring-boot-starter-test&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="additional-dependencies">Additional Dependencies
+&lt;/h3>&lt;p>To show how to integration test and how to use JavaMoney with MongoDB, we add two dependencies, namely &lt;a class="link" href="https://github.com/flapdoodle-oss/de.flapdoodle.embed.mongo" target="_blank" rel="noopener"
+>Flapdoodle Embedded MongoDB&lt;/a> and &lt;a class="link" href="https://javamoney.github.io/" target="_blank" rel="noopener"
+>JavaMoney&lt;/a>.
+Add&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">testImplementation &amp;#39;org.springframework.boot:spring-boot-starter-test&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">testImplementation &amp;#39;de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.0.0&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">implementation &amp;#39;org.javamoney.moneta:moneta-core:1.4.2&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>to your dependencies in the &lt;code>build.gradle&lt;/code> file. It should then look similar to this.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">dependencies {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> implementation &amp;#39;org.springframework.boot:spring-boot-starter-data-mongodb&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> compileOnly &amp;#39;org.projectlombok:lombok&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> annotationProcessor &amp;#39;org.projectlombok:lombok&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> testImplementation &amp;#39;org.springframework.boot:spring-boot-starter-test&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> testImplementation &amp;#39;de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.0.0&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> implementation &amp;#39;org.javamoney.moneta:moneta-core:1.4.2&amp;#39;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="connect-application-to-mongodb">Connect Application to MongoDB
+&lt;/h2>&lt;p>This part only covers how to configure your application to be able to connect with MongoDB.
+I assume you have a MongoDB instance running configured the same way as I did with the docker image.
+That is, listening on port &lt;code>27017&lt;/code>, with user &lt;code>admin&lt;/code> and password &lt;code>admin&lt;/code>.
+Note that you should not use those credentials in a real application of course, but for only running this on your local machine and getting started this is perfectly fine.&lt;/p>
+&lt;p>In the &lt;code>resources&lt;/code> folder (where the &lt;code>application.properties&lt;/code> resides), create a new properties file called e.g. &lt;code>application-production.properties&lt;/code> and put the following content in it.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">spring.data.mongodb.authentication-database=admin
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">spring.data.mongodb.username=admin
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">spring.data.mongodb.password=admin
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">spring.data.mongodb.database=testdatabase
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">spring.data.mongodb.port=27017
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">spring.data.mongodb.host=localhost
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>This enables Spring&amp;rsquo;s MongoDB repository to&lt;/p>
+&lt;ul>
+&lt;li>connect to a MongoDB instance running on &lt;code>localhost&lt;/code>&lt;/li>
+&lt;li>with port &lt;code>27017&lt;/code>&lt;/li>
+&lt;li>and username &lt;code>admin&lt;/code>&lt;/li>
+&lt;li>and password &lt;code>admin&lt;/code>&lt;/li>
+&lt;li>and selected database &lt;code>testdatabase&lt;/code>&lt;/li>
+&lt;li>and authentication database &lt;code>admin&lt;/code> (default in the docker container)&lt;/li>
+&lt;/ul>
+&lt;h3 id="why-not-the-default-applicationproperties">Why not the default application.properties?
+&lt;/h3>&lt;p>You may wonder why we don&amp;rsquo;t use the default properties file.
+The reason is that the embedded MongoDB for some reason does not override these values.
+In case you run your integration tests without providing a profile and/or not providing these values, it would fall back to the default properties file.
+Thus the tests would fail, as you could not connect to the database.&lt;/p>
+&lt;p>For the sake of completion, before your tests even start you would see this error.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">org.springframework.beans.factory.BeanCreationException: Error creating bean with name &amp;#39;embeddedMongoServer&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="create-mongo-document-in-application">Create Mongo Document in Application
+&lt;/h2>&lt;p>The next part is to create a &lt;a class="link" href="https://docs.mongodb.com/manual/core/document" target="_blank" rel="noopener"
+>MongoDB document&lt;/a> representation class.
+Simply put, this is the entity you are going to persist in the database.
+We keep it simple and want to store an &lt;code>Item&lt;/code> we purchased.
+Its values are an &lt;code>id&lt;/code>, a &lt;code>name&lt;/code> and a &lt;code>price&lt;/code>.
+We will use the &lt;code>id&lt;/code> as the primary key.&lt;/p>
+&lt;p>Create a class called &lt;code>Item&lt;/code> with the following contents.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">lombok.AllArgsConstructor&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">lombok.Data&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.javamoney.moneta.FastMoney&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.data.annotation.Id&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.data.mongodb.core.mapping.Document&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">java.util.UUID&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@Document&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@AllArgsConstructor&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@Data&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">Item&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nd">@Id&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">UUID&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">id&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">FastMoney&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">price&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">String&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Let&amp;rsquo;s explain a bit what&amp;rsquo;s going on here.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;code>@Document&lt;/code> indicates that we want this class to be persistable in MongoDB.
+In case you are familiar with JPA, this is the equivalent to &lt;code>@Entity&lt;/code>.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>@AllArgsConstructor&lt;/code> and &lt;code>@Data&lt;/code> are Lombok annotations.
+The former one creates what it states, a constructor with all parameters.
+With the latter we automatically create getters and setters.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>@Id&lt;/code> marks this field as the primary key to use in the database.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="use-mongorepository-to-access-document">Use MongoRepository to access Document
+&lt;/h2>&lt;p>The next step is that we want to store our document in the database.
+Spring provides a very easy to use interface for that.
+Just create a class called &lt;code>ItemRepository&lt;/code> that extends &lt;code>MongoRepository&amp;lt;T, ID&amp;gt;&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.data.mongodb.repository.MongoRepository&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">java.util.UUID&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">interface&lt;/span> &lt;span class="nc">ItemRepository&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">extends&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">MongoRepository&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">Item&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">UUID&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>The first generic parameter of &lt;code>MongoRepository&lt;/code> indicates what entity we want to persist.
+As our &lt;code>Item&lt;/code> is the entity, we put this there.
+To identify items, we set the primary key of type &lt;code>UUID&lt;/code>.
+Therefore we put the ID type as the second generic parameter.&lt;/p>
+&lt;h2 id="integration-test-mongodb">Integration Test MongoDB
+&lt;/h2>&lt;p>We are done, almost.
+Let us test our &lt;code>MongoRepository&lt;/code> whether it works as expected (hint, it doesn&amp;rsquo;t, but we will get to that).&lt;/p>
+&lt;h3 id="create-the-test">Create the test
+&lt;/h3>&lt;p>Create a test class &lt;code>ItemRepositoryTest&lt;/code> with the following content&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.javamoney.moneta.FastMoney&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.junit.jupiter.api.Test&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.beans.factory.annotation.Autowired&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">java.util.UUID&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import static&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.assertj.core.api.Assertions.assertThat&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@DataMongoTest&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">ItemRepositoryTest&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nd">@Autowired&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">ItemRepository&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">itemRepository&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nd">@Test&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nf">shouldStoreItem&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">Item&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">new&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Item&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">UUID&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">randomUUID&lt;/span>&lt;span class="p">(),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">FastMoney&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">of&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s">&amp;#34;EUR&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s">&amp;#34;Test Item&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">itemRepository&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">save&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">Item&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">storedItem&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">itemRepository&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">findById&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getId&lt;/span>&lt;span class="p">()).&lt;/span>&lt;span class="na">orElseThrow&lt;/span>&lt;span class="p">();&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">assertThat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">storedItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getId&lt;/span>&lt;span class="p">()).&lt;/span>&lt;span class="na">isEqualTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getId&lt;/span>&lt;span class="p">());&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">assertThat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">storedItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getPrice&lt;/span>&lt;span class="p">()).&lt;/span>&lt;span class="na">isEqualTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getPrice&lt;/span>&lt;span class="p">());&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">assertThat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">storedItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getName&lt;/span>&lt;span class="p">()).&lt;/span>&lt;span class="na">isEqualTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getName&lt;/span>&lt;span class="p">());&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Let us look at what&amp;rsquo;s done here, before we run the test.&lt;/p>
+&lt;p>&lt;code>@DataMongoTest&lt;/code> starts the Spring Boot Test context. In addition to that it also creates an embedded MongoDB instance.&lt;/p>
+&lt;p>&lt;code>@Autowired&lt;/code> &amp;ldquo;injects the dependency&amp;rdquo; of &lt;code>ItemRepository&lt;/code> into the test class.
+Simply put, Spring creates an instance of &lt;code>ItemRepository&lt;/code> and puts the reference to that instance in &lt;code>itemRepository&lt;/code>.
+So &lt;code>itemRepository&lt;/code> is not null, and the creation of it is done by Spring&amp;rsquo;s Dependency Injection container.
+If you want to to read more about it click on the links for &lt;a class="link" href="https://www.tutorialspoint.com/spring/spring_autowired_annotation.htm" target="_blank" rel="noopener"
+>@Autowired&lt;/a> and &lt;a class="link" href="https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/beans.html" target="_blank" rel="noopener"
+>Spring Dependency Injection&lt;/a>.&lt;/p>
+&lt;p>The test itself then is pretty simple.
+We create an Item with a random UUID, value of 1 euro and the name &amp;ldquo;Test Item&amp;rdquo;.
+Then we store this in the database and try to query the database for the item ID, asserting that the retrieved item is equal to the initial item.&lt;/p>
+&lt;h3 id="run-the-test">Run the test
+&lt;/h3>&lt;p>When we try to run the test, it will even fail before the first assertion is reached.
+Looking at the logs, we can see the following error.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">Failed&lt;/span> &lt;span class="n">to&lt;/span> &lt;span class="n">instantiate&lt;/span> &lt;span class="n">org&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">javamoney&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">moneta&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">FastMoney&lt;/span> &lt;span class="n">using&lt;/span> &lt;span class="n">constructor&lt;/span> &lt;span class="n">NO_CONSTRUCTOR&lt;/span> &lt;span class="n">with&lt;/span> &lt;span class="n">arguments&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">org&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">springframework&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">mapping&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">model&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">MappingInstantiationException&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Failed&lt;/span> &lt;span class="n">to&lt;/span> &lt;span class="n">instantiate&lt;/span> &lt;span class="n">org&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">javamoney&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">moneta&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">FastMoney&lt;/span> &lt;span class="n">using&lt;/span> &lt;span class="n">constructor&lt;/span> &lt;span class="n">NO_CONSTRUCTOR&lt;/span> &lt;span class="n">with&lt;/span> &lt;span class="n">arguments&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>The problem is the internal representation of &lt;code>FastMoney&lt;/code>. When serialized into a JSON object, it actually does not just look like&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-json" data-lang="json">&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span> &lt;span class="nt">&amp;#34;number&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nt">&amp;#34;currency&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;EUR&amp;#34;&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>but like&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-json" data-lang="json">&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>&lt;span class="nt">&amp;#34;currency&amp;#34;&lt;/span>&lt;span class="p">:{&lt;/span>&lt;span class="nt">&amp;#34;context&amp;#34;&lt;/span>&lt;span class="p">:{&lt;/span>&lt;span class="nt">&amp;#34;providerName&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="s2">&amp;#34;java.util.Currency&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;empty&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="p">},&lt;/span>&lt;span class="nt">&amp;#34;numericCode&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">978&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;defaultFractionDigits&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;currencyCode&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="s2">&amp;#34;EUR&amp;#34;&lt;/span>&lt;span class="p">},&lt;/span>&lt;span class="nt">&amp;#34;number&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mf">1.00000&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;precision&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;factory&amp;#34;&lt;/span>&lt;span class="p">:{&lt;/span>&lt;span class="nt">&amp;#34;defaultMonetaryContext&amp;#34;&lt;/span>&lt;span class="p">:{&lt;/span>&lt;span class="nt">&amp;#34;fixedScale&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;maxScale&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">5&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;amountType&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="s2">&amp;#34;org.javamoney.moneta.FastMoney&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;precision&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">19&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;providerName&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">null&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;empty&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="p">},&lt;/span>&lt;span class="nt">&amp;#34;amountType&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="s2">&amp;#34;org.javamoney.moneta.FastMoney&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;maxNumber&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mf">92233720368547.75807&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;minNumber&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mf">-92233720368547.75808&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;maximalMonetaryContext&amp;#34;&lt;/span>&lt;span class="p">:{&lt;/span>&lt;span class="nt">&amp;#34;fixedScale&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;maxScale&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">5&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;amountType&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="s2">&amp;#34;org.javamoney.moneta.FastMoney&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;precision&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">19&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;providerName&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">null&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;empty&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="p">}},&lt;/span>&lt;span class="nt">&amp;#34;context&amp;#34;&lt;/span>&lt;span class="p">:{&lt;/span>&lt;span class="nt">&amp;#34;fixedScale&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;maxScale&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">5&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;amountType&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="s2">&amp;#34;org.javamoney.moneta.FastMoney&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;precision&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">19&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;providerName&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">null&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;empty&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="p">},&lt;/span>&lt;span class="nt">&amp;#34;zero&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;positive&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;negative&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;negativeOrZero&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;positiveOrZero&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nt">&amp;#34;scale&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">5&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>But FastMoney does only have a constructor that accepts these very two parameters.
+The solution is to provide a custom converter, that would store our money representation exactly as what the constructor expects.&lt;/p>
+&lt;h2 id="mongodb-converter">MongoDB Converter
+&lt;/h2>&lt;h3 id="create-converters">Create Converters
+&lt;/h3>&lt;p>To successfully save and load our Item from the database, we need to convert the price.
+This is done by creating a &lt;code>ReadingConverter&lt;/code> and a &lt;code>WritingConverter&lt;/code>.
+Create two classes, namely &lt;code>FastMoneyReadConverter&lt;/code> and &lt;code>FastMoneyWriteConverter&lt;/code> with the following contents.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.javamoney.moneta.FastMoney&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.core.convert.converter.Converter&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.data.convert.ReadingConverter&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">java.math.BigDecimal&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@ReadingConverter&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">FastMoneyReadConverter&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">implements&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Converter&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">String&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">FastMoney&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">FastMoney&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nf">convert&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">String&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">input&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">String&lt;/span>&lt;span class="o">[]&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">storedValue&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">input&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">split&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;###&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="k">return&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">FastMoney&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">of&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">new&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">BigDecimal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">storedValue&lt;/span>&lt;span class="o">[&lt;/span>&lt;span class="n">0&lt;/span>&lt;span class="o">]&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">storedValue&lt;/span>&lt;span class="o">[&lt;/span>&lt;span class="n">1&lt;/span>&lt;span class="o">]&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.javamoney.moneta.FastMoney&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.core.convert.converter.Converter&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.data.convert.WritingConverter&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@WritingConverter&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">FastMoneyWriteConverter&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">implements&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Converter&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">FastMoney&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">String&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">String&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nf">convert&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">FastMoney&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">input&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="k">return&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">input&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getNumber&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s">&amp;#34;###&amp;#34;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">input&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getCurrency&lt;/span>&lt;span class="p">();&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Our converters implement the &lt;code>Converter&amp;lt;Input, Output&amp;gt;&lt;/code> interface.
+The naming states exactly what we want to achieve with them.
+With a ReadingConverter, we want to convert when &lt;em>reading from&lt;/em> the database &lt;em>into&lt;/em> the Java Object.
+A WritingConverter is used when we &lt;em>write into&lt;/em> the database &lt;em>from&lt;/em> the Java Object.&lt;/p>
+&lt;p>What the converters do is very straightforward.
+We take the values from the Money, concatenate them with a placeholder of three hashtags and then save this entire string to the database.
+On reading from the database, we revert that operation by splitting them at the three hashtags and creating a FastMoney instance of the two obtained values.&lt;/p>
+&lt;h3 id="create-converter-config">Create Converter Config
+&lt;/h3>&lt;p>We created our converters but need to make the MongoRepository aware of using them when storing/loading documents from MongoDB.
+For that, we simply create a configuration and provide a list of &lt;code>MongoCustomConversions&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.context.annotation.Bean&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.context.annotation.Configuration&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.data.mongodb.core.convert.MongoCustomConversions&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">java.util.List&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@Configuration&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">ConverterConfig&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nd">@Bean&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">MongoCustomConversions&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nf">mongoCustomConversions&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="k">return&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">new&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">MongoCustomConversions&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">List&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">of&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">new&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">FastMoneyReadConverter&lt;/span>&lt;span class="p">(),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">new&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">FastMoneyWriteConverter&lt;/span>&lt;span class="p">()));&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;code>@Configuration&lt;/code> loads this class in the Spring context.&lt;/p>
+&lt;p>&lt;code>@Bean&lt;/code> tells Spring to get an instance of the return type (here: &lt;code>MongoCustomConversions&lt;/code>) by calling this method.
+In the &lt;code>mongoCustomConversion&lt;/code> method we pass a list of our converters to the constructor of &lt;code>MongoCustomConversions&lt;/code> and return that.&lt;/p>
+&lt;h2 id="integration-tests-revisited">Integration Tests Revisited
+&lt;/h2>&lt;p>Let&amp;rsquo;s try running our integration tests again.
+Now that we have the converters in place, we should be good to go, right?
+No. Unfortunately our tests will fail for the very same reason again.&lt;/p>
+&lt;p>Why is that?&lt;/p>
+&lt;p>When running with &lt;code>@DataMongoTest&lt;/code>, it does not scan for the &lt;code>ConverterConfig&lt;/code>.
+That is why we need to include this in the Spring context in this test.
+This is easily done by adding &lt;code>@Import(ConverterConfig.class)&lt;/code>.&lt;/p>
+&lt;p>Our test should finally look like this and pass&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.javamoney.moneta.FastMoney&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.junit.jupiter.api.Test&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.beans.factory.annotation.Autowired&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.springframework.context.annotation.Import&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">java.util.UUID&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kn">import static&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nn">org.assertj.core.api.Assertions.assertThat&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@DataMongoTest&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@Import&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ConverterConfig&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">class&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">ItemRepositoryTest&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nd">@Autowired&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">ItemRepository&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">itemRepository&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nd">@Test&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nf">shouldStoreItem&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">Item&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">new&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Item&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">UUID&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">randomUUID&lt;/span>&lt;span class="p">(),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">FastMoney&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">of&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s">&amp;#34;EUR&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s">&amp;#34;Test Item&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">itemRepository&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">save&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">assertThat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">storedItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getId&lt;/span>&lt;span class="p">()).&lt;/span>&lt;span class="na">isEqualTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getId&lt;/span>&lt;span class="p">());&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">assertThat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">storedItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getPrice&lt;/span>&lt;span class="p">()).&lt;/span>&lt;span class="na">isEqualTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getPrice&lt;/span>&lt;span class="p">());&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">assertThat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">storedItem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getName&lt;/span>&lt;span class="p">()).&lt;/span>&lt;span class="na">isEqualTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">getName&lt;/span>&lt;span class="p">());&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Congratulations, you successfully wired Spring with MongoDB.&lt;/p></description></item></channel></rss>

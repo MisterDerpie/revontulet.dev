@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Arch on revontulet.dev</title><link>https://revontulet.dev/tags/arch/</link><description>Recent content in Arch on revontulet.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 26 Mar 2025 18:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/arch/index.xml" rel="self" type="application/rss+xml"/><item><title>Arch and i3 - Hello, Sway! - Install Arch and Sway</title><link>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</link><pubDate>Wed, 26 Mar 2025 18:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</guid><description>&lt;p>Welcome to part one of the three-part series &amp;ldquo;Hello, Sway!&amp;rdquo;
+The series is split into&lt;/p>
+&lt;ol>
+&lt;li>&lt;i>Arch &amp;amp; Sway setup using &lt;code>archinstall&lt;/code>&lt;/i>&lt;/li>
+&lt;li>Sway Configuration&lt;/li>
+&lt;li>Linux QoL Tools&lt;/li>
+&lt;/ol>
+&lt;h2 id="motivation">Motivation
+&lt;/h2>&lt;p>For a while already, there has been no real reason for me to keep Windows.
+The doubt started about two years ago, in January 2023, when I got myself a Steam Deck.
+Although the purchase was mostly to emulate console and handheld games, of course the question was
+&amp;ldquo;&lt;a class="link" href="https://knowyourmeme.com/memes/but-can-it-run-crysis" target="_blank" rel="noopener"
+>But Can It Run Crysis?&lt;/a>&amp;rdquo;
+To my surprise, the games I tried performed incredibly well, almost all of them out of the box.
+Thanks to ProtonDB, if there was a title that needed some extra configuration, it is usually there.&lt;/p>
+&lt;p>Besides gaming, my work is either on a Mac or (used to be) on a Linux machine.
+When using Linux at work, the default for me was to set up Arch and i3wm (I use Arch btw).
+Moreover, after being a nano user for quite a while, it was time to move to vim.
+It&amp;rsquo;s a nice coincidence that Sway uses vim keybinds for moving windows, although one could easily configure that in i3wm.&lt;/p>
+&lt;p>Given the circumstances, let&amp;rsquo;s move to Linux!&lt;/p>
+&lt;h2 id="arch--sway-setup-using-archinstall">Arch &amp;amp; Sway setup using &lt;code>archinstall&lt;/code>
+&lt;/h2>&lt;p>&lt;a class="link" href="https://github.com/archlinux/archinstall" target="_blank" rel="noopener"
+>archinstall&lt;/a> is a guided installer to setup Arch.
+There are many posts on how to create a bootable USB stick with Arch, and how to run archinstall.
+Thus, instead of providing all the steps here, you may want to follow e.g. this one on debugpoint.com:
+&lt;a class="link" href="https://www.debugpoint.com/archinstall-guide/" target="_blank" rel="noopener"
+>Installing Arch Linux Using archinstall Automated Script&lt;/a>
+&lt;strong>up to the point of installing the Desktop Environment&lt;/strong>.&lt;/p>
+&lt;p>Before looking into what to select, first comes two common issues, one often faced on laptops and the other may faced when running on an Nvidia card.
+Scroll past that to &lt;a class="link" href="./#sway-graphics-driver-and-ly" >Sway, Ly Greeter and Graphics Driver&lt;/a> in case you don&amp;rsquo;t encounter any issues.&lt;/p>
+&lt;h3 id="issues-during-archinstall">Issues During Archinstall
+&lt;/h3>&lt;h4 id="archinstall-boots-into-a-blackscreen-on-nvidia">Archinstall boots into a Blackscreen on Nvidia
+&lt;/h4>&lt;p>It may happen that with Nvidia Graphics Cards, once you select Arch Linux Install from the bootmedium, you only see a blank black screen.
+In that case, try to add &lt;code>nomodeset&lt;/code>.&lt;/p>
+&lt;ol>
+&lt;li>Select the entry on the USB stick you want to boot from, then press &lt;code>e&lt;/code>.&lt;/li>
+&lt;li>Navigate your cursor to the end of the line, and append &lt;code> nomodeset&lt;/code>.&lt;/li>
+&lt;/ol>
+&lt;p>This should resolve the issue.
+If you&amp;rsquo;re curious what exactly this does, feel free to read this post on ubuntuforums.com:
+&lt;a class="link" href="https://ubuntuforums.org/showthread.php?t=1613132" target="_blank" rel="noopener"
+>How to set NOMODESET ant other kernel boot options in grub2&lt;/a>&lt;/p>
+&lt;h4 id="cannot-connect-to-wifi">Cannot connect to Wifi
+&lt;/h4>&lt;p>This issue is common on Laptops.
+To connect to the WiFi, one may use &lt;code>iwctl&lt;/code> (as suggested).
+Trying to turn on the WiFi could result in &lt;code>operation failed&lt;/code>.&lt;/p>
+&lt;p>To fix this, run&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">rfkill unblock all
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>and then retry.&lt;/p>
+&lt;p>For further reading on why and how, see &lt;a class="link" href="https://wiki.archlinux.org/title/Network_configuration/Wireless#Rfkill_caveat" target="_blank" rel="noopener"
+>rfkill caveat (ArchWiki/NetworkConfiguration)&lt;/a>.&lt;/p>
+&lt;h3 id="sway-graphics-driver-and-ly">Sway, Graphics Driver and Ly
+&lt;/h3>&lt;p>On the desktop environment installation, select the following&lt;/p>
+&lt;h4 id="desktop---sway">Desktop - Sway
+&lt;/h4>&lt;p>This one goes without saying.&lt;/p>
+&lt;h4 id="graphics-driver">Graphics Driver
+&lt;/h4>&lt;p>For the Graphics Driver, it depends on your Graphics Card.
+As my laptop has an RTX 3070, which is newer than Turing, I chose the &amp;ldquo;Nvidia (open kernel &amp;hellip;)&amp;rdquo;.
+To find which Nvidia driver you need, please consult &lt;a class="link" href="https://wiki.archlinux.org/title/NVIDIA" target="_blank" rel="noopener"
+>ArchWiki/NVIDIA&lt;/a>.&lt;/p>
+&lt;h4 id="greeter---ly">Greeter - Ly
+&lt;/h4>&lt;p>My setup uses Ly as the greeter.
+This greeter takes you to the next level.
+Check it out on &lt;a class="link" href="https://github.com/fairyglade/ly" target="_blank" rel="noopener"
+>github.com/fairyglade/ly&lt;/a>.&lt;/p>
+&lt;p>Now, finish up the installation, and boot into your system.&lt;/p>
+&lt;h3 id="start-sway---nvidia-unsupported-gpu">Start Sway - Nvidia Unsupported GPU
+&lt;/h3>&lt;p>As mentioned in the Arch Wiki, to start Sway with Nvidia drivers, one must explicitly state that this is an unspported GPU
+(&lt;a class="link" href="https://wiki.archlinux.org/title/Sway" target="_blank" rel="noopener"
+>ref&lt;/a>).
+Edit the Sway Desktop file&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">vim /usr/share/wayland-sessions/sway.desktop
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>and change the Exec line to&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-txt" data-lang="txt">&lt;span class="line">&lt;span class="cl">Exec=sway --unsupported-gpu
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Logout, select Sway, and start it &amp;hellip; aaand you may see a black screen.
+At least that happened when I did this, and I don&amp;rsquo;t have an explanation for this, as in, why it is fixed after a reboot.
+In case that doesn&amp;rsquo;t happen: Great.
+If it happens though, reboot, and then - at least on my machine™ - it worked.&lt;/p>
+&lt;hr>
+&lt;p>Congratulations.
+You most likely have an Arch &amp;amp; Sway setup with a fancy login screen now.
+In the next post, we&amp;rsquo;ll look into some tools to get simple Sway configuration with most important things sorted.&lt;/p></description></item></channel></rss>

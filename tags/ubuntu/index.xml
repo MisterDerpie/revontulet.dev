@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Ubuntu on revontulet.dev</title><link>https://revontulet.dev/tags/ubuntu/</link><description>Recent content in Ubuntu on revontulet.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 11 May 2025 08:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/ubuntu/index.xml" rel="self" type="application/rss+xml"/><item><title>iPhone Ethernet bridge on RaspberryPi with Ubuntu Server</title><link>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</link><pubDate>Sun, 11 May 2025 08:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</guid><description>&lt;p>This post covers how to tether your iPhone via USB to your RaspberryPi, and share the iPhone&amp;rsquo;s network on &lt;code>eth0&lt;/code>.
+Eventually, the RaspberryPi will be connected to a router via ethernet, making the router use the iPhone&amp;rsquo;s internet connection.
+A RaspberryPi 4B is used, but this guide &lt;em>should&lt;/em> work on other models too.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup.webp"
+width="411"
+height="241"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_117e63e1bc3d7006.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_1c320d6ae2011933.webp 1024w"
+loading="lazy"
+alt="iphone-connected-to-rpi-connected-to-router"
+class="gallery-image"
+data-flex-grow="170"
+data-flex-basis="409px"
+>&lt;/p>
+&lt;p>One may wonder why this setup is needed.
+Routing at least DNS traffic through the Pi with the &lt;a class="link" href="https://pi-hole.net/" target="_blank" rel="noopener"
+>Pi-hole&lt;/a> is a common use-case, but all traffic less so.&lt;/p>
+&lt;p>My connection to the world is through the iPhone&amp;rsquo;s hotspot.
+Said hotspot turns invisible after a period of time.
+It is not the classic hidden SSID invisible, but connecting to it once invisible is impossible, only connected devices stay.&lt;/p>
+&lt;p>Still, why use a router, when the RaspberryPi comes with a WLAN chip?
+About a month ago, I attempted a similar setup and had the Pi directly as a WiFi hotspot.
+Unfortuantely, the throughput was only about 40 Mbit, defeating the purpose of the iPhone&amp;rsquo;s 300 Mbit 5G connection.&lt;/p>
+&lt;p>Given the fact that my RaspberyPi was collecting dust, it was perfectly suited.
+Moreover does my router at hand not support a USB connection, hence the need.&lt;/p>
+&lt;h2 id="installing-ubuntu-server">Installing Ubuntu Server
+&lt;/h2>&lt;p>To install Ubuntu Server, you may use the RaspberryPi Imager.
+It can be downloaded from &lt;a class="link" href="https://www.raspberrypi.com/software/" target="_blank" rel="noopener"
+>raspberrypi.com/software&lt;/a>.&lt;/p>
+&lt;p>During the installation, it will ask you to provide a custom configuration.
+Choose yes and provide a username and a password to be able to SSH into it during the next steps.
+Then install it.&lt;/p>
+&lt;p>Once done, start your RaspberryPi and connect it via ethernet to your router.&lt;/p>
+&lt;h2 id="raspberrypi-internet-setup">RaspberryPi Internet Setup
+&lt;/h2>&lt;p>Find the RaspberryPi&amp;rsquo;s IP Address from your router.
+Usually, it is listed under connected devices.
+Then ssh into it, e.g.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">ssh name-you-chose@192.168.X.Y
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>SSH probably asks you to trust the fingerprint, and you may select yes.
+Note: In case you need to factory reset your Pi, and it gets assigned the same IP, you will see an error from ssh.
+That is due to not matching fingerprints.
+Remove the entries of that IP from &lt;code>~/.ssh/known_hosts&lt;/code>.&lt;/p>
+&lt;h3 id="connect-to-the-iphone">Connect to the iPhone
+&lt;/h3>&lt;p>Install the packages&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://github.com/libimobiledevice/usbmuxd" target="_blank" rel="noopener"
+>usbmuxd&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://github.com/libimobiledevice/libimobiledevice" target="_blank" rel="noopener"
+>libimobiledevice-utils&lt;/a>&lt;/li>
+&lt;li>&lt;code>ipeth-utils&lt;/code> (this may be optional, I didn&amp;rsquo;t try it without)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo apt install -y &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> usbmuxd &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> ipheth-utils &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> libimobiledevice-utils
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Now it is time to connect our iPhone.
+With Mobile Hotspot enabled, it will show a dialog to Trust/Not trust the RaspberryPi.
+Trust it, and you may be required to enter your password.&lt;/p>
+&lt;p>We can see that it&amp;rsquo;s connected on the RaspberryPi running&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">networkctl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl">IDX LINK TYPE OPERATIONAL SETUP
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 1 lo loopback carrier unmanaged
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 2 eth0 ether routable configured
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 3 wlan0 wlan off unmanaged
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 4 enxfae5ce082148 ether off unmanaged
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>Important: Your iPhone will have a different ID, and in the steps from here on you need to replace it in the provided snippets.&lt;/strong>&lt;/p>
+&lt;p>The iPhone is &lt;code>enx...&lt;/code>, and the next step is to have it managed, so it gets an IP assigned and we can route traffic through that interface.
+At this point, the guide deviates slightly from &lt;a class="link" href="https://wiki.archlinux.org/title/IPhone_tethering#Using_systemd-networkd" target="_blank" rel="noopener"
+>Arch Wiki&amp;rsquo;s setup using systemd-networkd&lt;/a>.
+Although one may set it up that way, Ubuntu Server ships with netplan, which we take advantage of.
+That way, we only need to configure netplan.&lt;/p>
+&lt;p>There should already be an entry for &lt;code>eth0&lt;/code>, so you may only add the part for the iPhone.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo vim /etc/netplan/50-cloud-init.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">network&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">renderer&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">networkd&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ethernets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">enxfae5ce082148&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">// Add this&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">// Add this&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="l">// ... keep eth0 unchanged for now&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Apply the new network config.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">netplan apply
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>We can confirm it using the ip command.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">ip a
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">4: enxfae5ce082148: &amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> link/ether aa:bb:cc:dd:ff:gg brd ff:ff:ff:ff:ff:ff
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inet 123.12.10.4/28 metric 100 brd 123.12.10.15 scope global dynamic enxfae5ce082148
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> valid_lft 86357sec preferred_lft 86357sec
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inet6 1111:1222:333:4444:5555:6666:7777:8888/64 scope global mngtmpaddr noprefixroute
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> valid_lft forever preferred_lft forever
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inet6 1111::2222:3333:4444:2148/64 scope link proto kernel_ll
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> valid_lft forever preferred_lft forever
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>To test the connection, curl provides the option to set an interface through which to connect.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">curl&lt;/span> &lt;span class="o">--&lt;/span>&lt;span class="n">interface&lt;/span> &lt;span class="n">enxfae5ce082148&lt;/span> \
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">https&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="o">//&lt;/span>&lt;span class="n">example&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">com&lt;/span> \
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">-&lt;/span>&lt;span class="n">w&lt;/span> &lt;span class="s1">&amp;#39;%{speed_download}&amp;#39;&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="o">/&lt;/span>&lt;span class="n">dev&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">null&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Great, now you could use the iPhone&amp;rsquo;s USB tethered network to connect to the internet.&lt;/p>
+&lt;h3 id="route-traffic-through-the-iphone">Route traffic through the iPhone
+&lt;/h3>&lt;p>The second part is to tell iptables to route traffic through our iPhone&amp;rsquo;s interface.
+It is done with adding this entry using the iptables command.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">iptables -t nat -A POSTROUTING -o enxfae5ce082148 -j MASQUERADE
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Note that the newly created entry is not persisted on reboot.
+To persist it, one solution is to use &lt;code>iptables-persistent&lt;/code>.
+Whilst installing, it asks you to back up existing configurations.
+Answer &amp;ldquo;Yes&amp;rdquo;.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo apt install -y iptables-persistent
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>You will be able to confirm a &lt;code>MASQUERADE&lt;/code> entry running&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat /etc/iptables/rules.v4
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>In case the entry is not present, rerun the steps and the persistence&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">sudo iptables-save &amp;gt; /etc/iptables/rules.v4
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>We still need to enable IP forwarding between interfaces.
+This is achieved adding the following configuration.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo vim /etc/sysctl.d/30-ipforward.conf
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl">net.ipv4.ip_forward = 1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Last but not least, we must be able to connect on eth0.
+I did not get into the steps of setting up DHCP on it, so you may do that yourself.
+After this step, it will be assigned &lt;code>192.168.42.1&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo vim /etc/netplan/50-cloud-init.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">network&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">renderer&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">networkd&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ethernets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">enxfae5ce082148&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">eth0&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">addresses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="m">192.168.42.1&lt;/span>&lt;span class="l">/24&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>From here on, for connecting to your RaspberryPi on &lt;code>eth0&lt;/code>, you will need to assign the external device (e.g. a Laptop) a correct IP address, the right net mask and the right gateway.
+Note that the IP address suffix must be a value between 2 and 254.&lt;/p>
+&lt;p>Given our setup, the configuration is&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Type&lt;/th>
+&lt;th>Value&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>IP Address&lt;/td>
+&lt;td>192.168.42.X&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Gateway&lt;/td>
+&lt;td>192.168.42.1&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Netmask&lt;/td>
+&lt;td>24 or 255.255.255.0&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Reboot the RaspberryPi, and the changes take effect.
+Keep in mind that you &lt;u>must&lt;/u> assign the IP on your external device like above table, otherwise you will not see the RPi.&lt;/p>
+&lt;p>The Pi can be accessed at &lt;code>ssh your-name@192.168.42.1&lt;/code> thereafter.&lt;/p>
+&lt;h2 id="using-the-raspberrypi-with-a-router">Using the RaspberryPi with a Router
+&lt;/h2>&lt;p>The final step of this setup is to use the RaspberryPi as the internet provider for a router.
+Across most routers, these steps are almost identical, and you may consult your router&amp;rsquo;s documentation on where to find the right setuppage.&lt;/p>
+&lt;p>First, you need to connect your RaspberryPi to the port of the router that says &amp;ldquo;WAN&amp;rdquo;.&lt;/p>
+&lt;p>Then you need to find out where you can set the Conenction Mode/Internet Connection type of your router.
+Provide the values as below, and your router should be able to connect to the RaspberryPi, and use its network.&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Type&lt;/th>
+&lt;th>Value&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Connection Mode&lt;/td>
+&lt;td>Static IP&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>IP address&lt;/td>
+&lt;td>192.168.42.77&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Subnet Mask&lt;/td>
+&lt;td>255.255.255.0&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Default Gateway&lt;/td>
+&lt;td>192.168.42.1&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Primary DNS server&lt;/td>
+&lt;td>9.9.9.9&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Secondary DNS server&lt;/td>
+&lt;td>8.8.8.8&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;hr>
+&lt;p>The resulting speed with this setup is ~190 Mbit downloading, and 22 Mbit uploading.
+With a different USB cable, I only achieved 120 Mbit, so the remaining 110 Mbit may be due to the USB cable.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/speedtest.webp"
+width="412"
+height="122"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/speedtest_hu_b9cd19f0c84d0d6d.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/speedtest_hu_aee8f617dd64fe2c.webp 1024w"
+loading="lazy"
+alt="speedtest-result"
+class="gallery-image"
+data-flex-grow="337"
+data-flex-basis="810px"
+>&lt;/p>
+&lt;p>Connecting to the iPhone directly gives me almost 300 Mbit, so there is definitely a loss of performance somewhere.&lt;/p></description></item></channel></rss>
