@@ -8,6 +8,14 @@ categories:
 tags:
     - Opinion
     - AI
+keywords:
+    - AI
+    - AI-first
+    - Artificial Intelligence
+    - ChatGPT
+    - Cursor
+    - Windsurf
+    - AGI
 weight: 1
 ---
 

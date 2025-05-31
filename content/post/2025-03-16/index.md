@@ -8,6 +8,14 @@ categories:
     - General
 tags:
     - General
+keywords:
+    - Döpmann
+    - Matthias Doepmann
+    - Matthias Döpmann
+    - Blog
+    - Revontulet
+    - Arctic Circle
+    - Tech
 weight: 1
 links:
   - title: Cover Location (Google Maps)
