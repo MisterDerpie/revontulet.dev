@@ -155,8 +155,8 @@ About two weeks ago, I tried out Cursor myself on a Golang Template file.
 Said file is already hard for us to maintain and comprehend, so it seemed a fair baseline.
 Whilst the first suggestion worked (it took Cursor about 30 minutes to think), one small requirement change made it impossible for Cursor to produce a correct result.
 For a good 12 hours, over the course of 1 1/2 days, I tried to prompt it such that it yields what we needed.
-Eventually, **I figured that my prompts converged more and more to be almost the code I wanted.**
-After still not getting the exact result, I ended up implementing it myself in less than 30 minutes.
+Eventually, I noticed that **my prompts converged** more and more **to be almost the code** I wanted.
+After still not getting a working result, I ended up implementing it myself in less than 30 minutes.
 
 The more niche a topic is, the worse seem to be the LLM's results.
 For about 3 months now I am a Neovim user, before I never used neither Vim nor Nvim (adjusting git config to use nano was one of my first steps on a new OS).
