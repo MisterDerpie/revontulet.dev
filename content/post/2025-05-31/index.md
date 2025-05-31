@@ -71,8 +71,9 @@ At the same time, we hear great success stories from the really big tech compani
 
 Amazon and Google are boasting about their success stories, without providing much data.
 But luckily, we can find that data ourselves, for instance, on Open Source projects... or can we?
-Pivot to AI's article [If AI is so good at coding … where are the open source contributions?](https://pivot-to-ai.com/2025/05/13/if-ai-is-so-good-at-coding-where-are-the-open-source-contributions/)
-is a great read and makes you wonder.
+The blog "Pivot to AI" published the article
+[If AI is so good at coding … where are the open source contributions?](https://pivot-to-ai.com/2025/05/13/if-ai-is-so-good-at-coding-where-are-the-open-source-contributions/),
+and the result should make all of us wonder...
 
 Oftentimes, companies get away making these bold claims without ever proving them.
 We don't see the methodology Amazon used to come up with 4,500 developer years.
