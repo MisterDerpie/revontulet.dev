@@ -102,7 +102,7 @@ An article about one of GitHub's actual benchmarks is
 ([archive.is](https://archive.is/4fbdQ)) from Jadarma's blog... which draws a grim picture on the methodology.
 
 To our luck, there's been a public experiment.
-Recently (May 2025), .NET Developers tried out Copilot on their GitHub respository, see PR [github/dotnet/runtime#115762](https://github.com/dotnet/runtime/pull/115762).
+Recently (May 2025), .NET Developers tried out Copilot on their GitHub repository, see PR [github/dotnet/runtime#115762](https://github.com/dotnet/runtime/pull/115762).
 Whilst there are a lot of snarky comments, I think we should respect the attempt.
 It is important to see where we stand, and see where we can improve, or whether we aren't there (yet?).
 Have a look at it yourself, it's worth it.
