@@ -10,6 +10,11 @@ menu:
             icon: cv
 toc: false
 readingTime: false
+keywords:
+    - Doepmann
+    - Döpmann
+    - Matthias Doepmann
+    - Matthias Döpmann
 ---
 
 To be populated :-)
