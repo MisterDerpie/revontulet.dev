@@ -1,0 +1,1256 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>RaspberryPi on revontulet.dev</title><link>https://revontulet.dev/tags/raspberrypi/</link><description>Recent content in RaspberryPi on revontulet.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 11 May 2025 08:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/raspberrypi/index.xml" rel="self" type="application/rss+xml"/><item><title>iPhone Ethernet bridge on RaspberryPi with Ubuntu Server</title><link>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</link><pubDate>Sun, 11 May 2025 08:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</guid><description>&lt;p>This post covers how to tether your iPhone via USB to your RaspberryPi, and share the iPhone&amp;rsquo;s network on &lt;code>eth0&lt;/code>.
+Eventually, the RaspberryPi will be connected to a router via ethernet, making the router use the iPhone&amp;rsquo;s internet connection.
+A RaspberryPi 4B is used, but this guide &lt;em>should&lt;/em> work on other models too.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup.webp"
+width="411"
+height="241"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_117e63e1bc3d7006.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_1c320d6ae2011933.webp 1024w"
+loading="lazy"
+alt="iphone-connected-to-rpi-connected-to-router"
+class="gallery-image"
+data-flex-grow="170"
+data-flex-basis="409px"
+>&lt;/p>
+&lt;p>One may wonder why this setup is needed.
+Routing at least DNS traffic through the Pi with the &lt;a class="link" href="https://pi-hole.net/" target="_blank" rel="noopener"
+>Pi-hole&lt;/a> is a common use-case, but all traffic less so.&lt;/p>
+&lt;p>My connection to the world is through the iPhone&amp;rsquo;s hotspot.
+Said hotspot turns invisible after a period of time.
+It is not the classic hidden SSID invisible, but connecting to it once invisible is impossible, only connected devices stay.&lt;/p>
+&lt;p>Still, why use a router, when the RaspberryPi comes with a WLAN chip?
+About a month ago, I attempted a similar setup and had the Pi directly as a WiFi hotspot.
+Unfortuantely, the throughput was only about 40 Mbit, defeating the purpose of the iPhone&amp;rsquo;s 300 Mbit 5G connection.&lt;/p>
+&lt;p>Given the fact that my RaspberyPi was collecting dust, it was perfectly suited.
+Moreover does my router at hand not support a USB connection, hence the need.&lt;/p>
+&lt;h2 id="installing-ubuntu-server">Installing Ubuntu Server
+&lt;/h2>&lt;p>To install Ubuntu Server, you may use the RaspberryPi Imager.
+It can be downloaded from &lt;a class="link" href="https://www.raspberrypi.com/software/" target="_blank" rel="noopener"
+>raspberrypi.com/software&lt;/a>.&lt;/p>
+&lt;p>During the installation, it will ask you to provide a custom configuration.
+Choose yes and provide a username and a password to be able to SSH into it during the next steps.
+Then install it.&lt;/p>
+&lt;p>Once done, start your RaspberryPi and connect it via ethernet to your router.&lt;/p>
+&lt;h2 id="raspberrypi-internet-setup">RaspberryPi Internet Setup
+&lt;/h2>&lt;p>Find the RaspberryPi&amp;rsquo;s IP Address from your router.
+Usually, it is listed under connected devices.
+Then ssh into it, e.g.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">ssh name-you-chose@192.168.X.Y
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>SSH probably asks you to trust the fingerprint, and you may select yes.
+Note: In case you need to factory reset your Pi, and it gets assigned the same IP, you will see an error from ssh.
+That is due to not matching fingerprints.
+Remove the entries of that IP from &lt;code>~/.ssh/known_hosts&lt;/code>.&lt;/p>
+&lt;h3 id="connect-to-the-iphone">Connect to the iPhone
+&lt;/h3>&lt;p>Install the packages&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://github.com/libimobiledevice/usbmuxd" target="_blank" rel="noopener"
+>usbmuxd&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://github.com/libimobiledevice/libimobiledevice" target="_blank" rel="noopener"
+>libimobiledevice-utils&lt;/a>&lt;/li>
+&lt;li>&lt;code>ipeth-utils&lt;/code> (this may be optional, I didn&amp;rsquo;t try it without)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo apt install -y &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> usbmuxd &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> ipheth-utils &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> libimobiledevice-utils
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Now it is time to connect our iPhone.
+With Mobile Hotspot enabled, it will show a dialog to Trust/Not trust the RaspberryPi.
+Trust it, and you may be required to enter your password.&lt;/p>
+&lt;p>We can see that it&amp;rsquo;s connected on the RaspberryPi running&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">networkctl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl">IDX LINK TYPE OPERATIONAL SETUP
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 1 lo loopback carrier unmanaged
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 2 eth0 ether routable configured
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 3 wlan0 wlan off unmanaged
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 4 enxfae5ce082148 ether off unmanaged
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>Important: Your iPhone will have a different ID, and in the steps from here on you need to replace it in the provided snippets.&lt;/strong>&lt;/p>
+&lt;p>The iPhone is &lt;code>enx...&lt;/code>, and the next step is to have it managed, so it gets an IP assigned and we can route traffic through that interface.
+At this point, the guide deviates slightly from &lt;a class="link" href="https://wiki.archlinux.org/title/IPhone_tethering#Using_systemd-networkd" target="_blank" rel="noopener"
+>Arch Wiki&amp;rsquo;s setup using systemd-networkd&lt;/a>.
+Although one may set it up that way, Ubuntu Server ships with netplan, which we take advantage of.
+That way, we only need to configure netplan.&lt;/p>
+&lt;p>There should already be an entry for &lt;code>eth0&lt;/code>, so you may only add the part for the iPhone.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo vim /etc/netplan/50-cloud-init.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">network&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">renderer&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">networkd&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ethernets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">enxfae5ce082148&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">// Add this&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">// Add this&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="l">// ... keep eth0 unchanged for now&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Apply the new network config.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">netplan apply
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>We can confirm it using the ip command.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">ip a
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">4: enxfae5ce082148: &amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> link/ether aa:bb:cc:dd:ff:gg brd ff:ff:ff:ff:ff:ff
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inet 123.12.10.4/28 metric 100 brd 123.12.10.15 scope global dynamic enxfae5ce082148
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> valid_lft 86357sec preferred_lft 86357sec
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inet6 1111:1222:333:4444:5555:6666:7777:8888/64 scope global mngtmpaddr noprefixroute
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> valid_lft forever preferred_lft forever
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inet6 1111::2222:3333:4444:2148/64 scope link proto kernel_ll
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> valid_lft forever preferred_lft forever
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>To test the connection, curl provides the option to set an interface through which to connect.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">curl&lt;/span> &lt;span class="o">--&lt;/span>&lt;span class="n">interface&lt;/span> &lt;span class="n">enxfae5ce082148&lt;/span> \
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">https&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="o">//&lt;/span>&lt;span class="n">example&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">com&lt;/span> \
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">-&lt;/span>&lt;span class="n">w&lt;/span> &lt;span class="s1">&amp;#39;%{speed_download}&amp;#39;&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="o">/&lt;/span>&lt;span class="n">dev&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">null&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Great, now you could use the iPhone&amp;rsquo;s USB tethered network to connect to the internet.&lt;/p>
+&lt;h3 id="route-traffic-through-the-iphone">Route traffic through the iPhone
+&lt;/h3>&lt;p>The second part is to tell iptables to route traffic through our iPhone&amp;rsquo;s interface.
+It is done with adding this entry using the iptables command.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">iptables -t nat -A POSTROUTING -o enxfae5ce082148 -j MASQUERADE
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Note that the newly created entry is not persisted on reboot.
+To persist it, one solution is to use &lt;code>iptables-persistent&lt;/code>.
+Whilst installing, it asks you to back up existing configurations.
+Answer &amp;ldquo;Yes&amp;rdquo;.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo apt install -y iptables-persistent
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>You will be able to confirm a &lt;code>MASQUERADE&lt;/code> entry running&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat /etc/iptables/rules.v4
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>In case the entry is not present, rerun the steps and the persistence&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">sudo iptables-save &amp;gt; /etc/iptables/rules.v4
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>We still need to enable IP forwarding between interfaces.
+This is achieved adding the following configuration.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo vim /etc/sysctl.d/30-ipforward.conf
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl">net.ipv4.ip_forward = 1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Last but not least, we must be able to connect on eth0.
+I did not get into the steps of setting up DHCP on it, so you may do that yourself.
+After this step, it will be assigned &lt;code>192.168.42.1&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo vim /etc/netplan/50-cloud-init.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">network&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">renderer&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">networkd&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ethernets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">enxfae5ce082148&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">eth0&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">addresses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="m">192.168.42.1&lt;/span>&lt;span class="l">/24&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>From here on, for connecting to your RaspberryPi on &lt;code>eth0&lt;/code>, you will need to assign the external device (e.g. a Laptop) a correct IP address, the right net mask and the right gateway.
+Note that the IP address suffix must be a value between 2 and 254.&lt;/p>
+&lt;p>Given our setup, the configuration is&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Type&lt;/th>
+&lt;th>Value&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>IP Address&lt;/td>
+&lt;td>192.168.42.X&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Gateway&lt;/td>
+&lt;td>192.168.42.1&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Netmask&lt;/td>
+&lt;td>24 or 255.255.255.0&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Reboot the RaspberryPi, and the changes take effect.
+Keep in mind that you &lt;u>must&lt;/u> assign the IP on your external device like above table, otherwise you will not see the RPi.&lt;/p>
+&lt;p>The Pi can be accessed at &lt;code>ssh your-name@192.168.42.1&lt;/code> thereafter.&lt;/p>
+&lt;h2 id="using-the-raspberrypi-with-a-router">Using the RaspberryPi with a Router
+&lt;/h2>&lt;p>The final step of this setup is to use the RaspberryPi as the internet provider for a router.
+Across most routers, these steps are almost identical, and you may consult your router&amp;rsquo;s documentation on where to find the right setuppage.&lt;/p>
+&lt;p>First, you need to connect your RaspberryPi to the port of the router that says &amp;ldquo;WAN&amp;rdquo;.&lt;/p>
+&lt;p>Then you need to find out where you can set the Conenction Mode/Internet Connection type of your router.
+Provide the values as below, and your router should be able to connect to the RaspberryPi, and use its network.&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Type&lt;/th>
+&lt;th>Value&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Connection Mode&lt;/td>
+&lt;td>Static IP&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>IP address&lt;/td>
+&lt;td>192.168.42.77&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Subnet Mask&lt;/td>
+&lt;td>255.255.255.0&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Default Gateway&lt;/td>
+&lt;td>192.168.42.1&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Primary DNS server&lt;/td>
+&lt;td>9.9.9.9&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Secondary DNS server&lt;/td>
+&lt;td>8.8.8.8&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;hr>
+&lt;p>The resulting speed with this setup is ~190 Mbit downloading, and 22 Mbit uploading.
+With a different USB cable, I only achieved 120 Mbit, so the remaining 110 Mbit may be due to the USB cable.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/speedtest.webp"
+width="412"
+height="122"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/speedtest_hu_b9cd19f0c84d0d6d.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/speedtest_hu_aee8f617dd64fe2c.webp 1024w"
+loading="lazy"
+alt="speedtest-result"
+class="gallery-image"
+data-flex-grow="337"
+data-flex-basis="810px"
+>&lt;/p>
+&lt;p>Connecting to the iPhone directly gives me almost 300 Mbit, so there is definitely a loss of performance somewhere.&lt;/p></description></item><item><title>RaspberryPi 4 as a remote Multimedia Station</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</link><pubDate>Sun, 02 May 2021 17:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</guid><description>&lt;h2 id="foreword">Foreword
+&lt;/h2>&lt;p>Since many years I am using JDownloader as the solution to download things on all my computers.
+The problem with it is though that the files are not synchronized between them.
+Thus I cannot access what I downloaded from any machine different from the original downloader.
+This problem worsens even with the fact that once I am not at home, I cannot access the harddrives the multimedia is on.&lt;/p>
+&lt;p>What bugs me about JDownloader though is that there is no CLI application nor a WebUI, unless you want to rely on their external &lt;a class="link" href="https://my.jdownloader.org/" target="_blank" rel="noopener"
+>MyJDownloader&lt;/a> service.
+But I wanted to find a way that enables me to run JDownloader on a headless RaspberryPi.
+The JDownloader should be accessible via browser, yet selfhosted.&lt;/p>
+&lt;h2 id="prerequisites">Prerequisites
+&lt;/h2>&lt;p>I only tested this on a RaspberryPi 4 with 8 GB of RAM running &lt;a class="link" href="https://ubuntu.com/download/raspberry-pi/thank-you?version=21.04&amp;amp;architecture=server-arm64&amp;#43;raspi" target="_blank" rel="noopener"
+>Ubuntu Server 21.04&lt;/a>.
+It could be that the Raspbery Pi 3 is too weak for this, but feel free to give it a try.
+Therefore I assume you are running on a Debian based distribution.
+All not-containerized programs we need to build the multimedia station is &lt;a class="link" href="https://www.docker.com/" target="_blank" rel="noopener"
+>Docker&lt;/a> and &lt;a class="link" href="https://www.zerotier.com/" target="_blank" rel="noopener"
+>ZeroTier&lt;/a>.&lt;/p>
+&lt;h3 id="installation-of-prerequisites">Installation of Prerequisites
+&lt;/h3>&lt;p>To build this setup, we are using&lt;/p>
+&lt;ul>
+&lt;li>Docker&lt;/li>
+&lt;li>ZeroTier&lt;/li>
+&lt;li>&lt;a class="link" href="https://github.com/MisterDerpie/jdownloader-docker" target="_blank" rel="noopener"
+>MisterDerpie/jdownloader-docker&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://hub.docker.com/_/httpd" target="_blank" rel="noopener"
+>Docker-Apache/httpd&lt;/a>.&lt;/li>
+&lt;/ul>
+&lt;p>We need to install Docker and ZeroTier (the latter needs to be set up) before starting, the other two components will be touched later on.&lt;/p>
+&lt;h3 id="docker">Docker
+&lt;/h3>&lt;p>Installing Docker on the RaspberryPi is straightforward.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">curl https://get.docker.com/ &lt;span class="p">|&lt;/span> sh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>After the installation, you need to be add your user to the &lt;code>docker&lt;/code> group.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo usermod -aG docker &lt;span class="nv">$USER&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Once this is done, reboot or logout and login.
+Verify that the installation was successful by running &lt;code>hello-world&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker container run --rm hello-world
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="zerotier">ZeroTier
+&lt;/h3>&lt;p>This section describes how to setup ZeroTier on the RaspberryPi.
+This is solely for accessing it from anywhere.
+In case you don&amp;rsquo;t want to access the Pi from outside the same network which it is running in, you can skip this section.
+The IP address will then be your Pi&amp;rsquo;s local IP address.&lt;/p>
+&lt;p>As straightforward as it is to install Docker, the same it is for ZeroTier.
+Yet we need more steps to do it.&lt;/p>
+&lt;h4 id="create-zerotier-account">Create ZeroTier Account
+&lt;/h4>&lt;p>Go to &lt;a class="link" href="https://zerotier.com/" target="_blank" rel="noopener"
+>ZeroTier.com&lt;/a> and click on &lt;code>Sign Up&lt;/code> to create an account.
+It is free and you don&amp;rsquo;t need any premium plan.&lt;/p>
+&lt;h4 id="create-a-zerotier-network">Create a ZeroTier Network
+&lt;/h4>&lt;p>On the same page, go to &lt;code>Log In&lt;/code>.
+After logging in, you should be redirected to &lt;a class="link" href="my.zerotier.com]" >my.zerotier.com&lt;/a>.
+Click on &lt;code>Create Network&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-create-network.png"
+width="662"
+height="267"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-create-network_hu_a8d021630d6a9561.png 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-create-network_hu_3422b8a8f9eeb284.png 1024w"
+loading="lazy"
+alt="createnetwork"
+class="gallery-image"
+data-flex-grow="247"
+data-flex-basis="595px"
+>&lt;/p>
+&lt;p>You should see a table with the new created network.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-create-network-table.png"
+width="655"
+height="75"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-create-network-table_hu_7c9ea09077b90d42.png 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-create-network-table_hu_fbfd39169451025e.png 1024w"
+loading="lazy"
+alt="tablenetworks"
+class="gallery-image"
+data-flex-grow="873"
+data-flex-basis="2096px"
+>&lt;/p>
+&lt;p>Click anywhere on the row to go to the network configuration.
+The network can be named as you want.
+&lt;strong>Important&lt;/strong>: Ensure that it is marked as private.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-private.png"
+width="1114"
+height="781"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-private_hu_b996f9ba407032b2.png 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-private_hu_bc7aff1fd05aade9.png 1024w"
+loading="lazy"
+alt="privatenetwork"
+class="gallery-image"
+data-flex-grow="142"
+data-flex-basis="342px"
+>&lt;/p>
+&lt;p>This will prevent any other user who may guess your network ID from being able to access it directly.
+Scroll down to the &lt;code>Advanced&lt;/code> section and select any of the auto-assign IP addresses from the range in the lowest row.
+I selected &lt;code>192.168.195.*&lt;/code>, so this tutorial will continue assuming you&amp;rsquo;re in the same range.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-advanced-range.png"
+width="1172"
+height="784"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-advanced-range_hu_7976e02a53b5b5f7.png 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-advanced-range_hu_f7009a452f7e3803.png 1024w"
+loading="lazy"
+alt="ipv4-assign-range"
+class="gallery-image"
+data-flex-grow="149"
+data-flex-basis="358px"
+>&lt;/p>
+&lt;p>If you scroll further to the &lt;code>Members&lt;/code> section, you should see that no devices have joined this network yet.&lt;/p>
+&lt;h4 id="join-zerotier-network-with-raspberry-pi">Join ZeroTier Network with Raspberry Pi
+&lt;/h4>&lt;p>To join a network, we need the network ID.
+This can be found in the yellow box stating &lt;code>No devices have joined&lt;/code> in a way of &lt;code>join &amp;lt;NetworkId&amp;gt;&lt;/code>.
+You can join via &lt;code>zerotier-cli&lt;/code> command.
+My networkid is &lt;code>a84ac5c10a0a436f&lt;/code>, so I run the following.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo zerotier-cli join a84ac5c10a0a436f
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>When the command ran successful, the console output should be &lt;code>200 join OK&lt;/code>.
+After some seconds you should be able to see the first member in the &lt;code>Members&lt;/code> box.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-first-member.png"
+width="1023"
+height="162"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-first-member_hu_b7dac0e5efe4851b.png 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-first-member_hu_70d2dc7bdeddb5ea.png 1024w"
+loading="lazy"
+alt="raspberrypi-member"
+class="gallery-image"
+data-flex-grow="631"
+data-flex-basis="1515px"
+>&lt;/p>
+&lt;p>To get it assigned an IP address in the virtual ZeroTier network, we need to check the &lt;code>Auth?&lt;/code> box.
+Unless you check this, the device will not be part of this network and cannot communicate with others.
+I also recommend you to give it a name, for example &lt;code>RaspberryPi&lt;/code>.&lt;/p>
+&lt;p>We are done. ZeroTier is set up and installed on our RaspberryPi.
+As the yellow box warns us, there should be at least two devices.
+Of course, the other devices should be the hostmachines we want to access the RPi from.&lt;/p>
+&lt;h4 id="join-zerotier-network-from-another-machine">Join ZeroTier Network from another machine
+&lt;/h4>&lt;h5 id="linux">Linux
+&lt;/h5>&lt;p>In case your host machine is a Debian based Linux machine, you can install ZeroTier the very same as done for the RaspberryPi.
+The only step you need to do after installation is joining the previously created network.&lt;/p>
+&lt;h5 id="windows">Windows
+&lt;/h5>&lt;p>On Windows, download the &lt;a class="link" href="https://download.zerotier.com/dist/ZeroTier%20One.msi" target="_blank" rel="noopener"
+>ZeroTier One.msi&lt;/a> installer and install it.
+Start &lt;code>ZeroTier&lt;/code> from the program menu.
+Then you should see the icon in the tray (where the speaker symbol is in the taskbar).&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-tray.jpeg"
+width="356"
+height="58"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-tray_hu_e4ecaa6585c87392.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-tray_hu_2145ee824722ad10.jpeg 1024w"
+loading="lazy"
+alt="zerotier-tray"
+class="gallery-image"
+data-flex-grow="613"
+data-flex-basis="1473px"
+>&lt;/p>
+&lt;p>In case you don&amp;rsquo;t see it, click on the arrow next to the speaker.
+Then click on the icon and click &lt;code>Join Network ...&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-tray-join.jpeg"
+width="333"
+height="316"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-tray-join_hu_89fbca597292ef79.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-tray-join_hu_2e84973972a52ff1.jpeg 1024w"
+loading="lazy"
+alt="zerotier-tray-join"
+class="gallery-image"
+data-flex-grow="105"
+data-flex-basis="252px"
+>&lt;/p>
+&lt;p>Enter the network&amp;rsquo;s id and click &lt;code>Join&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-windows-joinbutton.jpeg"
+width="469"
+height="175"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-windows-joinbutton_hu_6d40be96bfc65722.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-windows-joinbutton_hu_4547e6c84188bdc8.jpeg 1024w"
+loading="lazy"
+alt="zerotier-windows-join"
+class="gallery-image"
+data-flex-grow="268"
+data-flex-basis="643px"
+>&lt;/p>
+&lt;p>After a short time Windows should ask you whether you want your computer to be discoverable.
+Select &lt;code>Yes&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-windows-discover.jpeg"
+width="497"
+height="520"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-windows-discover_hu_1deda1088617209f.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-windows-discover_hu_2637b90c2491406b.jpeg 1024w"
+loading="lazy"
+alt="zerotier-windows-discoverable"
+class="gallery-image"
+data-flex-grow="95"
+data-flex-basis="229px"
+>&lt;/p>
+&lt;h5 id="final-step">Final Step
+&lt;/h5>&lt;p>Once you have joined the network from your host machine, don&amp;rsquo;t forget to go back to the webinterface and authorize your device.
+Again, I recommend you to also name it.
+See the screenshots from &lt;code>Join ZeroTier Network with RaspberryPi&lt;/code> how to authorize and name it.&lt;/p>
+&lt;h2 id="jdownloader-docker">JDownloader-Docker
+&lt;/h2>&lt;p>The JDownloader-Docker image enables you to run JDownloader and access the UI via any browser.
+This image has minor JDownloader preconfiguration.
+If you are interested in the details, check the &lt;a class="link" href="https://github.com/MisterDerpie/jdownloader-docker" target="_blank" rel="noopener"
+>repository&lt;/a>.
+To do so, we first need to clone the repo and then build the image.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git clone https://github.com/MisterDerpie/jdownloader-docker
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Go into the root of the directory.
+From there, build the image named &lt;code>jd2-base&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker build -t jd2-base .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>This process will take some time.
+Once it&amp;rsquo;s done, congratulations: You are now having a JDownloader base image.
+We will not extend the image but use it to run our container.&lt;/p>
+&lt;h3 id="create-download-directory">Create Download Directory
+&lt;/h3>&lt;p>Create a folder in your home directory that is called &lt;code>jdownloader-root&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">mkdir ~/jdownloader-root/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Go in that directory and create 2 directories, &lt;code>Downloads&lt;/code> and &lt;code>Extracted&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">mkdir Downloads
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">mkdir Extracted
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="start-jdownloader">Start JDownloader
+&lt;/h3>&lt;p>The webinterface to JDownloader is accessible on port &lt;code>8080&lt;/code>.
+We can link it to any port on the Pi, yet we will use the same port.
+Make sure you are in the &lt;code>jdownloader-root&lt;/code> directory and the directories &lt;code>Downloads&lt;/code> and &lt;code>Extracted&lt;/code> exist.
+Then, let&amp;rsquo;s start our JDownloader container.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker container run -d &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> -p 8080:8080 &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> -v &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="k">$(&lt;/span>&lt;span class="nb">pwd&lt;/span>&lt;span class="k">)&lt;/span>&lt;span class="s2">/Downloads&amp;#34;&lt;/span>:/Downloads &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> -v &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="k">$(&lt;/span>&lt;span class="nb">pwd&lt;/span>&lt;span class="k">)&lt;/span>&lt;span class="s2">/Extracted&amp;#34;&lt;/span>:/Extracted &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --name jdownloader &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> jd2-base
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>This may also take some time.
+Once it&amp;rsquo;s done you should see the ID of the container being printed.&lt;/p>
+&lt;h4 id="what-does-this-do">What does this do?
+&lt;/h4>&lt;p>We start the &lt;code>JDownloader&lt;/code> container with the name &lt;code>jdownloader&lt;/code> and link it&amp;rsquo;s &lt;code>Downloads&lt;/code> and &lt;code>Extracted&lt;/code> directory to the ones in &lt;code>~/jdownloader-root/&lt;/code>.
+As I mentioned, the image is preconfigured, so everything that is downloaded will land in &lt;code>Downloads&lt;/code>.
+In case it&amp;rsquo;s an archive, it will be extracted to &lt;code>Extracted&lt;/code> and the archives will be deleted.&lt;/p>
+&lt;p>Note: This container is not configured to startup on boot again.
+You&amp;rsquo;d have to run &lt;code>docker container start jdownloader&lt;/code> after a reboot.&lt;/p>
+&lt;h3 id="connect-to-jdownloader">Connect to JDownloader
+&lt;/h3>&lt;p>This section only works if you set up ZeroTier.
+Go to the ZeroTier Webinterface and find out the IP Address of the RaspberryPi.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-raspberrypi-local-ip.png"
+width="1009"
+height="235"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-raspberrypi-local-ip_hu_e88061bdb0286e74.png 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-raspberrypi-local-ip_hu_435c7a35b8904602.png 1024w"
+loading="lazy"
+alt="zerotier-raspberrypi-ip"
+class="gallery-image"
+data-flex-grow="429"
+data-flex-basis="1030px"
+>&lt;/p>
+&lt;p>As you can see, the IP of my RaspberryPi is &lt;code>192.168.195.230&lt;/code>.
+To connect to JDownloader, open &lt;code>&amp;lt;yourip&amp;gt;:8080/vnc.html&lt;/code> in your browser.
+So in my case, I go to &lt;code>192.168.195.230:8080/vnc.html&lt;/code>.
+Click &lt;code>Connect&lt;/code>, and there it is.
+We see JDownloader running and open in the browser.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-jdownloader-webui.png"
+width="1119"
+height="660"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-jdownloader-webui_hu_389fea0c967a2514.png 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-jdownloader-webui_hu_8de06bc7f3241f16.png 1024w"
+loading="lazy"
+alt="zerotier-jdownloader-webui"
+class="gallery-image"
+data-flex-grow="169"
+data-flex-basis="406px"
+>&lt;/p>
+&lt;h2 id="apache-webserver-for-file-access">Apache Webserver for File Access
+&lt;/h2>&lt;p>We are almost good to go.
+Now JDownloader downloads and extracts files for us.
+We can also access them by accessing the Pi, but how can we access them from e.g. &lt;a class="link" href="https://www.videolan.org/" target="_blank" rel="noopener"
+>VLC&lt;/a>?&lt;/p>
+&lt;p>I present you a very basic and rudimentary way of providing them via &lt;a class="link" href="https://hub.docker.com/_/httpd" target="_blank" rel="noopener"
+>Docker-Apache/httpd&lt;/a>.
+You will be able to access the files via browser by simply putting in the Pi&amp;rsquo;s IP address.&lt;/p>
+&lt;p>&lt;strong>Note&lt;/strong>: This only works when you store all files in either &lt;code>Downloads&lt;/code> or &lt;code>Extracted&lt;/code> directories.
+In case you followed this guide, this applies.&lt;/p>
+&lt;h3 id="create-indexhtml">Create &lt;code>index.html&lt;/code>
+&lt;/h3>&lt;p>To be presented with a link to your JDownloader WebUI, as well as the &lt;code>Downloads&lt;/code> and &lt;code>Extracted&lt;/code> folder selection on the landing page, go to &lt;code>~/jdownloader-root/&lt;/code>.
+There create a file called &lt;code>index.html&lt;/code> and add the following content.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-html" data-lang="html">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&amp;lt;!DOCTYPE html&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">head&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">title&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>Server&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">title&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">head&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">body&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">a&lt;/span> &lt;span class="na">href&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;&amp;#34;&lt;/span> &lt;span class="na">id&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;jdownloader&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>JDownloader&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">a&lt;/span>&lt;span class="p">&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">a&lt;/span> &lt;span class="na">href&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;./Downloads/&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>Downloads&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">a&lt;/span>&lt;span class="p">&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">a&lt;/span> &lt;span class="na">href&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;./Extracted/&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>Extracted&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">a&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">script&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">document&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">getElementById&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;jdownloader&amp;#39;&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">href&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">window&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">location&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">protocol&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="s2">&amp;#34;//&amp;#34;&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="nb">window&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">location&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">hostname&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="s2">&amp;#34;:8080/vnc.html&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">script&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">body&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="start-the-webserver">Start the Webserver
+&lt;/h3>&lt;p>Go into the &lt;code>~/jdownloader-root/&lt;/code> directory.
+From there, start the webserver.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker container run -d --name webserver &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> -p 80:80 &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> -v &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="k">$(&lt;/span>&lt;span class="nb">pwd&lt;/span>&lt;span class="k">)&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>:/usr/local/apache2/htdocs/ httpd
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>It starts on port &lt;code>80&lt;/code> (the default port) containing the entire directory.
+When you go to your browser and navigate to your Pi&amp;rsquo;s IP address (in my case &lt;code>192.168.195.230&lt;/code>) you will be presented the landing page.
+There you can select whether you want to browse the &lt;code>Downloads&lt;/code> or &lt;code>Extracted&lt;/code> directory.
+Moreover can you also go to &lt;code>JDownloader&lt;/code> directly from the landing page.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-raspberry-webui.png"
+width="300"
+height="104"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-raspberry-webui_hu_b349d09bd615625b.png 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-raspberry-webui_hu_f37fd43513a14470.png 1024w"
+loading="lazy"
+alt="download-webui"
+class="gallery-image"
+data-flex-grow="288"
+data-flex-basis="692px"
+>&lt;/p>
+&lt;p>Clicking on e.g. &lt;code>Downloads&lt;/code> gives you an index of the files/folders contained in it.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-raspberry-webui-downloads.png"
+width="406"
+height="137"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-raspberry-webui-downloads_hu_e2a44589b108e11a.png 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/zerotier-raspberry-webui-downloads_hu_fdd3ca5a30d60b38.png 1024w"
+loading="lazy"
+alt="download-webui"
+class="gallery-image"
+data-flex-grow="296"
+data-flex-basis="711px"
+>&lt;/p>
+&lt;h2 id="bottom-line">Bottom Line
+&lt;/h2>&lt;p>That&amp;rsquo;s already it 🎉.
+You&amp;rsquo;re now running a fully remote accessible Multimedia Station on your Raspberry Pi.
+As mentioned, all the containers are not configured to start on the Pi&amp;rsquo;s startup.
+So once you reboot your RaspberryPi, you would have to run the following.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker container start jdownloader
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">docker container start webserver
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>There are several guides available online on how to make a container start on boot.
+This can for example be achieved by executing &lt;code>docker run&lt;/code> with the &lt;code>--restart=always&lt;/code> parameter or &lt;a class="link" href="https://blog.container-solutions.com/running-docker-containers-with-systemd" target="_blank" rel="noopener"
+>making it a service in systemd&lt;/a>.&lt;/p>
+&lt;h2 id="additional-content">Additional Content
+&lt;/h2>&lt;p>We have JDownloader downloading and extracting, can access it from anywhere and also access the files via browser.
+Yet two topics should be visited to make it fully worth.
+The first is how we get containers &amp;amp; links into JDownloader.
+Second topic is about how to stream downloaded content in VLC.&lt;/p>
+&lt;h3 id="add-dlcs-or-links-to-jdownloader">Add DLCs or Links to JDownloader
+&lt;/h3>&lt;p>To add links, you can use the clipboard from the sidebar.
+Click on the sidebar icon.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-sidebar-icon.jpeg"
+width="1280"
+height="1012"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-sidebar-icon_hu_8ac078c667f988c3.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-sidebar-icon_hu_214ca6b5540bc60f.jpeg 1024w"
+loading="lazy"
+alt="sidebar-icon"
+class="gallery-image"
+data-flex-grow="126"
+data-flex-basis="303px"
+>&lt;/p>
+&lt;p>Next, open the cliboard.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-sidebar-clipboard.jpeg"
+width="352"
+height="600"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-sidebar-clipboard_hu_8f9842add1891375.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-sidebar-clipboard_hu_1c6f6f667da41562.jpeg 1024w"
+loading="lazy"
+alt="sidebar-clipboard"
+class="gallery-image"
+data-flex-grow="58"
+data-flex-basis="140px"
+>&lt;/p>
+&lt;p>Then paste your links in the clipboard.
+Make a right-click somewhere in the LinkGrabber field.
+Select &lt;code>Paste Links&lt;/code> and the linkgrabber should start gathering them.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-sidebar-jdownloader-paste.jpeg"
+width="1280"
+height="754"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-sidebar-jdownloader-paste_hu_cea1f7c924616a15.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-sidebar-jdownloader-paste_hu_fb14500c1cb17d4f.jpeg 1024w"
+loading="lazy"
+alt="sidebar-jdownloader-paste"
+class="gallery-image"
+data-flex-grow="169"
+data-flex-basis="407px"
+>&lt;/p>
+&lt;p>To get DLCs to JDownloader, you can simply put them in the &lt;code>Downloads&lt;/code> or &lt;code>Extracted&lt;/code> directory.
+Do so by e.g. transfer them to the Pi first (e.g. via &lt;code>ssh&lt;/code>) and then open them via &lt;code>File -&amp;gt; Load Linkcontainer&lt;/code>.
+The docker image additionally offers the volume &lt;code>/containers&lt;/code> where you can place them in, but I didn&amp;rsquo;t use it in this post.
+This could be used in addition to running for instance a &lt;code>FileZilla&lt;/code> container for that directory.&lt;/p>
+&lt;h3 id="stream-to-vlc-media-player">Stream to VLC Media Player
+&lt;/h3>&lt;p>As many people use JDownloader to download multimedia files, it would be good having acces to them in VLC player.
+Open the webui.
+From there navigate to the file you want to stream.
+Make a right click on the file and copy it&amp;rsquo;s link address.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-vlc-copy-link.jpeg"
+width="780"
+height="514"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-vlc-copy-link_hu_ff9c9584c0db6b22.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-vlc-copy-link_hu_ce8a9ff9a3a50a18.jpeg 1024w"
+loading="lazy"
+alt="webui-vlc-copy-link"
+class="gallery-image"
+data-flex-grow="151"
+data-flex-basis="364px"
+>&lt;/p>
+&lt;p>Then go to VLC and click on &lt;code>File -&amp;gt; Open Network Stream ...&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-vlc-open-network-stream.jpeg"
+width="451"
+height="239"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-vlc-open-network-stream_hu_6f81bc88195596e2.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-vlc-open-network-stream_hu_bb1ff9dd7b22d320.jpeg 1024w"
+loading="lazy"
+alt="webui-vlc-open-network-stream"
+class="gallery-image"
+data-flex-grow="188"
+data-flex-basis="452px"
+>&lt;/p>
+&lt;p>Paste the link there and click on &lt;code>Play&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-vlc-location.jpeg"
+width="683"
+height="531"
+srcset="https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-vlc-location_hu_40d0bd6b1b5711a8.jpeg 480w, https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/webui-vlc-location_hu_fdbbafbdedf6fd5c.jpeg 1024w"
+loading="lazy"
+alt="webui-vlc-location"
+class="gallery-image"
+data-flex-grow="128"
+data-flex-basis="308px"
+>&lt;/p>
+&lt;p>VLC should now start playing your selected video.&lt;/p></description></item><item><title>Read Temperature &amp; Humidity with RaspberryPi 4 - Docker Setup</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</link><pubDate>Wed, 31 Mar 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</guid><description>&lt;p>In my previous post, I showed how to enable the Raspberry Pi 4 on Ubuntu Server to read out DHT11/DHT22 sensor data. But this is a very hacky solution. Moreover is the Raspberry Pi cluttered with some stuff, that we may need to configure differently for another setup or remove as a whole. It&amp;rsquo;s a nice coincidence that I&amp;rsquo;m currently reading &lt;a class="link" href="https://learning.oreilly.com/library/view/docker-in-action/9781617294761/" target="_blank" rel="noopener"
+>Docker in Action, Second Edition&lt;/a> (Manning, 2019), so I wanted to build a docker image to read out the data. There are some images available for this already, but I still wanted to build my own light-weight image.&lt;/p>
+&lt;p>Enough foreword, let&amp;rsquo;s jump right in.&lt;/p>
+&lt;h2 id="prerequesites">Prerequesites
+&lt;/h2>&lt;ul>
+&lt;li>Raspberry Pi 4 with Docker installed (&lt;code>curl https://get.docker.com/ | sh&lt;/code>)&lt;/li>
+&lt;li>DHT11/22 connected with your RapsberryPi (find any guide online for wiring)&lt;/li>
+&lt;/ul>
+&lt;h2 id="build-base-image">Build Base Image
+&lt;/h2>&lt;h3 id="interactively-in-a-container">Interactively in a Container
+&lt;/h3>&lt;p>This section is to interactively build the base docker image. If you want to get a Dockerfile right away, see the next section.&lt;/p>
+&lt;h4 id="start-container">Start Container
+&lt;/h4>&lt;p>As base we use &lt;code>python:3.7-alpine&lt;/code>, as it is a comparatively very small image with only &lt;code>41 MB&lt;/code> size. We start the alpine shell &lt;code>/bin/ash&lt;/code> and to attach us to the container we use the &lt;code>-it&lt;/code> parameter. The &lt;code>--name dht&lt;/code> parameter is to find the container by a predefined name.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker container run -it --name dht python:3.7-alpine /bin/ash
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>The shell should now look like below. We&amp;rsquo;re now running as a root user in the container.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">/ #
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="install-build-dependencies">Install Build Dependencies
+&lt;/h4>&lt;h5 id="build-tools">Build Tools
+&lt;/h5>&lt;p>To build all dependencies we need to be able to build the python lib &lt;code>RPi.GPIO&lt;/code>.&lt;/p>
+&lt;p>Run&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">apk update &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> apk upgrade
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">apk add g++ python3-dev
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>to install the build tools.&lt;/p>
+&lt;h5 id="rpigpio">RPi.GPIO
+&lt;/h5>&lt;p>It cost me some headache and searching around how I get this to build, as I always got errors that &lt;code>gcc&lt;/code> exited with &lt;code>status code 1&lt;/code>. Luckily I stumbled upon a post in &lt;a class="link" href="https://archlinuxarm.org/forum/viewtopic.php?p=64598#p64598" target="_blank" rel="noopener"
+>https://archlinuxarm.org/forum/viewtopic.php?p=64598#p64598&lt;/a> by user &lt;code>peiyangxie&lt;/code> who gave a one liner how to do this. So let&amp;rsquo;s do it, run&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nv">CFLAGS&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;-fcommon&amp;#34;&lt;/span> pip3 install RPi.GPIO
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>in the container. This will install &lt;code>RPi.GPIO&lt;/code>.&lt;/p>
+&lt;h5 id="adafruit-circuitpython-dht">adafruit-circuitpython-dht
+&lt;/h5>&lt;p>Last but not least we need to install the library &lt;code>adafruit-circuitpython-dht&lt;/code>. Do this by running&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">pip3 install adafruit-circuitpython-dht
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h5 id="clean-up">Clean up
+&lt;/h5>&lt;p>As we do not need &lt;code>g++&lt;/code> and &lt;code>python3-dev&lt;/code> anymore, we should remove them to shrink container size.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">apk del g++ python3-dev
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Then exit the container and return to the host shell.&lt;/p>
+&lt;h5 id="build-image-from-container">Build Image from Container
+&lt;/h5>&lt;p>It remains to build the image from the container. This is easily done by&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker container commit dht dht-image
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>and then remove the container&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker container rm dht
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="via-dockerfile">Via Dockerfile
+&lt;/h3>&lt;p>To build &lt;code>dht-image&lt;/code> automatically, just create a file called &lt;code>Dockerfile&lt;/code> and put below input in it.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-Dockerfile" data-lang="Dockerfile">&lt;span class="line">&lt;span class="cl">&lt;span class="k">FROM&lt;/span>&lt;span class="s"> python:3.7-alpine&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> apk update &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> apk upgrade&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> apk add g++ python3-dev&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="c">## See https://archlinuxarm.org/forum/viewtopic.php?p=64598#p64598&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> &lt;span class="nv">CFLAGS&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;-fcommon&amp;#34;&lt;/span> pip3 install RPi.GPIO&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> pip3 install adafruit-circuitpython-dht&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> apk del g++ python3-dev&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">ENTRYPOINT&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;/bin/ash&amp;#34;&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Navigate to the place the Dockerfile is located and run&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker image build -t dht-image .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>to build the image.&lt;/p>
+&lt;h2 id="read-dht-with-dht-image">Read DHT with &lt;code>dht-image&lt;/code>
+&lt;/h2>&lt;p>If you completed the aforementioned section you should have an image called &lt;code>dht-image&lt;/code>. Let&amp;rsquo;s verify this.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker images
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>It should print out a list of images, which contains &lt;code>dht-image&lt;/code> (most likely at the top).&lt;/p>
+&lt;p>In the previous post I shared a script &lt;a class="link" href="https://revontulet.dev/p/2021-raspberry-pi-four-dht/dht.py" target="_blank" rel="noopener"
+>dht.py&lt;/a> which we will first download into the container and then change the pin/sensor according to our needs. Finally we run the script and should get results from our sensor.&lt;/p>
+&lt;p>&lt;strong>Note&lt;/strong>&lt;/p>
+&lt;p>Docker is not able to access the GPIO pins unless we give it acces. There is a really good, short and comprehensive way about the best options we have on &lt;a class="link" href="https://stackoverflow.com/a/48234752" target="_blank" rel="noopener"
+>stackoverflow.com/a/48234752&lt;/a>. We will use the second option and add &lt;code>/dev/gpiomem&lt;/code> as a device to our container, as it is the easiest and most sensible option for our needs.&lt;/p>
+&lt;h4 id="start-container-1">Start Container
+&lt;/h4>&lt;p>We start the container with &lt;code>/dev/gpiomem&lt;/code> as a device and run &lt;code>/bin/ash&lt;/code> in it.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker container run --device /dev/gpiomem -it dht-image /bin/ash
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="download-dht-script">Download dht script
+&lt;/h4>&lt;p>Download the &lt;a class="link" href="https://revontulet.dev/p/2021-raspberry-pi-four-dht/dht.py" target="_blank" rel="noopener"
+>dht.py&lt;/a> script via&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">wget https://revontulet.dev/p/2021-raspberry-pi-four-dht/dht.py
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="adjust-dht-script-to-wiring">Adjust dht script to wiring
+&lt;/h4>&lt;p>The line we need to change is line &lt;code>8&lt;/code>. If you are familiar with &lt;code>Vi&lt;/code> you could easily do that, but in case you are not this is also achievable with a single &lt;code>sed&lt;/code> command (Source: &lt;a class="link" href="https://stackoverflow.com/a/11145362" target="_blank" rel="noopener"
+>stackoverflow.com&lt;/a>). Run the following command with&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>{X}&lt;/code> - 11 or 22 (DHT version)&lt;/li>
+&lt;li>&lt;code>{Y}&lt;/code> - Your GPIO Pin&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sed -i &lt;span class="s1">&amp;#39;8s/.*/dhtDevice = adafruit_dht.DHT{X}(board.D{Y})/&amp;#39;&lt;/span> dht.py
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>so for instance, I have a DHT11 and it is connected to Pin 4, so I would run&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sed -i &lt;span class="s1">&amp;#39;8s/.*/dhtDevice = adafruit_dht.DHT11(board.D4)/&amp;#39;&lt;/span> dht.py
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="run-dht-script">Run dht script
+&lt;/h4>&lt;p>This is the easiest step. Just execute it via&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">python3 dht.py
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>and you should start seeing output.&lt;/p>
+&lt;p>I do not know why, but this is failing a lot more often than running directly on the Pi. So you most likely see something like this&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">/ # python3 dht.py
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Checksum did not validate. Try again.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Checksum did not validate. Try again.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Temp: 69.8 F / 21.0 C Humidity: 20%
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Checksum did not validate. Try again.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">A full buffer was not returned. Try again.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Temp: 69.8 F / 21.0 C Humidity: 20%
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Checksum did not validate. Try again.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Checksum did not validate. Try again.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Anyway, here we are, having a working docker image in place that returns (most of the times) the results from the sensor.&lt;/p></description></item><item><title>Read Temperature &amp; Humidity with RaspberryPi 4</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-dht/</link><pubDate>Sun, 21 Mar 2021 11:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-dht/</guid><description>&lt;p>I recently bought a RaspberryPi 4 and installed Ubuntu Server 20.04 64 Bit on it. There are many tutorials available how to read the temperature/humidity via Python, unfortunately none of them worked out of the box. It seems to be that they are&lt;/p>
+&lt;ul>
+&lt;li>either for Raspbian OS&lt;/li>
+&lt;li>or for 32 Bit OSes.&lt;/li>
+&lt;/ul>
+&lt;p>After some searching I found a way from several sources to make it run. This is a horrible hacky workaround and I&amp;rsquo;d be very happy to see a better way and/or out-of-the-box solution.&lt;/p>
+&lt;h2 id="prerequisites">Prerequisites
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://ubuntu.com/download/raspberry-pi" target="_blank" rel="noopener"
+>Ubuntu Server 20.04.2 LTS&lt;/a>&lt;/li>
+&lt;li>Python 3 (preinstalled in aforementioned Ubuntu image)&lt;/li>
+&lt;li>DHT11/DHT22 &lt;strong>with 4 Pins&lt;/strong> connected to the Pi (follow &lt;a class="link" href="https://pimylifeup.com/raspberry-pi-humidity-sensor-dht22/" target="_blank" rel="noopener"
+>this guide&lt;/a> to see the wiring)&lt;/li>
+&lt;li>&lt;a class="link" href="dht.py" >dht.py&lt;/a> (Source code from &lt;a class="link" href="https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/python-setup" target="_blank" rel="noopener"
+>learn.adafruit.com&lt;/a>)&lt;/li>
+&lt;/ul>
+&lt;h2 id="installation">Installation
+&lt;/h2>&lt;h3 id="1-install-python-3-pip">1. Install Python 3 Pip
+&lt;/h3>&lt;p>We will use &lt;a class="link" href="https://pypi.org/project/adafruit-circuitpython-dht/" target="_blank" rel="noopener"
+>adafruit-circuitpython-dht&lt;/a> to read out the sensor and install it via &lt;code>pip&lt;/code>. Run below command from the shell.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install python3-pip
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="2-install-rpigpio-via-apt-get">2. Install &lt;code>RPi.GPIO&lt;/code> via apt-get
+&lt;/h3>&lt;p>Usually this is a dependency to &lt;code>adafruit-circuitpython-dht&lt;/code> and thus &lt;em>could&lt;/em> be installed with it. Unfortunately it does not succeed installing the dependency, so we need to install it ourself. For more information see &lt;a class="link" href="https://askubuntu.com/questions/1290037/error-while-installing-rpi-gpio-as-error-command-errored-out-with-exit-status" target="_blank" rel="noopener"
+>this thread&lt;/a> on &lt;a class="link" href="askubuntu.com" >askubuntu.com&lt;/a>. Run below command from the shell.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt-get install RPi.GPIO
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="3-install-adafruit-circuitpython-dht">3. Install &lt;code>adafruit-circuitpython-dht&lt;/code>
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo pip3 install adafruit-circuitpython-dht
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="4-install-libgiod">4. Install &lt;code>libgiod&lt;/code>
+&lt;/h3>&lt;p>This step is a bit ugly. Basically the default installation did not succeed for me, and I ended up finding that &lt;a class="link" href="https://github.com/adafruit/Adafruit_CircuitPython_DHT/issues/44#issuecomment-671587227" target="_blank" rel="noopener"
+>this solution on GitHub&lt;/a> worked yet slightly modified.&lt;/p>
+&lt;h4 id="41-install-and-build-libgpiod">4.1. Install and build &lt;code>libgpiod&lt;/code>
+&lt;/h4>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install libgpiod-dev git build-essential
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git clone https://github.com/adafruit/libgpiod_pulsein.git
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> libgpiod_pulsein/src
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">make
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>You should see a new folder named &lt;code>libgpiod_pulsein&lt;/code>. Run the script &lt;code>dht.py&lt;/code> (linked in the prerequisites) and you should see some similar error:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Traceback (most recent call last):
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> File &amp;#34;run.py&amp;#34;, line 11, in &amp;lt;module&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> dhtDevice = adafruit_dht.DHT11(board.D16)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> File &amp;#34;/usr/local/lib/python3.8/dist-packages/adafruit_dht.py&amp;#34;, line 265, in __init__
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> super().__init__(True, pin, 18000, use_pulseio)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> File &amp;#34;/usr/local/lib/python3.8/dist-packages/adafruit_dht.py&amp;#34;, line 56, in __init__
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self.pulse_in = PulseIn(self._pin, 81, True)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> File &amp;#34;/usr/local/lib/python3.8/dist-packages/adafruit_blinka/microcontroller/bcm283x/pulseio/PulseIn.py&amp;#34;, line 67, in __init__
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self._process = subprocess.Popen(cmd)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> File &amp;#34;/usr/lib/python3.8/subprocess.py&amp;#34;, line 854, in __init__
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self._execute_child(args, executable, preexec_fn, close_fds,
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> File &amp;#34;/usr/lib/python3.8/subprocess.py&amp;#34;, line 1702, in _execute_child
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> raise child_exception_type(errno_num, err_msg, err_filename)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">FileNotFoundError: [Errno 2] No such file or directory: &amp;#39;/usr/local/lib/python3.8/dist-packages/adafruit_blinka/microcontroller/bcm283x/pulseio/libgpiod_pulsein&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Of particular interest for us is the last line. The file exists, but Python cannot see/access it. Unfortunately granting Python any rights does not solve this problem either. So we need to replace it by the previous build and then grant python correct rights.&lt;/p>
+&lt;p>The path might be different on your computer, so don&amp;rsquo;t blindly copy &amp;amp; paste the next steps but in case it differs use path from your output.&lt;/p>
+&lt;h4 id="42-replace-libgpiod-with-build">4.2. Replace &lt;code>libgpiod&lt;/code> with build
+&lt;/h4>&lt;p>Go into the directory &lt;code>libgpiod_pulsein/src/&lt;/code> from step 4.1. and run the following command from there (&lt;strong>important&lt;/strong>: Replace the path if it differs).&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo cp libgpiod_pulsein /usr/local/lib/python3.8/dist-packages/adafruit_blinka/microcontroller/bcm283x/pulseio/libgpiod_pulsein
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="43-set-suid-for-python">4.3. Set &lt;code>suid&lt;/code> for Python
+&lt;/h4>&lt;p>If you run &lt;code>dht.py&lt;/code> again, it will show you the same error as before. We need to allow any user to run &lt;code>python&lt;/code> with the same rights as the owner, which is &lt;code>root&lt;/code>. It is done via &lt;a class="link" href="https://en.wikipedia.org/wiki/Setuid" target="_blank" rel="noopener"
+>setuid&lt;/a>. This solution was posted on &lt;a class="link" href="https://forum.armbian.com/topic/8714-gpio-not-working-for-non-root/?do=findComment&amp;amp;comment=65434" target="_blank" rel="noopener"
+>armbian.com&lt;/a>.
+&lt;strong>Please note&lt;/strong>: It is very dangerous to grant these rights to Python. So you should rather copy your Python Binary and change only the copy. See the linked solution for doing so.&lt;/p>
+&lt;p>As I have Python 3.8 on my machine, my Python Binary is found in &lt;code>/usr/bin/python3.8&lt;/code>. To enable &lt;code>setuid&lt;/code>, run the following command:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo chmod &lt;span class="m">4775&lt;/span> /usr/bin/python3.8
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="read-sensor-data">Read Sensor Data
+&lt;/h2>&lt;p>Everything set up, so we are ready to read the data. You need to alter the script &lt;code>dht.py&lt;/code> in line &lt;code>8&lt;/code>, depending on your GPIO Pin and Sensor:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">## VE - DHT version, e.g. 11 or 22&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">## PIN - GPIO Pin the board is connected to, e.g. D4 = GPIO Pin 4&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">## VE PIN&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">dhtDevice&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">adafruit_dht&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">DHT22&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">board&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">D4&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>It should now start without any errors and print output similar (different values) to that.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">➜ ~ python dht.py
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Temp: 66.2 F / 19.0 C Humidity: 32%
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Temp: 68.0 F / 20.0 C Humidity: 33%
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Temp: 68.0 F / 20.0 C Humidity: 33%
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Temp: 68.0 F / 20.0 C Humidity: 33%
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item></channel></rss>
