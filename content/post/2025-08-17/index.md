@@ -202,3 +202,5 @@ For the sake of numbers, the actual time it took to verify was ~20-30 minutes pe
 
 If you find yourself in the situation where seemingly simple tasks like this vary a deployment, stop adding yet another feature and address local verifiability.
 It's worth it.
+
+![](no-thanks-we-are-too-busy.webp)
