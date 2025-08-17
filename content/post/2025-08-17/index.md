@@ -1,7 +1,7 @@
 ---
 title: The Hidden Cost of Slow Feedback Loops
 description: >
-    We waste a lot of time (and money) on the absence of fast feedback loops.
+    We waste a lot of time (and money) due to the absence of fast feedback loops.
 slug: 2025-hidden-cost-slow-feedback-loops
 date: 2025-08-17 10:00:00+0000
 categories:
