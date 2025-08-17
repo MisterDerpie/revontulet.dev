@@ -4,7 +4,7 @@ description: Yet another review of where CEOs and AI are taking us at the moment
 slug: 2025-ai-first
 date: 2025-05-31 10:00:00+0000
 categories:
-    - Tech-Opinion
+    - Tech-Views
 tags:
     - Opinion
     - AI

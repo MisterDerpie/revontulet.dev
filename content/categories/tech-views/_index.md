@@ -1,5 +1,5 @@
 ---
-title: Tech-Opinion
+title: Tech-Views
 description: Personal views related to tech.
 
 # Badge style
