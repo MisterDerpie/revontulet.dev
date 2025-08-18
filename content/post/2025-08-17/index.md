@@ -91,7 +91,7 @@ Last but not least, what if it can only be verified in the actual production env
 Regardless of whether it's dangerous to test there or not, it tends to take the most time to get the change out there.
 Often, one also has to be precautious and apply additional measures, for example the use Feature Flags, to make sure not to impair existing flows.
 
-If you're manufacaturing an engine, after its assembly, you do not want (nor need) to build a car around it to verify that the engine works.
+If you're manufacturing an engine, after its assembly, you do not want (nor need) to build a car around it to verify that the engine works.
 
 ### Feedback Loops in Practice
 
@@ -129,7 +129,7 @@ This _debt_ accumulates, and will be paid at some point, but only noticed once i
 
 ### Where are the targets?
 
-![The Office - Michael Scott "Where are the targates?"](where-are-the-targets.webp)
+![The Office - Michael Scott "Where are the targets?"](where-are-the-targets.webp)
 
 If you have seen "The Office", Michael Scott screaming "Where are the turtles?!" might be a scene stuck to your head.
 Given the boiling frog situation of the feedback loop, I come to wonder: Where are the targets?
