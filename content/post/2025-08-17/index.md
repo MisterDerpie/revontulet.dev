@@ -54,7 +54,7 @@ What if, in this fictional world, the car was built in such a way that it **must
 It is very obvious that this is a an additional cost and a waste of time, as inspections take much longer.
 
 Let me ask you this:
-How often have you heard the sentence "We need to deploy this to {somewhere} to verify whether it works."
+How often have you heard the sentence "We need to deploy this to {somewhere} to verify whether it works"?
 Do you think that deploying your application somewhere is really necessary, to see if your change behaves as expected?
 Now is the time to ask yourself: Why don't we test this locally?
 And I am quite sure, you have heard all kinds of excuses around complexity and dependencies.
@@ -121,7 +121,7 @@ The premise is that <u>if a frog is put suddenly into boiling water, it will jum
 When we join a new team, we immediately notice the things that do not work very well.
 Especially if we come from teams where we took those things for granted.
 Right here, that is the degradation of the feedback loop.
-With every dependency pulled in, and every feature that needs to get shipped faster, it is very likely that the feedback time decreases.
+With every dependency pulled in, and every feature that needs to get shipped faster, it is very likely that the feedback time deteriorates a bit.
 Since we are part of the process, we do not notice it.
 Much like your relatives telling you _"You have grown quite a lot since last time we saw you!"_, although you don't actively notice any difference day-to-day.
 Most often, teams do not put the effort in keeping local verification easy enough when they add new features.
