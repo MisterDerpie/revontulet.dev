@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Tech on revontulet.dev</title><link>https://revontulet.dev/categories/tech/</link><description>Recent content in Tech on revontulet.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 11 May 2025 08:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/categories/tech/index.xml" rel="self" type="application/rss+xml"/><item><title>iPhone Ethernet bridge on RaspberryPi with Ubuntu Server</title><link>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</link><pubDate>Sun, 11 May 2025 08:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</guid><description>&lt;p>This post covers how to tether your iPhone via USB to your RaspberryPi, and share the iPhone&amp;rsquo;s network on &lt;code>eth0&lt;/code>.
+Eventually, the RaspberryPi will be connected to a router via ethernet, making the router use the iPhone&amp;rsquo;s internet connection.
+A RaspberryPi 4B is used, but this guide &lt;em>should&lt;/em> work on other models too.&lt;/p>
+&lt;p>&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup.webp"
+width="411"
+height="241"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_117e63e1bc3d7006.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_1c320d6ae2011933.webp 1024w"
+loading="lazy"
+alt="iphone-connected-to-rpi-connected-to-router"
+class="gallery-image"
+data-flex-grow="170"
+data-flex-basis="409px"
+>&lt;/p>
+&lt;p>One may wonder why this setup is needed.
+Routing at least DNS traffic through the Pi with the &lt;a class="link" href="https://pi-hole.net/" target="_blank" rel="noopener"
+>Pi-hole&lt;/a> is a common use-case, but all traffic less so.&lt;/p></description></item><item><title>Arch and i3 - Hello, Sway! - Install Arch and Sway</title><link>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</link><pubDate>Wed, 26 Mar 2025 18:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</guid><description>&lt;p>Welcome to part one of the three-part series &amp;ldquo;Hello, Sway!&amp;rdquo;
+The series is split into&lt;/p>
+&lt;ol>
+&lt;li>&lt;i>Arch &amp;amp; Sway setup using &lt;code>archinstall&lt;/code>&lt;/i>&lt;/li>
+&lt;li>Sway Configuration&lt;/li>
+&lt;li>Linux QoL Tools&lt;/li>
+&lt;/ol>
+&lt;h2 id="motivation">Motivation
+&lt;/h2>&lt;p>For a while already, there has been no real reason for me to keep Windows.
+The doubt started about two years ago, in January 2023, when I got myself a Steam Deck.
+Although the purchase was mostly to emulate console and handheld games, of course the question was
+&amp;ldquo;&lt;a class="link" href="https://knowyourmeme.com/memes/but-can-it-run-crysis" target="_blank" rel="noopener"
+>But Can It Run Crysis?&lt;/a>&amp;rdquo;
+To my surprise, the games I tried performed incredibly well, almost all of them out of the box.
+Thanks to ProtonDB, if there was a title that needed some extra configuration, it is usually there.&lt;/p></description></item><item><title>Ubuntu with WSL2 and i3 Window Manager GUI</title><link>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</link><pubDate>Sat, 04 Dec 2021 19:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</guid><description>&lt;p>Using &lt;code>i3&lt;/code> and &lt;code>Ubuntu&lt;/code> native is probably best, but you may not get the choice to do so, in case your working machine is running Windows.
+I looked through several guides how to set up Ubuntu with &lt;code>i3&lt;/code> on WSL2, but it took me several hours to get the setup I looked for because things did not work as expected.
+Therefore I&amp;rsquo;m writing this guide.&lt;/p>
+&lt;h2 id="installing-ubuntu-on-wsl2">Installing Ubuntu on WSL2
+&lt;/h2>&lt;p>There are plenty of tutorials and videos to do so.
+I will refer to the very one that I used to set up the bare, GUIless minimum,
+&lt;a class="link" href="https://www.youtube.com/watch?v=IL7Jd9rjgrM" target="_blank" rel="noopener"
+>WSL2 Ubuntu GUI&lt;/a> by David Bombai.
+Reproduce the steps until &lt;code>Install Ubuntu GUI&lt;/code> (7:25) to get the headless Ubuntu on WSL2 up and running.&lt;/p></description></item><item><title>Ubuntu and i3 on Lenovo Legion 5 Pro</title><link>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</link><pubDate>Sun, 22 Aug 2021 15:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</guid><description>&lt;p>During my summer vacation, I got myself a Lenovo Legion 5 Pro, powered by an AMD Ryzen 7 5800H and an Nvidia RTX3070.
+Though this post is not about the legion, I have to say it is an awesome laptop.
+What this post is about is how to make Ubuntu with &lt;a class="link" href="https://i3wm.org/" target="_blank" rel="noopener"
+>i3wm&lt;/a> run on the Lenovo Legion.&lt;/p>
+&lt;h2 id="installing-ubuntu">Installing Ubuntu
+&lt;/h2>&lt;h3 id="create-bootable-usb-media">Create Bootable USB Media
+&lt;/h3>&lt;p>You need a USB stick as well as a Ubuntu ISO image.
+Plenty of tutorials exist on the web to create a bootable Ubuntu USB stick.
+Ubuntu.com provides official documentation, coming from a device running
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-windows#1-overview" target="_blank" rel="noopener"
+>Windows&lt;/a>,
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-ubuntu#1-overview" target="_blank" rel="noopener"
+>Ubuntu&lt;/a> or &lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview" target="_blank" rel="noopener"
+>Mac OS X&lt;/a>.&lt;/p></description></item><item><title>RaspberryPi 4 as a remote Multimedia Station</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</link><pubDate>Sun, 02 May 2021 17:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</guid><description>&lt;h2 id="foreword">Foreword
+&lt;/h2>&lt;p>Since many years I am using JDownloader as the solution to download things on all my computers.
+The problem with it is though that the files are not synchronized between them.
+Thus I cannot access what I downloaded from any machine different from the original downloader.
+This problem worsens even with the fact that once I am not at home, I cannot access the harddrives the multimedia is on.&lt;/p></description></item><item><title>Create a blog using Jekyll and Docker</title><link>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</link><pubDate>Sat, 24 Apr 2021 20:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</guid><description>&lt;h2 id="foreword">Foreword
+&lt;/h2>&lt;p>&lt;del>This blog is created using &lt;a class="link" href="https://jekyllrb.com/" target="_blank" rel="noopener"
+>Jekyll&lt;/a>.&lt;/del>&lt;/p>
+&lt;p>The striked through sentence above used to be true for the old version of this blog, hosted on [misterderpie.com].
+However, the version at [revontulet.dev] uses GitHub pages and Hugo.&lt;/p>
+&lt;h2 id="original-post">Original Post
+&lt;/h2>&lt;p>I really like Jekyll, as I don&amp;rsquo;t like frontend development.
+One problem is though, that I currently only have Jekyll installed on one single machine.
+So when I&amp;rsquo;m not at home but want to add a blog post, I would have to install Jekyll on the machine I&amp;rsquo;m travelling with.
+Luckily there is Docker and the &lt;a class="link" href="https://github.com/envygeeks/jekyll-docker" target="_blank" rel="noopener"
+>envygeeks/jekyll-docker&lt;/a> Jekyll Image.
+As I&amp;rsquo;m adding blogposts very rarely, I do not need to have a full build and delivery pipeline for it (despite the fact that at the time of writing I wouldn&amp;rsquo;t even be able to create such).
+A simple container to build the latest version of the site suits my needs.&lt;/p></description></item><item><title>Read Temperature &amp; Humidity with RaspberryPi 4 - Docker Setup</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</link><pubDate>Wed, 31 Mar 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</guid><description>&lt;p>In my previous post, I showed how to enable the Raspberry Pi 4 on Ubuntu Server to read out DHT11/DHT22 sensor data. But this is a very hacky solution. Moreover is the Raspberry Pi cluttered with some stuff, that we may need to configure differently for another setup or remove as a whole. It&amp;rsquo;s a nice coincidence that I&amp;rsquo;m currently reading &lt;a class="link" href="https://learning.oreilly.com/library/view/docker-in-action/9781617294761/" target="_blank" rel="noopener"
+>Docker in Action, Second Edition&lt;/a> (Manning, 2019), so I wanted to build a docker image to read out the data. There are some images available for this already, but I still wanted to build my own light-weight image.&lt;/p></description></item><item><title>Read Temperature &amp; Humidity with RaspberryPi 4</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-dht/</link><pubDate>Sun, 21 Mar 2021 11:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-dht/</guid><description>&lt;p>I recently bought a RaspberryPi 4 and installed Ubuntu Server 20.04 64 Bit on it. There are many tutorials available how to read the temperature/humidity via Python, unfortunately none of them worked out of the box. It seems to be that they are&lt;/p>
+&lt;ul>
+&lt;li>either for Raspbian OS&lt;/li>
+&lt;li>or for 32 Bit OSes.&lt;/li>
+&lt;/ul>
+&lt;p>After some searching I found a way from several sources to make it run. This is a horrible hacky workaround and I&amp;rsquo;d be very happy to see a better way and/or out-of-the-box solution.&lt;/p></description></item></channel></rss>

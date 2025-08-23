@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Software Engineering on revontulet.dev</title><link>https://revontulet.dev/categories/software-engineering/</link><description>Recent content in Software Engineering on revontulet.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 04 Jul 2021 22:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/categories/software-engineering/index.xml" rel="self" type="application/rss+xml"/><item><title>Generics - Invariance, Covariance and Contravariance</title><link>https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/</link><pubDate>Sun, 04 Jul 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/</guid><description>&lt;p>In my previous post I stated that I am currently reading &lt;a class="link" href="https://www.manning.com/books/kotlin-in-action" target="_blank" rel="noopener"
+>Kotlin in Action&lt;/a> (2017, Manning).
+In chapter 9, the authors introduce generics in Kotlin.
+My overall experience with generics in Java is good, but apparently that book taught me something completely new.
+The concept of &lt;a class="link" href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_%28computer_science%29" target="_blank" rel="noopener"
+>Covariance and Contravariance&lt;/a> was something unknown to me.
+This post, though categorized Kotlin, focuses more on the concepts in general, yet will demonstrate them in Kotlin.
+I assume the reader has a basic understanding of generics and inheritance.&lt;/p></description></item><item><title>Teststubs with Kotlin Extensions</title><link>https://revontulet.dev/p/2021-teststubs-with-kotlin-extensions/</link><pubDate>Fri, 25 Jun 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-teststubs-with-kotlin-extensions/</guid><description>&lt;p>The repository with the Kotlin code can be found on &lt;a class="link" href="https://github.com/MisterDerpie/kotlin-data-stubs" target="_blank" rel="noopener"
+>github/MisterDerpie/kotlin-data-stubs&lt;/a>.&lt;/p>
+&lt;p>Currently I&amp;rsquo;m having the great luck that our team started using Kotlin at work.
+For that reason, I decided to learn Kotlin properly and started my journey with &lt;a class="link" href="https://www.manning.com/books/kotlin-in-action" target="_blank" rel="noopener"
+>Kotlin in Action&lt;/a> (2017, Manning).
+This is a bit outdated, considering that Kotlin 1.5 is the current release, but the vast majority of concepts are the same as for 1.0.&lt;/p>
+&lt;p>One concept that fascinates me and I really see a lot of value in is &lt;a class="link" href="https://kotlinlang.org/docs/extensions.html" target="_blank" rel="noopener"
+>Extensions&lt;/a>.
+Especially for tests I find that concept very useful, because it enables us to provide test related logic to our classes without actually adding this in the real production code.
+Let&amp;rsquo;s have a look at how we can utilize extensions to create stubs of business classes.&lt;/p></description></item><item><title>Spring Boot with MongoDB</title><link>https://revontulet.dev/p/2021-spring-boot-with-mongodb/</link><pubDate>Wed, 26 May 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-spring-boot-with-mongodb/</guid><description>&lt;p>The sourcecode of this post is available on &lt;a class="link" href="https://github.com/MisterDerpie/spring-boot-with-mongodb" target="_blank" rel="noopener"
+>github/MisterDerpie/spring-boot-with-mongodb&lt;/a>.&lt;/p>
+&lt;h2 id="foreword">Foreword
+&lt;/h2>&lt;p>For a small application to store receipts I wanted to use &lt;a class="link" href="https://spring.io/projects/spring-boot" target="_blank" rel="noopener"
+>Spring Boot&lt;/a> and NoSQL database &lt;a class="link" href="https://www.mongodb.com/" target="_blank" rel="noopener"
+>MongoDB&lt;/a>.
+As with many basic topics in the spring world, there is a &lt;a class="link" href="https://spring.io/guides/gs/accessing-data-mongodb/" target="_blank" rel="noopener"
+>Getting Started guide&lt;/a> on &lt;a class="link" href="https://spring.io" target="_blank" rel="noopener"
+>spring.io&lt;/a>, with the specific title &amp;ldquo;Accessing Data with MongoDB&amp;rdquo;.&lt;/p>
+&lt;p>Though this guide may suffice for a really straightforward start, it actually misses out two, from my point of view, essential questions.&lt;/p></description></item></channel></rss>
