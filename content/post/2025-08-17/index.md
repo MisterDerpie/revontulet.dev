@@ -123,7 +123,7 @@ Especially if we come from teams where we took those things for granted.
 Right here, that is the degradation of the feedback loop.
 With every dependency pulled in, and every feature that needs to get shipped faster, it is very likely that the feedback time deteriorates a bit.
 Since we are part of the process, we do not notice it.
-Much like your relatives telling you _"You have grown quite a lot since last time we saw you!"_, although you don't actively notice any difference day-to-day.
+Much like your relatives told you when growing up _"You have grown quite a lot since last time we saw you!"_, although you don't actively notice any difference day-to-day.
 Most often, teams do not put the effort in keeping local verification easy enough when they add new features.
 This _debt_ accumulates, and will be paid at some point, but only noticed once it becomes too painful and too much of a drag to keep shipping fast.
 
