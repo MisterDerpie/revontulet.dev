@@ -78,7 +78,7 @@ func Test_InsertIntoDb(t *testing.T) {
     expectedResp := Response{OK: true}
 
     mockRepo.
-        On("ExecuteQuery", "users", "INSERT ...").
+        On("ExecuteQuery", "users", "INSERT {...}").
         Return(expectedResp, nil).
         Once()
 
@@ -90,7 +90,13 @@ func Test_InsertIntoDb(t *testing.T) {
 
 While the test looks right on the surface, are we actually testing that our insert works?
 Nope.
-However, with this test (and the tests for the unhappy path), we're hitting 100% Code Coverage.
+At best, we verify that _some string_ was passed as the first parameter, and _some other string_ was passed as the second one,
+supposedly the table name and the insert query respectively.
+But looking at the method's signature, the order would be to first pass the query and then pass the table name.
+
+
+
+[Oh no, anyway!](https://knowyourmeme.com/memes/oh-no-anyway), with this test (and all other mock tests), we hit 100% Code Coverage!
 Great, our system is fully tested, straight to production!
 
 ![](mfw-pikachu.webp)
