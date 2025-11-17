@@ -146,7 +146,7 @@ You can always `sudo pacman -Rns` what you installed, but make sure that your co
 TL;DR: 
 
 ```shell
-sudo pacman -S plasma
+sudo pacman -S plasma-desktop
 ```
 
 I used KDE Plasma, as it is the same DE that the Steam Deck uses.
