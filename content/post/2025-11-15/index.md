@@ -149,6 +149,11 @@ TL;DR:
 sudo pacman -S plasma-desktop
 ```
 
+Note: Install `plasma` first to gett all the tooling for e.g. monitor setup.
+Boot into KDE, then configure everything.
+Uninstall KDE then (`pacman -Rns plasma`) and then install `plasma-desktop`.
+Enjoy a preconfigured KDE Plasma, but with a lot less overhead.
+
 I used KDE Plasma, as it is the same DE that the Steam Deck uses.
 Besides that, I tried GNOME, Cinnamon, Xfce4 and MATE.
 Some of them I did not even get to boot without configuring
