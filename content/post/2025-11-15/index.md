@@ -149,7 +149,7 @@ TL;DR:
 sudo pacman -S plasma-desktop
 ```
 
-Note: Install `plasma` first to gett all the tooling for e.g. monitor setup.
+Note: Install `plasma` first to get all the tooling for e.g. monitor setup.
 Boot into KDE, then configure everything.
 Uninstall KDE then (`pacman -Rns plasma`) and then install `plasma-desktop`.
 Enjoy a preconfigured KDE Plasma, but with a lot less overhead.
