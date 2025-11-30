@@ -1,9 +1,9 @@
 ---
-title: Male Health and Face Detection
+title: No Shave November and Face Detection
 description: >
     It's been No Shave November & Movember.
     Whilst tracking the beard growth every day, this post shows how we can create a fairly smooth progress GIF.
-slug: 2025-male-health-and-face-detection
+slug: 2025-no-shave-november-and-face-detection
 date: 2025-11-30 08:00:00+0000
 categories:
     - Software-Engineering
