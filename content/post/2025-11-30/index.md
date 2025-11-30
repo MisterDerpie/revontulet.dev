@@ -1,5 +1,5 @@
 ---
-title: No Shave November and Face Detection
+title: No Shave November Through the Eyes of Face Detection
 description: >
     It's been No Shave November & Movember.
     Whilst tracking the beard growth every day, this post shows how we can create a fairly smooth progress GIF.
