@@ -484,7 +484,7 @@ The final code can be found in [final_result.py](final_result.py)
 Of course, here is a result of 30 days not shaving:
 
 <div class="gallery">
-    <video src="output.mp4" controls autoplay loop muted></video>
+    <video src="output.mp4" controls loop muted></video>
 </div>
 
 The irony of providing this as an MP4 cannot be overlooked.
