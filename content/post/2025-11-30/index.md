@@ -32,9 +32,9 @@ They are more or less the same, but not exactly.
 [Movember vs No Shave November (tue.nl)](https://www.cursor.tue.nl/opinie/harsh-jethwani/movember-vs-no-shave-november)
 provides a more detailed view of their differences.
 The idea is simple:
-Do not spend your money on a barber for the whole of November, instead donate the money to cancer research and treatment.
+Do not spend your money on a barber for the whole of November, instead donate it for a good cause.
 
-You can find more information on either of them at
+You can find more information about either of them at
 
 * [movember.com](https://movember.com/)
 * [no-shave.org](https://no-shave.org/).
