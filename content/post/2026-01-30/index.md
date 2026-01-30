@@ -186,7 +186,7 @@ To get closer to a boot, install the [Microcode](https://wiki.archlinux.org/titl
 
 * [Configure the System](https://wiki.archlinux.org/title/Installation_guide#Configure_the_system)
 
-#### Create the fstab
+#### Creating the fstab
 
 **Note**: In this chapter, we must be truly superuser.
 Running _sudo_ won't do, so please run `su` now, if you did not yet.
@@ -237,7 +237,7 @@ Last but not least, we should set a root password.
 passwd
 ```
 
-#### Install the Booatloader
+#### Installing the Booatloader
 
 * [Boot Loader](https://wiki.archlinux.org/title/Arch_boot_process#Boot_loader)
 * [systemd-boot](https://wiki.archlinux.org/title/Systemd-boot)
@@ -267,7 +267,7 @@ Credits to
 [Use systemd-boot instead of grub in Arch Linux (tsunderechen.io)](https://www.tsunderechen.io/2020/05/archlinux-systemd-boot-installation/),
 who's blog post we're following.
 
-##### Create the Loader Conf
+##### Creating the Loader Conf
 
 ```bash
 vim /boot/loader/loader.conf
@@ -278,7 +278,7 @@ default arch    # match the filename of the entry
 timeout 5       # the timeout before loading the entry
 ```
 
-##### Create the Boot Entry
+##### Creating the Boot Entry
 
 Creating the boot entry requires to know the UUID of the partition to load/start Linux from/on.
 In our case, that would be `/dev/sdX2`, where _X_ is the letter and 2 is the system partition.
