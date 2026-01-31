@@ -54,7 +54,14 @@ You may want to adjust the parts in _chroot-install.sh_ for your timezone and ke
 Start the install script as superuser (NOT as `sudo`)
 
 ```bash
+chmod a+x ./install-requirements.sh
+chmod a+x ./chroot-install.sh
 su
+```
+
+Once you entered the password, start the installer by
+
+```bash
 ./install-requirements.sh
 ```
 
