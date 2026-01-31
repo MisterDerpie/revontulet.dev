@@ -40,7 +40,27 @@ Either run them with `sudo` or first run `su`, and then execute them.
 
 Each section starts with a bullet point, referring to the page in the official Arch Wiki guide, that may be consulted for additional readup.
 
-### Prerequesites
+<hr/>
+
+### Semi-Automated Script
+
+The steps from the next parts are all semi-automated and can be downloaded from this post
+
+* [install-requirements.sh](./install-requirements.sh)
+* [chroot-install.sh](./chroot-install.sh).
+
+
+You may want to adjust the parts in _chroot-install.sh_ for your timezone and keyboard layout. 
+Start the install script as superuser (NOT as `sudo`)
+
+```bash
+su
+./install-requirements.sh
+```
+
+<hr/>
+
+### Prerequisites
 
 A host system that runs Arch, a target drive that we install Arch on, and two packages.
 The first is the _arch-install-scripts_, which contains _pacstrap_.
@@ -51,6 +71,7 @@ pacman -Sy arch-install-scripts dosfstools
 ```
 
 We're assuming that the target machine supports UEFI, not BIOS.
+
 
 ### Partitioning and Formatting
 
