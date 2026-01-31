@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Docker on revontulet.dev by Matthias Döpmann</title><link>https://revontulet.dev/tags/docker/</link><description>Recent content in Docker on revontulet.dev by Matthias Döpmann</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 26 May 2021 22:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/docker/index.xml" rel="self" type="application/rss+xml"/><item><title>Spring Boot with MongoDB</title><link>https://revontulet.dev/p/2021-spring-boot-with-mongodb/</link><pubDate>Wed, 26 May 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-spring-boot-with-mongodb/</guid><description>&lt;p&gt;The sourcecode of this post is available on &lt;a class="link" href="https://github.com/MisterDerpie/spring-boot-with-mongodb" target="_blank" rel="noopener"
+&gt;github/MisterDerpie/spring-boot-with-mongodb&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="foreword"&gt;Foreword
+&lt;/h2&gt;&lt;p&gt;For a small application to store receipts I wanted to use &lt;a class="link" href="https://spring.io/projects/spring-boot" target="_blank" rel="noopener"
+&gt;Spring Boot&lt;/a&gt; and NoSQL database &lt;a class="link" href="https://www.mongodb.com/" target="_blank" rel="noopener"
+&gt;MongoDB&lt;/a&gt;.
+As with many basic topics in the spring world, there is a &lt;a class="link" href="https://spring.io/guides/gs/accessing-data-mongodb/" target="_blank" rel="noopener"
+&gt;Getting Started guide&lt;/a&gt; on &lt;a class="link" href="https://spring.io" target="_blank" rel="noopener"
+&gt;spring.io&lt;/a&gt;, with the specific title &amp;ldquo;Accessing Data with MongoDB&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;Though this guide may suffice for a really straightforward start, it actually misses out two, from my point of view, essential questions.&lt;/p&gt;</description></item><item><title>RaspberryPi 4 as a remote Multimedia Station</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</link><pubDate>Sun, 02 May 2021 17:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</guid><description>&lt;h2 id="foreword"&gt;Foreword
+&lt;/h2&gt;&lt;p&gt;Since many years I am using JDownloader as the solution to download things on all my computers.
+The problem with it is though that the files are not synchronized between them.
+Thus I cannot access what I downloaded from any machine different from the original downloader.
+This problem worsens even with the fact that once I am not at home, I cannot access the harddrives the multimedia is on.&lt;/p&gt;</description></item><item><title>Create a blog using Jekyll and Docker</title><link>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</link><pubDate>Sat, 24 Apr 2021 20:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</guid><description>&lt;h2 id="foreword"&gt;Foreword
+&lt;/h2&gt;&lt;p&gt;&lt;del&gt;This blog is created using &lt;a class="link" href="https://jekyllrb.com/" target="_blank" rel="noopener"
+&gt;Jekyll&lt;/a&gt;.&lt;/del&gt;&lt;/p&gt;
+&lt;p&gt;The striked through sentence above used to be true for the old version of this blog, hosted on [misterderpie.com].
+However, the version at [revontulet.dev] uses GitHub pages and Hugo.&lt;/p&gt;
+&lt;h2 id="original-post"&gt;Original Post
+&lt;/h2&gt;&lt;p&gt;I really like Jekyll, as I don&amp;rsquo;t like frontend development.
+One problem is though, that I currently only have Jekyll installed on one single machine.
+So when I&amp;rsquo;m not at home but want to add a blog post, I would have to install Jekyll on the machine I&amp;rsquo;m travelling with.
+Luckily there is Docker and the &lt;a class="link" href="https://github.com/envygeeks/jekyll-docker" target="_blank" rel="noopener"
+&gt;envygeeks/jekyll-docker&lt;/a&gt; Jekyll Image.
+As I&amp;rsquo;m adding blogposts very rarely, I do not need to have a full build and delivery pipeline for it (despite the fact that at the time of writing I wouldn&amp;rsquo;t even be able to create such).
+A simple container to build the latest version of the site suits my needs.&lt;/p&gt;</description></item><item><title>Read Temperature &amp; Humidity with RaspberryPi 4 - Docker Setup</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</link><pubDate>Wed, 31 Mar 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</guid><description>&lt;p&gt;In my previous post, I showed how to enable the Raspberry Pi 4 on Ubuntu Server to read out DHT11/DHT22 sensor data. But this is a very hacky solution. Moreover is the Raspberry Pi cluttered with some stuff, that we may need to configure differently for another setup or remove as a whole. It&amp;rsquo;s a nice coincidence that I&amp;rsquo;m currently reading &lt;a class="link" href="https://learning.oreilly.com/library/view/docker-in-action/9781617294761/" target="_blank" rel="noopener"
+&gt;Docker in Action, Second Edition&lt;/a&gt; (Manning, 2019), so I wanted to build a docker image to read out the data. There are some images available for this already, but I still wanted to build my own light-weight image.&lt;/p&gt;</description></item></channel></rss>

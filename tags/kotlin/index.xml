@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kotlin on revontulet.dev by Matthias Döpmann</title><link>https://revontulet.dev/tags/kotlin/</link><description>Recent content in Kotlin on revontulet.dev by Matthias Döpmann</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 04 Jul 2021 22:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/kotlin/index.xml" rel="self" type="application/rss+xml"/><item><title>Generics - Invariance, Covariance and Contravariance</title><link>https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/</link><pubDate>Sun, 04 Jul 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/</guid><description>&lt;p&gt;In my previous post I stated that I am currently reading &lt;a class="link" href="https://www.manning.com/books/kotlin-in-action" target="_blank" rel="noopener"
+&gt;Kotlin in Action&lt;/a&gt; (2017, Manning).
+In chapter 9, the authors introduce generics in Kotlin.
+My overall experience with generics in Java is good, but apparently that book taught me something completely new.
+The concept of &lt;a class="link" href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_%28computer_science%29" target="_blank" rel="noopener"
+&gt;Covariance and Contravariance&lt;/a&gt; was something unknown to me.
+This post, though categorized Kotlin, focuses more on the concepts in general, yet will demonstrate them in Kotlin.
+I assume the reader has a basic understanding of generics and inheritance.&lt;/p&gt;</description></item><item><title>Teststubs with Kotlin Extensions</title><link>https://revontulet.dev/p/2021-teststubs-with-kotlin-extensions/</link><pubDate>Fri, 25 Jun 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-teststubs-with-kotlin-extensions/</guid><description>&lt;p&gt;The repository with the Kotlin code can be found on &lt;a class="link" href="https://github.com/MisterDerpie/kotlin-data-stubs" target="_blank" rel="noopener"
+&gt;github/MisterDerpie/kotlin-data-stubs&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Currently I&amp;rsquo;m having the great luck that our team started using Kotlin at work.
+For that reason, I decided to learn Kotlin properly and started my journey with &lt;a class="link" href="https://www.manning.com/books/kotlin-in-action" target="_blank" rel="noopener"
+&gt;Kotlin in Action&lt;/a&gt; (2017, Manning).
+This is a bit outdated, considering that Kotlin 1.5 is the current release, but the vast majority of concepts are the same as for 1.0.&lt;/p&gt;
+&lt;p&gt;One concept that fascinates me and I really see a lot of value in is &lt;a class="link" href="https://kotlinlang.org/docs/extensions.html" target="_blank" rel="noopener"
+&gt;Extensions&lt;/a&gt;.
+Especially for tests I find that concept very useful, because it enables us to provide test related logic to our classes without actually adding this in the real production code.
+Let&amp;rsquo;s have a look at how we can utilize extensions to create stubs of business classes.&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>revontulet.dev by Matthias Döpmann</title><link>https://revontulet.dev/</link><description>Recent content on revontulet.dev by Matthias Döpmann</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 30 Jan 2026 10:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/index.xml" rel="self" type="application/rss+xml"/><item><title>Installing Arch from Arch onto an External Drive</title><link>https://revontulet.dev/p/2026-installing-arch-from-arch-onto-an-external-drive/</link><pubDate>Fri, 30 Jan 2026 10:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2026-installing-arch-from-arch-onto-an-external-drive/</guid><description>&lt;p&gt;To install Arch Linux, the most common and easiest way is booting it up from an installation media.
+This may not be an option, and instead we want to install it straight onto a drive.
+The Arch Wiki provides a guide to &lt;a class="link" href="https://wiki.archlinux.org/title/Install_Arch_Linux_from_existing_Linux" target="_blank" rel="noopener"
+&gt;Install Arch Linux from existing Linux&lt;/a&gt;, but it took a while to get all pieces right.
+Consider this post to aim for a more noob-friendly and handholding setup on how to &lt;em&gt;install Arch from Arch&lt;/em&gt;.
+For readability, only hyperlinks not referring to &lt;a class="link" href="wiki.archlinux.org" &gt;wiki.archlinux.org&lt;/a&gt; are marked with their source in brackets.&lt;/p&gt;</description></item><item><title>No Shave November Through the Eyes of Face Detection</title><link>https://revontulet.dev/p/2025-no-shave-november-and-face-detection/</link><pubDate>Sun, 30 Nov 2025 08:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-no-shave-november-and-face-detection/</guid><description>&lt;p&gt;Every year No Shave November and Movember are held to raise funds and spread awareness for Men&amp;rsquo;s Health, particularly cancer research and treatment.
+They are more or less the same, but not exactly.
+&lt;a class="link" href="https://www.cursor.tue.nl/opinie/harsh-jethwani/movember-vs-no-shave-november" target="_blank" rel="noopener"
+&gt;Movember vs No Shave November (tue.nl)&lt;/a&gt;
+provides a more detailed view of their differences.
+The idea is simple:
+Do not spend your money on a barber for the whole of November, instead donate it to a good cause.&lt;/p&gt;</description></item><item><title>Wayland, Sway, Nvidia DLSS, Unreal Engine and Ghosting</title><link>https://revontulet.dev/p/2025-wayland-sway-nvidia-dlss-unreal-engine-and-ghosting/</link><pubDate>Sat, 15 Nov 2025 10:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-wayland-sway-nvidia-dlss-unreal-engine-and-ghosting/</guid><description>&lt;p&gt;Since January 2023, I&amp;rsquo;m the owner of a Steam Deck.
+Until April 2025, my main computer still had Windows running, but I found that I hardly use it for anything but the browser and games.
+Given the Steam Deck experience, I was confident to ditch Windows and continue playing on Linux from here on.
+Especially as pretty much anything I play is on Steam.
+However, in my setup with an Nvidia RTX 3070 and Sway (thus Wayland), heavy ghosting occurred on games like &lt;em&gt;Hogwarts Legacy&lt;/em&gt;, and one I started most recently, &lt;em&gt;Arc: Raiders&lt;/em&gt;.
+Overall, these problems seem to happen with games that are built in &lt;em&gt;Unreal Engine&lt;/em&gt;, as e.g. &lt;em&gt;RDR2&lt;/em&gt; or &lt;em&gt;GTA V&lt;/em&gt; work flawlessly.&lt;/p&gt;</description></item><item><title>Don't Let Your Mocks Mock You!</title><link>https://revontulet.dev/p/2025-dont-let-your-mocks-mock-you/</link><pubDate>Fri, 12 Sep 2025 10:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-dont-let-your-mocks-mock-you/</guid><description>&lt;p&gt;Here&amp;rsquo;s a short one about a pattern that we can unfortunately too often observe when it comes to mocks.
+Especially with databases, we see our &amp;ldquo;Repository&amp;rdquo; or &amp;ldquo;Database Connection&amp;rdquo; mocked out in tests.
+That is, for the sake of unhappy path testing.
+However, more often than not we also see that these mocks are used for happy path testing.&lt;/p&gt;
+&lt;p&gt;There is a real danger where our &lt;em&gt;mocks are mocking&lt;/em&gt; us.&lt;/p&gt;</description></item><item><title>The Hidden Cost of Slow Feedback Loops</title><link>https://revontulet.dev/p/2025-hidden-cost-slow-feedback-loops/</link><pubDate>Sun, 17 Aug 2025 10:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-hidden-cost-slow-feedback-loops/</guid><description>&lt;p&gt;This post has been lying around as an idea for a couple of months now.
+A list of bullet points on my computer is from somewhere mid-June, and I originally intended to title it &lt;em&gt;&amp;ldquo;The Underappreciation of Fast Feedback Loops&amp;rdquo;&lt;/em&gt;.
+However, calling out a cost sounds catchier and is more accurate, because we do not only underappreciate them, but they cost us.
+First and foremost, nerves (because who likes to wait for results?), but moreover do slow feedback loops actively reduce delivery speed of teams.&lt;/p&gt;</description></item><item><title>AI-first - We're just 6 months away from AGI ;-)</title><link>https://revontulet.dev/p/2025-ai-first/</link><pubDate>Sat, 31 May 2025 10:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-ai-first/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;The &lt;del&gt;Matrix&lt;/del&gt; &lt;em&gt;AI&lt;/em&gt; is everywhere.
+It is all around us.
+Even now, in this very room.
+You can see it when you look &lt;del&gt;out your window&lt;/del&gt; &lt;em&gt;something up on the internet&lt;/em&gt; or when you turn on your &lt;del&gt;television&lt;/del&gt; &lt;em&gt;washing machine&lt;/em&gt;.
+You can feel it when you go to &lt;del&gt;work&lt;/del&gt; &lt;em&gt;do anything nowadays&lt;/em&gt;&amp;hellip;
+when you go to &lt;del&gt;church&lt;/del&gt; a &lt;em&gt;search engine&lt;/em&gt;&amp;hellip;
+when you &lt;del&gt;pay&lt;/del&gt; &lt;em&gt;fill out&lt;/em&gt; your taxes.
+It is the world that has been pulled over your eyes to blind you from &lt;del&gt;the truth&lt;/del&gt; &lt;em&gt;meaningful content&lt;/em&gt;.&lt;/p&gt;</description></item><item><title>iPhone Ethernet bridge on RaspberryPi with Ubuntu Server</title><link>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</link><pubDate>Sun, 11 May 2025 08:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</guid><description>&lt;p&gt;This post covers how to tether your iPhone via USB to your RaspberryPi, and share the iPhone&amp;rsquo;s network on &lt;code&gt;eth0&lt;/code&gt;.
+Eventually, the RaspberryPi will be connected to a router via ethernet, making the router use the iPhone&amp;rsquo;s internet connection.
+A RaspberryPi 4B is used, but this guide &lt;em&gt;should&lt;/em&gt; work on other models too.&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup.webp"
+width="411"
+height="241"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_8b83f33608668852.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_10beb28f012f694b.webp 1024w"
+loading="lazy"
+alt="iphone-connected-to-rpi-connected-to-router"
+class="gallery-image"
+data-flex-grow="170"
+data-flex-basis="409px"
+&gt;&lt;/p&gt;
+&lt;p&gt;One may wonder why this setup is needed.
+Routing at least DNS traffic through the Pi with the &lt;a class="link" href="https://pi-hole.net/" target="_blank" rel="noopener"
+&gt;Pi-hole&lt;/a&gt; is a common use-case, but all traffic less so.&lt;/p&gt;</description></item><item><title>Arch and i3 - Hello, Sway! - Install Arch and Sway</title><link>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</link><pubDate>Wed, 26 Mar 2025 18:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</guid><description>&lt;p&gt;Welcome to part one of the three-part series &amp;ldquo;Hello, Sway!&amp;rdquo;
+The series is split into&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;i&gt;Arch &amp;amp; Sway setup using &lt;code&gt;archinstall&lt;/code&gt;&lt;/i&gt;&lt;/li&gt;
+&lt;li&gt;Sway Configuration&lt;/li&gt;
+&lt;li&gt;Linux QoL Tools&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="motivation"&gt;Motivation
+&lt;/h2&gt;&lt;p&gt;For a while already, there has been no real reason for me to keep Windows.
+The doubt started about two years ago, in January 2023, when I got myself a Steam Deck.
+Although the purchase was mostly to emulate console and handheld games, of course the question was
+&amp;ldquo;&lt;a class="link" href="https://knowyourmeme.com/memes/but-can-it-run-crysis" target="_blank" rel="noopener"
+&gt;But Can It Run Crysis?&lt;/a&gt;&amp;rdquo;
+To my surprise, the games I tried performed incredibly well, almost all of them out of the box.
+Thanks to ProtonDB, if there was a title that needed some extra configuration, it is usually there.&lt;/p&gt;</description></item><item><title>Hello World</title><link>https://revontulet.dev/p/2025-hello-world/</link><pubDate>Sun, 16 Mar 2025 00:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-hello-world/</guid><description>&lt;img src="https://revontulet.dev/p/2025-hello-world/cover-min.png" alt="Featured image of post Hello World" /&gt;&lt;h1 id="welcome-to-revontuletdev"&gt;Welcome to revontulet.dev!
+&lt;/h1&gt;&lt;p&gt;So &amp;hellip; what is this about?&lt;/p&gt;
+&lt;h2 id="introduction"&gt;Introduction
+&lt;/h2&gt;&lt;p&gt;My name is Matthias Döpmann.
+I&amp;rsquo;m a Software Engineer, originally from Germany, nowadays located at the Arctic Circle in Finland.
+There is no specific content for this blog.
+At the time of writing, I host a couple of articles on &lt;a class="link" href="https://misterderpie.com/" target="_blank" rel="noopener"
+&gt;MisterDerpie.com&lt;/a&gt;, that I intend to migrate over to this blog.&lt;/p&gt;
+&lt;p&gt;There were several reasons I stopped writing on the old blog.
+The first is, that whilst living in Dublin and working for Amazon/Amazon Web Services, I was fairly occupied by work and rarely found motivation to follow up on these topics besides work.
+Second, in 2022, the world at Amazon was still remote, so on top of that I spent a lot of time travelling.
+Moreover, instead of reading computer science/software engineering books, I spent a good chunk studying languages (actual languages, not Programming Languages).
+These days I&amp;rsquo;m taking courses in Finnish, so I am not sure how much time is left to actually dump content here, but let&amp;rsquo;s see!
+Ultimately, the non-integration of the old blog with GitHub Actions or the like set the bar higher to publish contentent.
+Although I dockerized the process of rendering the blog, uploading it to an FTP after the render was still too annoying (&amp;hellip; and yes, whilst I could have automated that, I didn&amp;rsquo;t).
+Checking out a GitHub repository, write down some thought, and then just hit &lt;code&gt;git commmit&lt;/code&gt; and &lt;code&gt;git push&lt;/code&gt; is just a lot more convenient.&lt;/p&gt;</description></item><item><title>Ubuntu with WSL2 and i3 Window Manager GUI</title><link>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</link><pubDate>Sat, 04 Dec 2021 19:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</guid><description>&lt;p&gt;Using &lt;code&gt;i3&lt;/code&gt; and &lt;code&gt;Ubuntu&lt;/code&gt; native is probably best, but you may not get the choice to do so, in case your working machine is running Windows.
+I looked through several guides how to set up Ubuntu with &lt;code&gt;i3&lt;/code&gt; on WSL2, but it took me several hours to get the setup I looked for because things did not work as expected.
+Therefore I&amp;rsquo;m writing this guide.&lt;/p&gt;
+&lt;h2 id="installing-ubuntu-on-wsl2"&gt;Installing Ubuntu on WSL2
+&lt;/h2&gt;&lt;p&gt;There are plenty of tutorials and videos to do so.
+I will refer to the very one that I used to set up the bare, GUIless minimum,
+&lt;a class="link" href="https://www.youtube.com/watch?v=IL7Jd9rjgrM" target="_blank" rel="noopener"
+&gt;WSL2 Ubuntu GUI&lt;/a&gt; by David Bombai.
+Reproduce the steps until &lt;code&gt;Install Ubuntu GUI&lt;/code&gt; (7:25) to get the headless Ubuntu on WSL2 up and running.&lt;/p&gt;</description></item><item><title>Ubuntu and i3 on Lenovo Legion 5 Pro</title><link>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</link><pubDate>Sun, 22 Aug 2021 15:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</guid><description>&lt;p&gt;During my summer vacation, I got myself a Lenovo Legion 5 Pro, powered by an AMD Ryzen 7 5800H and an Nvidia RTX3070.
+Though this post is not about the legion, I have to say it is an awesome laptop.
+What this post is about is how to make Ubuntu with &lt;a class="link" href="https://i3wm.org/" target="_blank" rel="noopener"
+&gt;i3wm&lt;/a&gt; run on the Lenovo Legion.&lt;/p&gt;
+&lt;h2 id="installing-ubuntu"&gt;Installing Ubuntu
+&lt;/h2&gt;&lt;h3 id="create-bootable-usb-media"&gt;Create Bootable USB Media
+&lt;/h3&gt;&lt;p&gt;You need a USB stick as well as a Ubuntu ISO image.
+Plenty of tutorials exist on the web to create a bootable Ubuntu USB stick.
+Ubuntu.com provides official documentation, coming from a device running
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-windows#1-overview" target="_blank" rel="noopener"
+&gt;Windows&lt;/a&gt;,
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-ubuntu#1-overview" target="_blank" rel="noopener"
+&gt;Ubuntu&lt;/a&gt; or &lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview" target="_blank" rel="noopener"
+&gt;Mac OS X&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>Generics - Invariance, Covariance and Contravariance</title><link>https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/</link><pubDate>Sun, 04 Jul 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/</guid><description>&lt;p&gt;In my previous post I stated that I am currently reading &lt;a class="link" href="https://www.manning.com/books/kotlin-in-action" target="_blank" rel="noopener"
+&gt;Kotlin in Action&lt;/a&gt; (2017, Manning).
+In chapter 9, the authors introduce generics in Kotlin.
+My overall experience with generics in Java is good, but apparently that book taught me something completely new.
+The concept of &lt;a class="link" href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_%28computer_science%29" target="_blank" rel="noopener"
+&gt;Covariance and Contravariance&lt;/a&gt; was something unknown to me.
+This post, though categorized Kotlin, focuses more on the concepts in general, yet will demonstrate them in Kotlin.
+I assume the reader has a basic understanding of generics and inheritance.&lt;/p&gt;</description></item><item><title>Teststubs with Kotlin Extensions</title><link>https://revontulet.dev/p/2021-teststubs-with-kotlin-extensions/</link><pubDate>Fri, 25 Jun 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-teststubs-with-kotlin-extensions/</guid><description>&lt;p&gt;The repository with the Kotlin code can be found on &lt;a class="link" href="https://github.com/MisterDerpie/kotlin-data-stubs" target="_blank" rel="noopener"
+&gt;github/MisterDerpie/kotlin-data-stubs&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Currently I&amp;rsquo;m having the great luck that our team started using Kotlin at work.
+For that reason, I decided to learn Kotlin properly and started my journey with &lt;a class="link" href="https://www.manning.com/books/kotlin-in-action" target="_blank" rel="noopener"
+&gt;Kotlin in Action&lt;/a&gt; (2017, Manning).
+This is a bit outdated, considering that Kotlin 1.5 is the current release, but the vast majority of concepts are the same as for 1.0.&lt;/p&gt;
+&lt;p&gt;One concept that fascinates me and I really see a lot of value in is &lt;a class="link" href="https://kotlinlang.org/docs/extensions.html" target="_blank" rel="noopener"
+&gt;Extensions&lt;/a&gt;.
+Especially for tests I find that concept very useful, because it enables us to provide test related logic to our classes without actually adding this in the real production code.
+Let&amp;rsquo;s have a look at how we can utilize extensions to create stubs of business classes.&lt;/p&gt;</description></item><item><title>Spring Boot with MongoDB</title><link>https://revontulet.dev/p/2021-spring-boot-with-mongodb/</link><pubDate>Wed, 26 May 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-spring-boot-with-mongodb/</guid><description>&lt;p&gt;The sourcecode of this post is available on &lt;a class="link" href="https://github.com/MisterDerpie/spring-boot-with-mongodb" target="_blank" rel="noopener"
+&gt;github/MisterDerpie/spring-boot-with-mongodb&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="foreword"&gt;Foreword
+&lt;/h2&gt;&lt;p&gt;For a small application to store receipts I wanted to use &lt;a class="link" href="https://spring.io/projects/spring-boot" target="_blank" rel="noopener"
+&gt;Spring Boot&lt;/a&gt; and NoSQL database &lt;a class="link" href="https://www.mongodb.com/" target="_blank" rel="noopener"
+&gt;MongoDB&lt;/a&gt;.
+As with many basic topics in the spring world, there is a &lt;a class="link" href="https://spring.io/guides/gs/accessing-data-mongodb/" target="_blank" rel="noopener"
+&gt;Getting Started guide&lt;/a&gt; on &lt;a class="link" href="https://spring.io" target="_blank" rel="noopener"
+&gt;spring.io&lt;/a&gt;, with the specific title &amp;ldquo;Accessing Data with MongoDB&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;Though this guide may suffice for a really straightforward start, it actually misses out two, from my point of view, essential questions.&lt;/p&gt;</description></item><item><title>RaspberryPi 4 as a remote Multimedia Station</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</link><pubDate>Sun, 02 May 2021 17:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</guid><description>&lt;h2 id="foreword"&gt;Foreword
+&lt;/h2&gt;&lt;p&gt;Since many years I am using JDownloader as the solution to download things on all my computers.
+The problem with it is though that the files are not synchronized between them.
+Thus I cannot access what I downloaded from any machine different from the original downloader.
+This problem worsens even with the fact that once I am not at home, I cannot access the harddrives the multimedia is on.&lt;/p&gt;</description></item><item><title>Create a blog using Jekyll and Docker</title><link>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</link><pubDate>Sat, 24 Apr 2021 20:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</guid><description>&lt;h2 id="foreword"&gt;Foreword
+&lt;/h2&gt;&lt;p&gt;&lt;del&gt;This blog is created using &lt;a class="link" href="https://jekyllrb.com/" target="_blank" rel="noopener"
+&gt;Jekyll&lt;/a&gt;.&lt;/del&gt;&lt;/p&gt;
+&lt;p&gt;The striked through sentence above used to be true for the old version of this blog, hosted on [misterderpie.com].
+However, the version at [revontulet.dev] uses GitHub pages and Hugo.&lt;/p&gt;
+&lt;h2 id="original-post"&gt;Original Post
+&lt;/h2&gt;&lt;p&gt;I really like Jekyll, as I don&amp;rsquo;t like frontend development.
+One problem is though, that I currently only have Jekyll installed on one single machine.
+So when I&amp;rsquo;m not at home but want to add a blog post, I would have to install Jekyll on the machine I&amp;rsquo;m travelling with.
+Luckily there is Docker and the &lt;a class="link" href="https://github.com/envygeeks/jekyll-docker" target="_blank" rel="noopener"
+&gt;envygeeks/jekyll-docker&lt;/a&gt; Jekyll Image.
+As I&amp;rsquo;m adding blogposts very rarely, I do not need to have a full build and delivery pipeline for it (despite the fact that at the time of writing I wouldn&amp;rsquo;t even be able to create such).
+A simple container to build the latest version of the site suits my needs.&lt;/p&gt;</description></item><item><title>Read Temperature &amp; Humidity with RaspberryPi 4 - Docker Setup</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</link><pubDate>Wed, 31 Mar 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</guid><description>&lt;p&gt;In my previous post, I showed how to enable the Raspberry Pi 4 on Ubuntu Server to read out DHT11/DHT22 sensor data. But this is a very hacky solution. Moreover is the Raspberry Pi cluttered with some stuff, that we may need to configure differently for another setup or remove as a whole. It&amp;rsquo;s a nice coincidence that I&amp;rsquo;m currently reading &lt;a class="link" href="https://learning.oreilly.com/library/view/docker-in-action/9781617294761/" target="_blank" rel="noopener"
+&gt;Docker in Action, Second Edition&lt;/a&gt; (Manning, 2019), so I wanted to build a docker image to read out the data. There are some images available for this already, but I still wanted to build my own light-weight image.&lt;/p&gt;</description></item><item><title>Read Temperature &amp; Humidity with RaspberryPi 4</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-dht/</link><pubDate>Sun, 21 Mar 2021 11:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-dht/</guid><description>&lt;p&gt;I recently bought a RaspberryPi 4 and installed Ubuntu Server 20.04 64 Bit on it. There are many tutorials available how to read the temperature/humidity via Python, unfortunately none of them worked out of the box. It seems to be that they are&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;either for Raspbian OS&lt;/li&gt;
+&lt;li&gt;or for 32 Bit OSes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After some searching I found a way from several sources to make it run. This is a horrible hacky workaround and I&amp;rsquo;d be very happy to see a better way and/or out-of-the-box solution.&lt;/p&gt;</description></item><item><title>About Me</title><link>https://revontulet.dev/cv/</link><pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate><guid>https://revontulet.dev/cv/</guid><description>&lt;p&gt;To be populated :-)&lt;/p&gt;</description></item><item><title>Archives</title><link>https://revontulet.dev/archives/</link><pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate><guid>https://revontulet.dev/archives/</guid><description/></item><item><title>Search</title><link>https://revontulet.dev/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://revontulet.dev/search/</guid><description/></item></channel></rss>

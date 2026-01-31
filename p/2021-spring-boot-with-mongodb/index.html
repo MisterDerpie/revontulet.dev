@@ -1,0 +1,378 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Accessing data from MongoDB, running in Docker, through Spring Boot, using a custom converter."><title>Spring Boot with MongoDB</title><link rel=canonical href=https://revontulet.dev/p/2021-spring-boot-with-mongodb/><link rel=stylesheet href=/scss/style.min.6a692fd055deae459f2a9767f57f3855ba80cafd5041317f24f7360f6ca47cdf.css><meta property='og:title' content="Spring Boot with MongoDB"><meta property='og:description' content="Accessing data from MongoDB, running in Docker, through Spring Boot, using a custom converter."><meta property='og:url' content='https://revontulet.dev/p/2021-spring-boot-with-mongodb/'><meta property='og:site_name' content='revontulet.dev by Matthias Döpmann'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Software Engineering'><meta property='article:tag' content='Docker'><meta property='article:tag' content='Java'><meta property='article:published_time' content='2021-05-26T22:00:00+00:00'><meta property='article:modified_time' content='2021-05-26T22:00:00+00:00'><meta name=twitter:title content="Spring Boot with MongoDB"><meta name=twitter:description content="Accessing data from MongoDB, running in Docker, through Spring Boot, using a custom converter."><link rel="shortcut icon" href=/favicon.ico><meta author="Matthias Döpmann"></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu_1a8e49ce50b9ffbc.webp width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🇫🇮</span></figure><div class=site-meta><h1 class=site-name><a href=/>revontulet.dev by Matthias Döpmann</a></h1><h2 class=site-description>A blog about Software Engineering, from the arctic circle. And anything else.</h2></div></header><ol class=menu-social><li><a href=https://github.com/MisterDerpie target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://www.linkedin.com/in/matthias-doepmann/ target=_blank title=LinkedIn rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-linkedin"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 11v5"/><path d="M8 8v.01"/><path d="M12 16v-5"/><path d="M16 16v-3a2 2 0 10-4 0"/><path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4z"/></svg></a></li><li><a href=https://revontulet.dev/index.xml title=RSS rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-rss"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 19m-1 0a1 1 0 102 0 1 1 0 10-2 0"/><path d="M4 4a16 16 0 0116 16"/><path d="M4 11a9 9 0 019 9"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/cv/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-cv"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 001 1h4"/><path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/><path d="M11 12.5a1.5 1.5.0 00-3 0v3a1.5 1.5.0 003 0"/><path d="M13 11l1.5 6 1.5-6"/></svg>
+<span>About Me</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#foreword>Foreword</a></li><li><a href=#setup-mongodb>Setup MongoDB</a></li><li><a href=#setup-spring-boot-project>Setup Spring Boot Project</a><ol><li><a href=#create-spring-project>Create Spring Project</a><ol><li><a href=#create-project-with-spring-initializr>Create project with Spring Initializr</a></li><li><a href=#create-project-with-gradle>Create project with Gradle</a></li></ol></li><li><a href=#additional-dependencies>Additional Dependencies</a></li></ol></li><li><a href=#connect-application-to-mongodb>Connect Application to MongoDB</a><ol><li><a href=#why-not-the-default-applicationproperties>Why not the default application.properties?</a></li></ol></li><li><a href=#create-mongo-document-in-application>Create Mongo Document in Application</a></li><li><a href=#use-mongorepository-to-access-document>Use MongoRepository to access Document</a></li><li><a href=#integration-test-mongodb>Integration Test MongoDB</a><ol><li><a href=#create-the-test>Create the test</a></li><li><a href=#run-the-test>Run the test</a></li></ol></li><li><a href=#mongodb-converter>MongoDB Converter</a><ol><li><a href=#create-converters>Create Converters</a></li><li><a href=#create-converter-config>Create Converter Config</a></li></ol></li><li><a href=#integration-tests-revisited>Integration Tests Revisited</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/software-engineering/ style=background-color:#2082a6;color:#fff>Software Engineering</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/2021-spring-boot-with-mongodb/>Spring Boot with MongoDB</a></h2><h3 class=article-subtitle>Accessing data from MongoDB, running in Docker, through Spring Boot, using a custom converter.</h3></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>May 26, 2021</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>9 minute read</time></div></footer></div></header><section class=article-content><p>The sourcecode of this post is available on <a class=link href=https://github.com/MisterDerpie/spring-boot-with-mongodb target=_blank rel=noopener>github/MisterDerpie/spring-boot-with-mongodb</a>.</p><h2 id=foreword>Foreword</h2><p>For a small application to store receipts I wanted to use <a class=link href=https://spring.io/projects/spring-boot target=_blank rel=noopener>Spring Boot</a> and NoSQL database <a class=link href=https://www.mongodb.com/ target=_blank rel=noopener>MongoDB</a>.
+As with many basic topics in the spring world, there is a <a class=link href=https://spring.io/guides/gs/accessing-data-mongodb/ target=_blank rel=noopener>Getting Started guide</a> on <a class=link href=https://spring.io target=_blank rel=noopener>spring.io</a>, with the specific title &ldquo;Accessing Data with MongoDB&rdquo;.</p><p>Though this guide may suffice for a really straightforward start, it actually misses out two, from my point of view, essential questions.</p><ol><li>How to connect to a MongoDB instance?</li><li>How to integration test MongoDB?</li></ol><p>Therefore I wrote this post.
+As I want to use JavaMoney, I also cover Mongo Converters.
+The list explains what is covered in this post.</p><ul><li>Use MongoDB as a data store in Spring</li><li>Connect to a MongoDB instance with your provided credentials</li><li>Integration test with an embedded MongoDB</li><li>Use <a class=link href=https://javamoney.github.io/ target=_blank rel=noopener>JavaMoney</a> with MongoDB</li></ul><h2 id=setup-mongodb>Setup MongoDB</h2><p>First we need an instance of MongoDB.
+I will - as usual - use <a class=link href=https://www.docker.com/ target=_blank rel=noopener>Docker</a>.
+Therefore I assume you have docker installed, if not, there are plenty of guides how to do that available online.
+We use the <a class=link href=https://hub.docker.com/_/mongo target=_blank rel=noopener>Docker-Mongo</a> image.
+To start a MongoDB instance that is running in the background, run below code from the shell.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>docker container run -d <span class=se>\
+</span></span></span><span class=line><span class=cl>    --name mongodb <span class=se>\
+</span></span></span><span class=line><span class=cl>    -e <span class=nv>MONGO_INITDB_ROOT_USERNAME</span><span class=o>=</span>admin <span class=se>\
+</span></span></span><span class=line><span class=cl>    -e <span class=nv>MONGO_INITDB_ROOT_PASSWORD</span><span class=o>=</span>admin <span class=se>\
+</span></span></span><span class=line><span class=cl>    -p 27017-27019:27017-27019 <span class=se>\
+</span></span></span><span class=line><span class=cl>    mongo:latest
+</span></span></code></pre></td></tr></table></div></div><h2 id=setup-spring-boot-project>Setup Spring Boot Project</h2><h3 id=create-spring-project>Create Spring Project</h3><p>This section is about creating the Spring project.
+After you created the project, don&rsquo;t forget to add the additional dependencies (next section).</p><h4 id=create-project-with-spring-initializr>Create project with Spring Initializr</h4><p>The easiest way to create the project is using <a class=link href=https://start.spring.io/ target=_blank rel=noopener>Spring Initializr</a>.
+I will use <a class=link href=https://gradle.org/ target=_blank rel=noopener>Gradle</a> as the build automation tool, but it doesn&rsquo;t matter and you can well select Maven.</p><p>We will include the 2 starters</p><ul><li>Lombok</li><li>Spring Data MongoDB</li></ul><p><img src=/p/2021-spring-boot-with-mongodb/spring-initializr.png width=1080 height=754 srcset="/p/2021-spring-boot-with-mongodb/spring-initializr_hu_eae6d21c0b99147f.png 480w, /p/2021-spring-boot-with-mongodb/spring-initializr_hu_9c351b0b59af4d3c.png 1024w" loading=lazy alt=spring-initializr class=gallery-image data-flex-grow=143 data-flex-basis=343px></p><p>To do so, click on <code>Add Dependencies</code> (top right corner) and search for <code>Spring Data Mongo DB</code> (don&rsquo;t use the reactive one) and <code>Lombok</code>.</p><p>Select that you want to have a <code>Gradle Project</code>, use <code>Java</code>, fill out the <code>Project Metadata</code>, select <code>Packaging Jar</code> and <code>Java 11</code>.
+Then click <code>Generate</code> and you should get a <code>.zip</code> containing your project.
+Unzip this anywhere and open it in the IDE of your choice.
+I prefer <a class=link href=https://www.jetbrains.com/idea/ target=_blank rel=noopener>IntelliJ</a>.</p><h4 id=create-project-with-gradle>Create project with Gradle</h4><p>In case you want to create your Gradle project from scratch, you can follow <a class=link href=https://docs.gradle.org/current/samples/sample_building_java_applications.html target=_blank rel=noopener>docs.gradle.org - Building Java Applications Sample</a>.
+Add below dependencies to your <code>dependencies</code> block in the <code>build.gradle</code> file.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>implementation &#39;org.springframework.boot:spring-boot-starter-data-mongodb&#39;
+</span></span><span class=line><span class=cl>implementation &#39;org.springframework.boot:spring-boot-starter-web&#39;
+</span></span><span class=line><span class=cl>compileOnly &#39;org.projectlombok:lombok&#39;
+</span></span><span class=line><span class=cl>annotationProcessor &#39;org.projectlombok:lombok&#39;
+</span></span><span class=line><span class=cl>testImplementation &#39;org.springframework.boot:spring-boot-starter-test&#39;
+</span></span></code></pre></td></tr></table></div></div><h3 id=additional-dependencies>Additional Dependencies</h3><p>To show how to integration test and how to use JavaMoney with MongoDB, we add two dependencies, namely <a class=link href=https://github.com/flapdoodle-oss/de.flapdoodle.embed.mongo target=_blank rel=noopener>Flapdoodle Embedded MongoDB</a> and <a class=link href=https://javamoney.github.io/ target=_blank rel=noopener>JavaMoney</a>.
+Add</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>testImplementation &#39;org.springframework.boot:spring-boot-starter-test&#39;
+</span></span><span class=line><span class=cl>testImplementation &#39;de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.0.0&#39;
+</span></span><span class=line><span class=cl>implementation &#39;org.javamoney.moneta:moneta-core:1.4.2&#39;
+</span></span></code></pre></td></tr></table></div></div><p>to your dependencies in the <code>build.gradle</code> file. It should then look similar to this.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>dependencies {
+</span></span><span class=line><span class=cl>	implementation &#39;org.springframework.boot:spring-boot-starter-data-mongodb&#39;
+</span></span><span class=line><span class=cl>	compileOnly &#39;org.projectlombok:lombok&#39;
+</span></span><span class=line><span class=cl>	annotationProcessor &#39;org.projectlombok:lombok&#39;
+</span></span><span class=line><span class=cl>	testImplementation &#39;org.springframework.boot:spring-boot-starter-test&#39;
+</span></span><span class=line><span class=cl>	testImplementation &#39;de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.0.0&#39;
+</span></span><span class=line><span class=cl>	implementation &#39;org.javamoney.moneta:moneta-core:1.4.2&#39;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><h2 id=connect-application-to-mongodb>Connect Application to MongoDB</h2><p>This part only covers how to configure your application to be able to connect with MongoDB.
+I assume you have a MongoDB instance running configured the same way as I did with the docker image.
+That is, listening on port <code>27017</code>, with user <code>admin</code> and password <code>admin</code>.
+Note that you should not use those credentials in a real application of course, but for only running this on your local machine and getting started this is perfectly fine.</p><p>In the <code>resources</code> folder (where the <code>application.properties</code> resides), create a new properties file called e.g. <code>application-production.properties</code> and put the following content in it.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>spring.data.mongodb.authentication-database=admin
+</span></span><span class=line><span class=cl>spring.data.mongodb.username=admin
+</span></span><span class=line><span class=cl>spring.data.mongodb.password=admin
+</span></span><span class=line><span class=cl>spring.data.mongodb.database=testdatabase
+</span></span><span class=line><span class=cl>spring.data.mongodb.port=27017
+</span></span><span class=line><span class=cl>spring.data.mongodb.host=localhost
+</span></span></code></pre></td></tr></table></div></div><p>This enables Spring&rsquo;s MongoDB repository to</p><ul><li>connect to a MongoDB instance running on <code>localhost</code></li><li>with port <code>27017</code></li><li>and username <code>admin</code></li><li>and password <code>admin</code></li><li>and selected database <code>testdatabase</code></li><li>and authentication database <code>admin</code> (default in the docker container)</li></ul><h3 id=why-not-the-default-applicationproperties>Why not the default application.properties?</h3><p>You may wonder why we don&rsquo;t use the default properties file.
+The reason is that the embedded MongoDB for some reason does not override these values.
+In case you run your integration tests without providing a profile and/or not providing these values, it would fall back to the default properties file.
+Thus the tests would fail, as you could not connect to the database.</p><p>For the sake of completion, before your tests even start you would see this error.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>org.springframework.beans.factory.BeanCreationException: Error creating bean with name &#39;embeddedMongoServer&#39;
+</span></span></code></pre></td></tr></table></div></div><h2 id=create-mongo-document-in-application>Create Mongo Document in Application</h2><p>The next part is to create a <a class=link href=https://docs.mongodb.com/manual/core/document target=_blank rel=noopener>MongoDB document</a> representation class.
+Simply put, this is the entity you are going to persist in the database.
+We keep it simple and want to store an <code>Item</code> we purchased.
+Its values are an <code>id</code>, a <code>name</code> and a <code>price</code>.
+We will use the <code>id</code> as the primary key.</p><p>Create a class called <code>Item</code> with the following contents.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>lombok.AllArgsConstructor</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>lombok.Data</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.javamoney.moneta.FastMoney</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.data.annotation.Id</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.data.mongodb.core.mapping.Document</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.UUID</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@Document</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@AllArgsConstructor</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@Data</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>Item</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Id</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>UUID</span><span class=w> </span><span class=n>id</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>FastMoney</span><span class=w> </span><span class=n>price</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>name</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>Let&rsquo;s explain a bit what&rsquo;s going on here.</p><ul><li><p><code>@Document</code> indicates that we want this class to be persistable in MongoDB.
+In case you are familiar with JPA, this is the equivalent to <code>@Entity</code>.</p></li><li><p><code>@AllArgsConstructor</code> and <code>@Data</code> are Lombok annotations.
+The former one creates what it states, a constructor with all parameters.
+With the latter we automatically create getters and setters.</p></li><li><p><code>@Id</code> marks this field as the primary key to use in the database.</p></li></ul><h2 id=use-mongorepository-to-access-document>Use MongoRepository to access Document</h2><p>The next step is that we want to store our document in the database.
+Spring provides a very easy to use interface for that.
+Just create a class called <code>ItemRepository</code> that extends <code>MongoRepository&lt;T, ID></code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.data.mongodb.repository.MongoRepository</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.UUID</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>interface</span> <span class=nc>ItemRepository</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>MongoRepository</span><span class=o>&lt;</span><span class=n>Item</span><span class=p>,</span><span class=w> </span><span class=n>UUID</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>The first generic parameter of <code>MongoRepository</code> indicates what entity we want to persist.
+As our <code>Item</code> is the entity, we put this there.
+To identify items, we set the primary key of type <code>UUID</code>.
+Therefore we put the ID type as the second generic parameter.</p><h2 id=integration-test-mongodb>Integration Test MongoDB</h2><p>We are done, almost.
+Let us test our <code>MongoRepository</code> whether it works as expected (hint, it doesn&rsquo;t, but we will get to that).</p><h3 id=create-the-test>Create the test</h3><p>Create a test class <code>ItemRepositoryTest</code> with the following content</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.javamoney.moneta.FastMoney</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.junit.jupiter.api.Test</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.beans.factory.annotation.Autowired</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.UUID</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import static</span><span class=w> </span><span class=nn>org.assertj.core.api.Assertions.assertThat</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@DataMongoTest</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>ItemRepositoryTest</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Autowired</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>ItemRepository</span><span class=w> </span><span class=n>itemRepository</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Test</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>shouldStoreItem</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Item</span><span class=w> </span><span class=n>item</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Item</span><span class=p>(</span><span class=n>UUID</span><span class=p>.</span><span class=na>randomUUID</span><span class=p>(),</span><span class=w> </span><span class=n>FastMoney</span><span class=p>.</span><span class=na>of</span><span class=p>(</span><span class=n>1</span><span class=p>,</span><span class=w> </span><span class=s>&#34;EUR&#34;</span><span class=p>),</span><span class=w> </span><span class=s>&#34;Test Item&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>itemRepository</span><span class=p>.</span><span class=na>save</span><span class=p>(</span><span class=n>item</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Item</span><span class=w> </span><span class=n>storedItem</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>itemRepository</span><span class=p>.</span><span class=na>findById</span><span class=p>(</span><span class=n>item</span><span class=p>.</span><span class=na>getId</span><span class=p>()).</span><span class=na>orElseThrow</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>assertThat</span><span class=p>(</span><span class=n>storedItem</span><span class=p>.</span><span class=na>getId</span><span class=p>()).</span><span class=na>isEqualTo</span><span class=p>(</span><span class=n>item</span><span class=p>.</span><span class=na>getId</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>assertThat</span><span class=p>(</span><span class=n>storedItem</span><span class=p>.</span><span class=na>getPrice</span><span class=p>()).</span><span class=na>isEqualTo</span><span class=p>(</span><span class=n>item</span><span class=p>.</span><span class=na>getPrice</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>assertThat</span><span class=p>(</span><span class=n>storedItem</span><span class=p>.</span><span class=na>getName</span><span class=p>()).</span><span class=na>isEqualTo</span><span class=p>(</span><span class=n>item</span><span class=p>.</span><span class=na>getName</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>Let us look at what&rsquo;s done here, before we run the test.</p><p><code>@DataMongoTest</code> starts the Spring Boot Test context. In addition to that it also creates an embedded MongoDB instance.</p><p><code>@Autowired</code> &ldquo;injects the dependency&rdquo; of <code>ItemRepository</code> into the test class.
+Simply put, Spring creates an instance of <code>ItemRepository</code> and puts the reference to that instance in <code>itemRepository</code>.
+So <code>itemRepository</code> is not null, and the creation of it is done by Spring&rsquo;s Dependency Injection container.
+If you want to to read more about it click on the links for <a class=link href=https://www.tutorialspoint.com/spring/spring_autowired_annotation.htm target=_blank rel=noopener>@Autowired</a> and <a class=link href=https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/beans.html target=_blank rel=noopener>Spring Dependency Injection</a>.</p><p>The test itself then is pretty simple.
+We create an Item with a random UUID, value of 1 euro and the name &ldquo;Test Item&rdquo;.
+Then we store this in the database and try to query the database for the item ID, asserting that the retrieved item is equal to the initial item.</p><h3 id=run-the-test>Run the test</h3><p>When we try to run the test, it will even fail before the first assertion is reached.
+Looking at the logs, we can see the following error.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>Failed</span> <span class=n>to</span> <span class=n>instantiate</span> <span class=n>org</span><span class=o>.</span><span class=n>javamoney</span><span class=o>.</span><span class=n>moneta</span><span class=o>.</span><span class=n>FastMoney</span> <span class=n>using</span> <span class=n>constructor</span> <span class=n>NO_CONSTRUCTOR</span> <span class=n>with</span> <span class=n>arguments</span>
+</span></span><span class=line><span class=cl><span class=n>org</span><span class=o>.</span><span class=n>springframework</span><span class=o>.</span><span class=n>data</span><span class=o>.</span><span class=n>mapping</span><span class=o>.</span><span class=n>model</span><span class=o>.</span><span class=n>MappingInstantiationException</span><span class=p>:</span> <span class=n>Failed</span> <span class=n>to</span> <span class=n>instantiate</span> <span class=n>org</span><span class=o>.</span><span class=n>javamoney</span><span class=o>.</span><span class=n>moneta</span><span class=o>.</span><span class=n>FastMoney</span> <span class=n>using</span> <span class=n>constructor</span> <span class=n>NO_CONSTRUCTOR</span> <span class=n>with</span> <span class=n>arguments</span>
+</span></span><span class=line><span class=cl><span class=o>...</span>
+</span></span></code></pre></td></tr></table></div></div><p>The problem is the internal representation of <code>FastMoney</code>. When serialized into a JSON object, it actually does not just look like</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span> <span class=nt>&#34;number&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span> <span class=nt>&#34;currency&#34;</span><span class=p>:</span> <span class=s2>&#34;EUR&#34;</span> <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>but like</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;currency&#34;</span><span class=p>:{</span><span class=nt>&#34;context&#34;</span><span class=p>:{</span><span class=nt>&#34;providerName&#34;</span><span class=p>:</span><span class=s2>&#34;java.util.Currency&#34;</span><span class=p>,</span><span class=nt>&#34;empty&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>},</span><span class=nt>&#34;numericCode&#34;</span><span class=p>:</span><span class=mi>978</span><span class=p>,</span><span class=nt>&#34;defaultFractionDigits&#34;</span><span class=p>:</span><span class=mi>2</span><span class=p>,</span><span class=nt>&#34;currencyCode&#34;</span><span class=p>:</span><span class=s2>&#34;EUR&#34;</span><span class=p>},</span><span class=nt>&#34;number&#34;</span><span class=p>:</span><span class=mf>1.00000</span><span class=p>,</span><span class=nt>&#34;precision&#34;</span><span class=p>:</span><span class=mi>1</span><span class=p>,</span><span class=nt>&#34;factory&#34;</span><span class=p>:{</span><span class=nt>&#34;defaultMonetaryContext&#34;</span><span class=p>:{</span><span class=nt>&#34;fixedScale&#34;</span><span class=p>:</span><span class=kc>true</span><span class=p>,</span><span class=nt>&#34;maxScale&#34;</span><span class=p>:</span><span class=mi>5</span><span class=p>,</span><span class=nt>&#34;amountType&#34;</span><span class=p>:</span><span class=s2>&#34;org.javamoney.moneta.FastMoney&#34;</span><span class=p>,</span><span class=nt>&#34;precision&#34;</span><span class=p>:</span><span class=mi>19</span><span class=p>,</span><span class=nt>&#34;providerName&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;empty&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>},</span><span class=nt>&#34;amountType&#34;</span><span class=p>:</span><span class=s2>&#34;org.javamoney.moneta.FastMoney&#34;</span><span class=p>,</span><span class=nt>&#34;maxNumber&#34;</span><span class=p>:</span><span class=mf>92233720368547.75807</span><span class=p>,</span><span class=nt>&#34;minNumber&#34;</span><span class=p>:</span><span class=mf>-92233720368547.75808</span><span class=p>,</span><span class=nt>&#34;maximalMonetaryContext&#34;</span><span class=p>:{</span><span class=nt>&#34;fixedScale&#34;</span><span class=p>:</span><span class=kc>true</span><span class=p>,</span><span class=nt>&#34;maxScale&#34;</span><span class=p>:</span><span class=mi>5</span><span class=p>,</span><span class=nt>&#34;amountType&#34;</span><span class=p>:</span><span class=s2>&#34;org.javamoney.moneta.FastMoney&#34;</span><span class=p>,</span><span class=nt>&#34;precision&#34;</span><span class=p>:</span><span class=mi>19</span><span class=p>,</span><span class=nt>&#34;providerName&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;empty&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>}},</span><span class=nt>&#34;context&#34;</span><span class=p>:{</span><span class=nt>&#34;fixedScale&#34;</span><span class=p>:</span><span class=kc>true</span><span class=p>,</span><span class=nt>&#34;maxScale&#34;</span><span class=p>:</span><span class=mi>5</span><span class=p>,</span><span class=nt>&#34;amountType&#34;</span><span class=p>:</span><span class=s2>&#34;org.javamoney.moneta.FastMoney&#34;</span><span class=p>,</span><span class=nt>&#34;precision&#34;</span><span class=p>:</span><span class=mi>19</span><span class=p>,</span><span class=nt>&#34;providerName&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;empty&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>},</span><span class=nt>&#34;zero&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>,</span><span class=nt>&#34;positive&#34;</span><span class=p>:</span><span class=kc>true</span><span class=p>,</span><span class=nt>&#34;negative&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>,</span><span class=nt>&#34;negativeOrZero&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>,</span><span class=nt>&#34;positiveOrZero&#34;</span><span class=p>:</span><span class=kc>true</span><span class=p>,</span><span class=nt>&#34;scale&#34;</span><span class=p>:</span><span class=mi>5</span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>But FastMoney does only have a constructor that accepts these very two parameters.
+The solution is to provide a custom converter, that would store our money representation exactly as what the constructor expects.</p><h2 id=mongodb-converter>MongoDB Converter</h2><h3 id=create-converters>Create Converters</h3><p>To successfully save and load our Item from the database, we need to convert the price.
+This is done by creating a <code>ReadingConverter</code> and a <code>WritingConverter</code>.
+Create two classes, namely <code>FastMoneyReadConverter</code> and <code>FastMoneyWriteConverter</code> with the following contents.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.javamoney.moneta.FastMoney</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.core.convert.converter.Converter</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.data.convert.ReadingConverter</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.math.BigDecimal</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@ReadingConverter</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>FastMoneyReadConverter</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>Converter</span><span class=o>&lt;</span><span class=n>String</span><span class=p>,</span><span class=w> </span><span class=n>FastMoney</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>FastMoney</span><span class=w> </span><span class=nf>convert</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>input</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>storedValue</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>input</span><span class=p>.</span><span class=na>split</span><span class=p>(</span><span class=s>&#34;###&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>FastMoney</span><span class=p>.</span><span class=na>of</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>BigDecimal</span><span class=p>(</span><span class=n>storedValue</span><span class=o>[</span><span class=n>0</span><span class=o>]</span><span class=p>),</span><span class=w> </span><span class=n>storedValue</span><span class=o>[</span><span class=n>1</span><span class=o>]</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.javamoney.moneta.FastMoney</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.core.convert.converter.Converter</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.data.convert.WritingConverter</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@WritingConverter</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>FastMoneyWriteConverter</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>Converter</span><span class=o>&lt;</span><span class=n>FastMoney</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=nf>convert</span><span class=p>(</span><span class=n>FastMoney</span><span class=w> </span><span class=n>input</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>input</span><span class=p>.</span><span class=na>getNumber</span><span class=p>()</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34;###&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>input</span><span class=p>.</span><span class=na>getCurrency</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>Our converters implement the <code>Converter&lt;Input, Output></code> interface.
+The naming states exactly what we want to achieve with them.
+With a ReadingConverter, we want to convert when <em>reading from</em> the database <em>into</em> the Java Object.
+A WritingConverter is used when we <em>write into</em> the database <em>from</em> the Java Object.</p><p>What the converters do is very straightforward.
+We take the values from the Money, concatenate them with a placeholder of three hashtags and then save this entire string to the database.
+On reading from the database, we revert that operation by splitting them at the three hashtags and creating a FastMoney instance of the two obtained values.</p><h3 id=create-converter-config>Create Converter Config</h3><p>We created our converters but need to make the MongoRepository aware of using them when storing/loading documents from MongoDB.
+For that, we simply create a configuration and provide a list of <code>MongoCustomConversions</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.context.annotation.Bean</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.context.annotation.Configuration</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.data.mongodb.core.convert.MongoCustomConversions</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.List</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@Configuration</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>ConverterConfig</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Bean</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>MongoCustomConversions</span><span class=w> </span><span class=nf>mongoCustomConversions</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>MongoCustomConversions</span><span class=p>(</span><span class=n>List</span><span class=p>.</span><span class=na>of</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>FastMoneyReadConverter</span><span class=p>(),</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>FastMoneyWriteConverter</span><span class=p>()));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><code>@Configuration</code> loads this class in the Spring context.</p><p><code>@Bean</code> tells Spring to get an instance of the return type (here: <code>MongoCustomConversions</code>) by calling this method.
+In the <code>mongoCustomConversion</code> method we pass a list of our converters to the constructor of <code>MongoCustomConversions</code> and return that.</p><h2 id=integration-tests-revisited>Integration Tests Revisited</h2><p>Let&rsquo;s try running our integration tests again.
+Now that we have the converters in place, we should be good to go, right?
+No. Unfortunately our tests will fail for the very same reason again.</p><p>Why is that?</p><p>When running with <code>@DataMongoTest</code>, it does not scan for the <code>ConverterConfig</code>.
+That is why we need to include this in the Spring context in this test.
+This is easily done by adding <code>@Import(ConverterConfig.class)</code>.</p><p>Our test should finally look like this and pass</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.javamoney.moneta.FastMoney</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.junit.jupiter.api.Test</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.beans.factory.annotation.Autowired</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.context.annotation.Import</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.UUID</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import static</span><span class=w> </span><span class=nn>org.assertj.core.api.Assertions.assertThat</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@DataMongoTest</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@Import</span><span class=p>(</span><span class=n>ConverterConfig</span><span class=p>.</span><span class=na>class</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>ItemRepositoryTest</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Autowired</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>ItemRepository</span><span class=w> </span><span class=n>itemRepository</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Test</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>shouldStoreItem</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Item</span><span class=w> </span><span class=n>item</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Item</span><span class=p>(</span><span class=n>UUID</span><span class=p>.</span><span class=na>randomUUID</span><span class=p>(),</span><span class=w> </span><span class=n>FastMoney</span><span class=p>.</span><span class=na>of</span><span class=p>(</span><span class=n>1</span><span class=p>,</span><span class=w> </span><span class=s>&#34;EUR&#34;</span><span class=p>),</span><span class=w> </span><span class=s>&#34;Test Item&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>itemRepository</span><span class=p>.</span><span class=na>save</span><span class=p>(</span><span class=n>item</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>assertThat</span><span class=p>(</span><span class=n>storedItem</span><span class=p>.</span><span class=na>getId</span><span class=p>()).</span><span class=na>isEqualTo</span><span class=p>(</span><span class=n>item</span><span class=p>.</span><span class=na>getId</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>assertThat</span><span class=p>(</span><span class=n>storedItem</span><span class=p>.</span><span class=na>getPrice</span><span class=p>()).</span><span class=na>isEqualTo</span><span class=p>(</span><span class=n>item</span><span class=p>.</span><span class=na>getPrice</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>assertThat</span><span class=p>(</span><span class=n>storedItem</span><span class=p>.</span><span class=na>getName</span><span class=p>()).</span><span class=na>isEqualTo</span><span class=p>(</span><span class=n>item</span><span class=p>.</span><span class=na>getName</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>Congratulations, you successfully wired Spring with MongoDB.</p></section><footer class=article-footer><section class=article-tags><a href=/tags/software-engineering/>Software Engineering</a>
+<a href=/tags/docker/>Docker</a>
+<a href=/tags/java/>Java</a></section><section class=article-copyright><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/2021-generics-invariance-covariance-contravariance/><div class=article-details><h2 class=article-title>Generics - Invariance, Covariance and Contravariance</h2></div></a></article><article><a href=/p/2021-teststubs-with-kotlin-extensions/><div class=article-details><h2 class=article-title>Teststubs with Kotlin Extensions</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 revontulet.dev by Matthias Döpmann</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.30.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script><script defer src=https://static.cloudflareinsights.com/beacon.min.js data-cf-beacon='{"token": "ab26ba39e87544c98ce4711525f9a8b8"}'></script></body></html>

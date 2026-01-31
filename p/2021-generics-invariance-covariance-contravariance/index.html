@@ -1,0 +1,340 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Explaining the concepts of generics - Invariance, Covariance and Contravariance. The code samples are in Kotlin."><title>Generics - Invariance, Covariance and Contravariance</title><link rel=canonical href=https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/><link rel=stylesheet href=/scss/style.min.6a692fd055deae459f2a9767f57f3855ba80cafd5041317f24f7360f6ca47cdf.css><meta property='og:title' content="Generics - Invariance, Covariance and Contravariance"><meta property='og:description' content="Explaining the concepts of generics - Invariance, Covariance and Contravariance. The code samples are in Kotlin."><meta property='og:url' content='https://revontulet.dev/p/2021-generics-invariance-covariance-contravariance/'><meta property='og:site_name' content='revontulet.dev by Matthias Döpmann'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Software Engineering'><meta property='article:tag' content='Kotlin'><meta property='article:published_time' content='2021-07-04T22:00:00+00:00'><meta property='article:modified_time' content='2021-07-04T22:00:00+00:00'><meta name=twitter:title content="Generics - Invariance, Covariance and Contravariance"><meta name=twitter:description content="Explaining the concepts of generics - Invariance, Covariance and Contravariance. The code samples are in Kotlin."><link rel="shortcut icon" href=/favicon.ico><meta author="Matthias Döpmann"></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu_1a8e49ce50b9ffbc.webp width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🇫🇮</span></figure><div class=site-meta><h1 class=site-name><a href=/>revontulet.dev by Matthias Döpmann</a></h1><h2 class=site-description>A blog about Software Engineering, from the arctic circle. And anything else.</h2></div></header><ol class=menu-social><li><a href=https://github.com/MisterDerpie target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://www.linkedin.com/in/matthias-doepmann/ target=_blank title=LinkedIn rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-linkedin"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 11v5"/><path d="M8 8v.01"/><path d="M12 16v-5"/><path d="M16 16v-3a2 2 0 10-4 0"/><path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4z"/></svg></a></li><li><a href=https://revontulet.dev/index.xml title=RSS rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-rss"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 19m-1 0a1 1 0 102 0 1 1 0 10-2 0"/><path d="M4 4a16 16 0 0116 16"/><path d="M4 11a9 9 0 019 9"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/cv/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-cv"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 001 1h4"/><path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/><path d="M11 12.5a1.5 1.5.0 00-3 0v3a1.5 1.5.0 003 0"/><path d="M13 11l1.5 6 1.5-6"/></svg>
+<span>About Me</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#inheritance-for-normal-classes>Inheritance for normal Classes</a></li><li><a href=#covariance>Covariance</a><ol><li><a href=#domain-model>Domain Model</a></li><li><a href=#basketshoe-not-is-a-basketclothingitem>Basket&lt;Shoe> not is-a Basket&lt;ClothingItem></a></li><li><a href=#definition-of-covariance>Definition of Covariance</a></li><li><a href=#covariance-in-code>Covariance in Code</a></li></ol></li><li><a href=#contravariance>Contravariance</a><ol><li><a href=#adding-an-action-object>Adding an Action Object</a></li><li><a href=#call-action-on-printing>Call Action on printing</a></li><li><a href=#more-general-action>More general action</a></li><li><a href=#definition-of-contravariance>Definition of Contravariance</a></li><li><a href=#contravariance-in-code>Contravariance in Code</a></li></ol></li><li><a href=#invariance>Invariance</a></li><li><a href=#bottom-line>Bottom Line</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/software-engineering/ style=background-color:#2082a6;color:#fff>Software Engineering</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/2021-generics-invariance-covariance-contravariance/>Generics - Invariance, Covariance and Contravariance</a></h2><h3 class=article-subtitle>Explaining the concepts of generics - Invariance, Covariance and Contravariance. The code samples are in Kotlin.</h3></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Jul 04, 2021</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>10 minute read</time></div></footer></div></header><section class=article-content><p>In my previous post I stated that I am currently reading <a class=link href=https://www.manning.com/books/kotlin-in-action target=_blank rel=noopener>Kotlin in Action</a> (2017, Manning).
+In chapter 9, the authors introduce generics in Kotlin.
+My overall experience with generics in Java is good, but apparently that book taught me something completely new.
+The concept of <a class=link href=https://en.wikipedia.org/wiki/Covariance_and_contravariance_%28computer_science%29 target=_blank rel=noopener>Covariance and Contravariance</a> was something unknown to me.
+This post, though categorized Kotlin, focuses more on the concepts in general, yet will demonstrate them in Kotlin.
+I assume the reader has a basic understanding of generics and inheritance.</p><h2 id=inheritance-for-normal-classes>Inheritance for normal Classes</h2><p>Before we get into generics, let us look into inheritance for normal classes.
+For that, consider the following class hierarchy.</p><p><img src=/p/2021-generics-invariance-covariance-contravariance/class-hierarchy.png width=294 height=212 srcset="/p/2021-generics-invariance-covariance-contravariance/class-hierarchy_hu_c24857bb11f3ff87.png 480w, /p/2021-generics-invariance-covariance-contravariance/class-hierarchy_hu_19f0d07b73474eb0.png 1024w" loading=lazy alt=class-hierarchy class=gallery-image data-flex-grow=138 data-flex-basis=332px></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>abstract</span> <span class=k>class</span> <span class=nc>ClothingItem</span><span class=p>(</span><span class=k>val</span> <span class=py>price</span><span class=p>:</span> <span class=n>Float</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Shoe</span><span class=p>(</span><span class=n>price</span><span class=p>:</span> <span class=n>Float</span><span class=p>,</span> <span class=k>val</span> <span class=py>size</span><span class=p>:</span> <span class=n>Float</span><span class=p>)</span> <span class=p>:</span> <span class=n>ClothingItem</span><span class=p>(</span><span class=n>price</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Jacket</span><span class=p>(</span><span class=n>price</span><span class=p>:</span> <span class=n>Float</span><span class=p>,</span> <span class=k>val</span> <span class=py>hasZipper</span><span class=p>:</span> <span class=n>Boolean</span><span class=p>)</span> <span class=p>:</span> <span class=n>ClothingItem</span><span class=p>(</span><span class=n>price</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>Between <code>Shoe</code> and <code>Jacket</code> there is no relationship in terms of &ldquo;Shoe <em>is-a</em> Jacket&rdquo; or &ldquo;Jacket <em>is-a</em> Shoe&rdquo;.
+Thus, whenever we expect a shoe, we cannot treat it as a jacket and vice versa.
+But between <code>ClothingItem</code> and <code>Shoe</code>/<code>Jacket</code>, there is in fact an <em>is-a</em> relationship.
+Shoes and jackets are both clothing items.
+Hence we can always use a <code>Shoe</code> or <code>Jacket</code> in code when we expect a <code>ClothingItem</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>fun</span> <span class=nf>printPrice</span><span class=p>(</span><span class=n>item</span><span class=p>:</span> <span class=n>ClothingItem</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>println</span><span class=p>(</span><span class=s2>&#34;The item costs </span><span class=si>${item.price}</span><span class=s2>.&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>We can call that with either shoe or jacket.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=c1>// The item costs 5.
+</span></span></span><span class=line><span class=cl><span class=n>printPrice</span><span class=p>(</span><span class=n>Shoe</span><span class=p>(</span><span class=mf>5f</span><span class=p>,</span> <span class=mf>33.5f</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// The item costs 20.
+</span></span></span><span class=line><span class=cl><span class=n>printPrice</span><span class=p>(</span><span class=n>Jacket</span><span class=p>(</span><span class=mf>20f</span><span class=p>,</span> <span class=k>false</span><span class=p>))</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=covariance>Covariance</h2><p>To explain how inheritance in generics works, and the word &ldquo;covariance&rdquo;, I want to do that by an example.</p><h3 id=domain-model>Domain Model</h3><p>We create a <code>Basket</code> where we can put exactly 2 of any clothing item.
+Also we define a function to print the total price of the items in the basket.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>class</span> <span class=nc>Basket</span><span class=p>&lt;</span><span class=n>T</span> <span class=p>:</span> <span class=n>ClothingItem</span><span class=p>&gt;(</span><span class=k>val</span> <span class=py>firstItem</span><span class=p>:</span> <span class=n>T</span><span class=p>,</span> <span class=k>val</span> <span class=py>secondItem</span><span class=p>:</span> <span class=n>T</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>fun</span> <span class=nf>printBasketPrice</span><span class=p>(</span><span class=n>basket</span><span class=p>:</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>ClothingItem</span><span class=p>&gt;)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>val</span> <span class=py>firstPrice</span> <span class=p>=</span> <span class=n>basket</span><span class=p>.</span><span class=n>firstItem</span><span class=p>.</span><span class=n>price</span>
+</span></span><span class=line><span class=cl>    <span class=k>val</span> <span class=py>secondPrice</span> <span class=p>=</span> <span class=n>basket</span><span class=p>.</span><span class=n>secondItem</span><span class=p>.</span><span class=n>price</span>
+</span></span><span class=line><span class=cl>    <span class=k>val</span> <span class=py>total</span> <span class=p>=</span> <span class=n>basket</span><span class=p>.</span><span class=n>firstItem</span><span class=p>.</span><span class=n>price</span> <span class=p>+</span> <span class=n>basket</span><span class=p>.</span><span class=n>secondItem</span><span class=p>.</span><span class=n>price</span>
+</span></span><span class=line><span class=cl>    <span class=n>println</span><span class=p>(</span><span class=s2>&#34;The total price of </span><span class=si>$firstPrice</span><span class=s2> + </span><span class=si>$secondPrice</span><span class=s2> = </span><span class=si>$total</span><span class=s2>.&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Now, assume we only want to buy shoes, so we create a basket only containing shoes.
+This saves us from accidently putting a jacket into the basket.
+We then want to print its price, using the previously defined function.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>val</span> <span class=py>shoeBasket</span> <span class=p>=</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>Shoe</span><span class=p>&gt;(</span><span class=n>Shoe</span><span class=p>(</span><span class=mf>5.5f</span><span class=p>,</span> <span class=mf>37.5f</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=n>printPrice</span><span class=p>(</span><span class=n>shoeBasket</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>When we try to run this, it won&rsquo;t compile, because the types are not matching.</p><h3 id=basketshoe-not-is-a-basketclothingitem>Basket&lt;Shoe> not is-a Basket&lt;ClothingItem></h3><p>This is strange.
+We know that Shoe is-a ClothingItem, and wherever we expect the latter, we could actually provide the former.
+It turns out that <code>Basket&lt;Shoe></code> is not a <code>Basket&lt;ClothingItem></code>.</p><p><img src=/p/2021-generics-invariance-covariance-contravariance/basket-not-is.png width=182 height=212 srcset="/p/2021-generics-invariance-covariance-contravariance/basket-not-is_hu_e0aa796227bac4d0.png 480w, /p/2021-generics-invariance-covariance-contravariance/basket-not-is_hu_ddbf6f196db14348.png 1024w" loading=lazy alt=basket-not-is class=gallery-image data-flex-grow=85 data-flex-basis=206px></p><p>Even though the inner types are in an is-a relationship with each other, in the generic world this does not apply.
+Why is that?</p><p>It is best shown by changing the basket to be able to replace items, i.e. change <code>val</code> to <code>var</code>.
+Now we add a function that is able to replace the first clothing item by one that is provided.
+This won&rsquo;t compile, but if it would, the program would crash at the print.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>class</span> <span class=nc>Basket</span><span class=p>&lt;</span><span class=n>T</span> <span class=p>:</span> <span class=n>ClothingItem</span><span class=p>&gt;(</span><span class=k>var</span> <span class=py>firstItem</span><span class=p>:</span> <span class=n>T</span><span class=p>,</span> <span class=k>var</span> <span class=py>secondItem</span><span class=p>:</span> <span class=n>T</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>fun</span> <span class=nf>replaceFirstItem</span><span class=p>(</span><span class=n>basket</span><span class=p>:</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>ClothingItem</span><span class=p>&gt;,</span> <span class=n>item</span><span class=p>:</span> <span class=n>ClothingItem</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>basket</span><span class=p>.</span><span class=n>firstItem</span> <span class=p>=</span> <span class=n>item</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>//... called from some other place
+</span></span></span><span class=line><span class=cl><span class=k>val</span> <span class=py>basket</span> <span class=p>=</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>Shoe</span><span class=p>&gt;(</span><span class=n>Shoe</span><span class=p>(</span><span class=mf>1f</span><span class=p>,</span> <span class=mf>2f</span><span class=p>),</span> <span class=n>Shoe</span><span class=p>(</span><span class=mf>3f</span><span class=p>,</span> <span class=mf>4f</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=n>replaceFirstItem</span><span class=p>(</span><span class=n>basket</span><span class=p>,</span> <span class=n>Jacket</span><span class=p>(</span><span class=mf>5f</span><span class=p>,</span> <span class=k>false</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=c1>// The print causes the program to crash
+</span></span></span><span class=line><span class=cl><span class=c1>// Basket&lt;Shoe&gt; now holds a Jacket, and Jacket has no size property
+</span></span></span><span class=line><span class=cl><span class=n>println</span><span class=p>(</span><span class=s2>&#34;The shoe has size </span><span class=si>${basket.firstItem.size}</span><span class=s2>.&#34;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>And that is the reason why the is-a relationship for generics is not safe to treat the same way as for normal classes.
+It is unsafe for a function that expects a more generic type to pass a more specific one.</p><p>But if we could not do that, this would limit us by a lot.
+You&rsquo;ve seen the function to print the price of the basket.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>fun</span> <span class=nf>printBasketPrice</span><span class=p>(</span><span class=n>basket</span><span class=p>:</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>ClothingItem</span><span class=p>&gt;)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// ...
+</span></span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>If we would not be able to do that, we would have to create the same function for each type of clothing.
+That may be possible, but neither keeps your code <a class=link href=https://en.wikipedia.org/wiki/Don%27t_repeat_yourself target=_blank rel=noopener>DRY</a> nor would it be feasible if you had hundreds of items.</p><h3 id=definition-of-covariance>Definition of Covariance</h3><p>The previous can be achieved with covariance.
+Formally defined:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>Given</span> <span class=n>a</span> <span class=k>class</span> <span class=n>with</span> <span class=n>a</span> <span class=n>generic</span> <span class=n>parameter</span><span class=p>:</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;.</span>
+</span></span><span class=line><span class=cl><span class=n>We</span> <span class=n>say</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>A</span><span class=o>&gt;</span> <span class=n>is</span><span class=o>-</span><span class=n>a</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>B</span><span class=o>&gt;</span> <span class=k>if</span> <span class=n>A</span> <span class=n>is</span><span class=o>-</span><span class=n>a</span> <span class=n>B</span><span class=p>,</span> <span class=ow>and</span> <span class=n>that</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span> <span class=n>is</span> <span class=n>covariant</span> <span class=n>on</span> <span class=n>T</span><span class=o>.</span>
+</span></span></code></pre></td></tr></table></div></div><p>Informally speaking, the &ldquo;normal object inheritance&rdquo; holds.
+Thus the covariant basket inheritance diagram looks like the following.</p><p><img src=/p/2021-generics-invariance-covariance-contravariance/covariance.png width=182 height=212 srcset="/p/2021-generics-invariance-covariance-contravariance/covariance_hu_3bed4f2b478d61e4.png 480w, /p/2021-generics-invariance-covariance-contravariance/covariance_hu_e514fb22daad8246.png 1024w" loading=lazy alt=basket-not-is class=gallery-image data-flex-grow=85 data-flex-basis=206px></p><h3 id=covariance-in-code>Covariance in Code</h3><p>Covariance exactly solves our problem.
+But how do we achieve that in code?
+And, if we enable that, would we run into the same problem that we could maybe override values with the wrong type?</p><p>In Kotlin, you define covariance on T using the keyword <code>out</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=c1>// Note, we use val again
+</span></span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Basket</span><span class=p>&lt;</span><span class=k>out</span> <span class=n>T</span> <span class=p>:</span> <span class=n>ClothingItem</span><span class=p>&gt;(</span><span class=k>val</span> <span class=py>firstItem</span><span class=p>:</span> <span class=n>T</span><span class=p>,</span> <span class=k>val</span> <span class=py>secondItem</span><span class=p>:</span> <span class=n>T</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// ... call it
+</span></span></span><span class=line><span class=cl><span class=k>val</span> <span class=py>basket</span> <span class=p>=</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>Shoe</span><span class=p>&gt;(</span><span class=n>Shoe</span><span class=p>(</span><span class=mf>1f</span><span class=p>,</span> <span class=mf>2f</span><span class=p>),</span> <span class=n>Shoe</span><span class=p>(</span><span class=mf>3f</span><span class=p>,</span> <span class=mf>4f</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=n>println</span><span class=p>(</span><span class=s2>&#34;The shoe has size </span><span class=si>${basket.firstItem.size}</span><span class=s2>.&#34;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>The keyword is not coincidantelly named <code>out</code>, it actually has a specific reason.
+When you mark the generic parameter as covariant, you can only use an instance of T in out positions.
+This does probably introduce another questionmark, because what are out positions?
+Informally said, an out position is everything that is returning, but never receiving.
+An instance of T could be acquired by getting from the basket, because the getter would <em>return</em> the instance.
+An operation like setting a variable to an instance would not be allowed, because the setter would <em>receive</em> the instance.</p><p>With that said, with a covariant basket, we could never run into overriding an item with a wrong instance.
+How should we?
+The operation to write is a receiving operation, thus not an out operation.
+This is also the reason we have to define the items as <code>val</code> instead of <code>var</code>.
+As <code>var</code> provides setters, it wouldn&rsquo;t compile.</p><h2 id=contravariance>Contravariance</h2><p>Covariance is a concept that is quite natural, because it follows the &ldquo;normal flow&rdquo; of inheritance.
+What is way less natural is the concept of contravariance, because it allows you to walk &ldquo;upwards&rdquo; in the inheritance tree - kind of.</p><h3 id=adding-an-action-object>Adding an Action Object</h3><p>Let&rsquo;s create an abstract base class that supports a single function, provided two objects, and returns nothing.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>abstract</span> <span class=k>class</span> <span class=nc>Action</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>abstract</span> <span class=k>fun</span> <span class=nf>performAction</span><span class=p>(</span><span class=n>firstItem</span><span class=p>:</span> <span class=n>T</span><span class=p>,</span> <span class=n>secondItem</span><span class=p>:</span> <span class=n>T</span><span class=p>):</span> <span class=n>Unit</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>For contravariance we want to work with a basket full of jackets.
+So we create an action specific to jackets.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>class</span> <span class=nc>JacketAction</span> <span class=p>:</span> <span class=n>Action</span><span class=p>&lt;</span><span class=n>Jacket</span><span class=p>&gt;()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>override</span> <span class=k>fun</span> <span class=nf>performAction</span><span class=p>(</span><span class=n>firstItem</span><span class=p>:</span> <span class=n>Jacket</span><span class=p>,</span> <span class=n>secondItem</span><span class=p>:</span> <span class=n>Jacket</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>firstItem</span><span class=p>.</span><span class=n>hasZipper</span> <span class=o>&amp;&amp;</span> <span class=n>secondItem</span><span class=p>.</span><span class=n>hasZipper</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>println</span><span class=p>(</span><span class=s2>&#34;Both jackets have zippers!!!&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>println</span><span class=p>(</span><span class=s2>&#34;You have at least one non-zipper jacket.&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=call-action-on-printing>Call Action on printing</h3><p>Let&rsquo;s create a method that takes a basket full of jackets and an action for jackets.
+Also we create a jacket basket and call the method with it and the previously defined jacket action.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>fun</span> <span class=nf>printComplimentAndPerformAction</span><span class=p>(</span><span class=n>basket</span><span class=p>:</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>Jacket</span><span class=p>&gt;,</span> <span class=n>action</span><span class=p>:</span> <span class=n>Action</span><span class=p>&lt;</span><span class=n>Jacket</span><span class=p>&gt;)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>println</span><span class=p>(</span><span class=s2>&#34;Nice jackets!&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>action</span><span class=p>.</span><span class=n>performAction</span><span class=p>(</span><span class=n>basket</span><span class=p>.</span><span class=n>firstItem</span><span class=p>,</span> <span class=n>basket</span><span class=p>.</span><span class=n>secondItem</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// ... in the caller
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>val</span> <span class=py>jacketBasket</span><span class=p>:</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>Jacket</span><span class=p>&gt;</span> <span class=p>=</span> <span class=n>Basket</span><span class=p>(</span><span class=n>Jacket</span><span class=p>(</span><span class=mf>1f</span><span class=p>,</span> <span class=k>false</span><span class=p>),</span> <span class=n>Jacket</span><span class=p>(</span><span class=mf>2f</span><span class=p>,</span> <span class=k>false</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=k>val</span> <span class=py>jacketAction</span> <span class=p>=</span> <span class=n>JacketAction</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>printComplimentAndPerformAction</span><span class=p>(</span><span class=n>jacketBasket</span><span class=p>,</span> <span class=n>jacketAction</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=cm>/* Output
+</span></span></span><span class=line><span class=cl><span class=cm>Nice jackets!
+</span></span></span><span class=line><span class=cl><span class=cm>You have at least one non-zipper jacket.
+</span></span></span><span class=line><span class=cl><span class=cm>*/</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=more-general-action>More general action</h3><p>Say we want to have an action we can perform on any clothing item.
+That is a common use-case.
+You have a less specific type (in our example: Clothing Item) and want to perform an action based on methods already provided by that type.
+Such action could, for example, be to print the more expensive of the two items.
+If we had to create that for every single item type, we would repeat code all over the place and this would not scale at all.
+Not to mention again that there are many clothing items.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>class</span> <span class=nc>ClothingActionHighestPrice</span> <span class=p>:</span> <span class=n>Action</span><span class=p>&lt;</span><span class=n>ClothingItem</span><span class=p>&gt;()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>override</span> <span class=k>fun</span> <span class=nf>performAction</span><span class=p>(</span><span class=n>firstItem</span><span class=p>:</span> <span class=n>ClothingItem</span><span class=p>,</span> <span class=n>secondItem</span><span class=p>:</span> <span class=n>ClothingItem</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>firstItem</span><span class=p>.</span><span class=n>price</span> <span class=p>&gt;</span> <span class=n>secondItem</span><span class=p>.</span><span class=n>price</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>println</span><span class=p>(</span><span class=s2>&#34;First item is more expensive.&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>println</span><span class=p>(</span><span class=s2>&#34;Second item is more expensive&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>We would like to call the <code>printComplimentAndPerformAction</code> method with the <code>ClothingActionHighestPrice</code>.
+But this will not compile.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>val</span> <span class=py>clothingActionHighestPrice</span> <span class=p>=</span> <span class=n>ClothingActionHighestPrice</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=c1>// This call won&#39;t compile
+</span></span></span><span class=line><span class=cl><span class=n>printComplimentAndPerformAction</span><span class=p>(</span><span class=n>jacketBasket</span><span class=p>,</span> <span class=n>clothingActionHighestPrice</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>At first glance, this seems to be intuitive.
+We know that <code>Jacket</code> is-a <code>ClothingItem</code>, so we cannot pass a <code>ClothingItem</code> when we want to have a <code>Jacket</code>.
+So what we want to do is shown in below diagram.</p><p><img src=/p/2021-generics-invariance-covariance-contravariance/not-contravariant-action.png width=182 height=212 srcset="/p/2021-generics-invariance-covariance-contravariance/not-contravariant-action_hu_636d5db7107c6675.png 480w, /p/2021-generics-invariance-covariance-contravariance/not-contravariant-action_hu_79bdba73dab37175.png 1024w" loading=lazy alt=not-covariant-action class=gallery-image data-flex-grow=85 data-flex-basis=206px></p><h3 id=definition-of-contravariance>Definition of Contravariance</h3><p>It is possible to achieve previous diagram by contravariance.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>Given</span> <span class=n>a</span> <span class=k>class</span> <span class=n>with</span> <span class=n>a</span> <span class=n>generic</span> <span class=n>parameter</span><span class=p>:</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;.</span>
+</span></span><span class=line><span class=cl><span class=n>We</span> <span class=n>say</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>A</span><span class=o>&gt;</span> <span class=n>is</span><span class=o>-</span><span class=n>a</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>B</span><span class=o>&gt;</span> <span class=k>if</span> <span class=n>B</span> <span class=n>is</span><span class=o>-</span><span class=n>a</span> <span class=n>A</span><span class=p>,</span> <span class=ow>and</span> <span class=n>that</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span> <span class=n>is</span> <span class=n>contravariant</span> <span class=n>on</span> <span class=n>T</span><span class=o>.</span>
+</span></span></code></pre></td></tr></table></div></div><p>Informally speaking, we say that our class with generic parameter <code>A</code> is a <em>child</em> of another class with generic parameter <code>B</code> if <code>B</code> supersedes <code>A</code>.
+The diagram shows that we want to do exactly that.
+ClothingItem supersedes Jacket, yet we want the <code>Action&lt;ClothingItem></code> to be a <code>Action&lt;Jacket></code>.</p><p><img src=/p/2021-generics-invariance-covariance-contravariance/contravariant-action.png width=182 height=212 srcset="/p/2021-generics-invariance-covariance-contravariance/contravariant-action_hu_16599d1b901e47db.png 480w, /p/2021-generics-invariance-covariance-contravariance/contravariant-action_hu_559464aa8a946e.png 1024w" loading=lazy alt=contravariant-action class=gallery-image data-flex-grow=85 data-flex-basis=206px></p><p>When I read about contravariance the first time, I was confused.
+My confusion came from that I thought we are actually allowing the <code>Action&lt;ClothingItem></code> to perform methods on <code>Jacket</code>.
+This is obviously not the case, the clothing item action only sees a clothing item.</p><h3 id=contravariance-in-code>Contravariance in Code</h3><p>For covariance there is <code>out</code>, and contravariance is more or less the opposite of covariance.
+It&rsquo;s not a big surprise that the keyword for contravariance is <code>in</code>.
+On the abstract base class, the <code>Action</code>, we make <code>T</code> covariant.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>abstract</span> <span class=k>class</span> <span class=nc>Action</span><span class=p>&lt;</span><span class=k>in</span> <span class=n>T</span><span class=p>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>abstract</span> <span class=k>fun</span> <span class=nf>performAction</span><span class=p>(</span><span class=n>firstItem</span><span class=p>:</span> <span class=n>T</span><span class=p>,</span> <span class=n>secondItem</span><span class=p>:</span> <span class=n>T</span><span class=p>):</span> <span class=n>Unit</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>As with the <code>out</code> keyword, the <code>in</code> keyword also specifies where the type is allowed to be placed at.
+You can only place <code>T</code> on <em>receiving</em>, not <em>returning</em> operations.
+Passing the jackets into the <code>performAction</code> function is <em>receiving</em>, so we can safely do that.
+Yet we cannot <em>receive</em> <code>T</code> from <code>performAction</code>, because the base type is unknown to that method.
+It could be anything more specific.</p><p>Assume for contravariance you would allow to also return the type.
+When the <code>printComplimentAndPerformAction</code> method, defined on jacket, would receive some clothing item, it could also be a shoe.
+This would not be safe anymore.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>abstract</span> <span class=k>class</span> <span class=nc>Action</span><span class=p>&lt;</span><span class=k>in</span> <span class=n>T</span><span class=p>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Having T in the return is not allowed
+</span></span></span><span class=line><span class=cl>    <span class=k>abstract</span> <span class=k>fun</span> <span class=nf>performAction</span><span class=p>(</span><span class=n>firstItem</span><span class=p>:</span> <span class=n>T</span><span class=p>,</span> <span class=n>secondItem</span><span class=p>:</span> <span class=n>T</span><span class=p>):</span> <span class=n>T</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// ...
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>NotAllowedReturn</span> <span class=p>:</span> <span class=n>Action</span><span class=p>&lt;</span><span class=n>ClothingItem</span><span class=p>&gt;()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>override</span> <span class=k>fun</span> <span class=nf>performAction</span><span class=p>(</span><span class=n>firstItem</span><span class=p>:</span> <span class=n>ClothingItem</span><span class=p>,</span> <span class=n>secondItem</span><span class=p>:</span> <span class=n>ClothingItem</span><span class=p>):</span> <span class=n>ClothingItem</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>Shoe</span><span class=p>(</span><span class=mf>1f</span><span class=p>,</span> <span class=mf>1f</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// ...
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>fun</span> <span class=nf>printComplimentAndPerformAction</span><span class=p>(</span><span class=n>basket</span><span class=p>:</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>Jacket</span><span class=p>&gt;,</span> <span class=n>action</span><span class=p>:</span> <span class=n>Action</span><span class=p>&lt;</span><span class=n>Jacket</span><span class=p>&gt;)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>println</span><span class=p>(</span><span class=s2>&#34;Nice jackets!&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>val</span> <span class=py>receivedItem</span> <span class=p>=</span> <span class=n>action</span><span class=p>.</span><span class=n>performAction</span><span class=p>(</span><span class=n>basket</span><span class=p>.</span><span class=n>firstItem</span><span class=p>,</span> <span class=n>basket</span><span class=p>.</span><span class=n>secondItem</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// If firstItem were var, we would put a shoe in here
+</span></span></span><span class=line><span class=cl>    <span class=c1>// Which violates the contract that there are only jackets
+</span></span></span><span class=line><span class=cl>    <span class=n>basket</span><span class=p>.</span><span class=n>firstItem</span> <span class=p>=</span> <span class=n>receivedItem</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=invariance>Invariance</h2><p>Now that covariance and contravariance are covered, the last piece is the default mode: Invariance.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>Given</span> <span class=n>a</span> <span class=k>class</span> <span class=n>with</span> <span class=n>a</span> <span class=n>generic</span> <span class=n>parameter</span><span class=p>:</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;.</span>
+</span></span><span class=line><span class=cl><span class=n>We</span> <span class=n>say</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>A</span><span class=o>&gt;</span> <span class=n>is</span> <span class=n>invariant</span> <span class=n>to</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>B</span><span class=o>&gt;</span> <span class=k>if</span> <span class=n>neither</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>A</span><span class=o>&gt;</span> <span class=n>is</span><span class=o>-</span><span class=n>a</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>B</span><span class=o>&gt;</span> <span class=n>nor</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>B</span><span class=o>&gt;</span> <span class=n>is</span><span class=o>-</span><span class=n>a</span> <span class=n>SomeClass</span><span class=o>&lt;</span><span class=n>A</span><span class=o>&gt;.</span>
+</span></span></code></pre></td></tr></table></div></div><p>In simple words: Whenever an instance of <code>SomeClass&lt;A></code> is expected, you must provide <code>SomeClass&lt;A></code>, and cannot provide a <code>SomeClass&lt;T></code> with a <code>T</code> being higher/lower in the class hierarchy.
+This is the default mode for any generic class in Kotlin.
+That is why the first example didn&rsquo;t work and we had to make it covariant.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-kotlin data-lang=kotlin><span class=line><span class=cl><span class=k>abstract</span> <span class=k>class</span> <span class=nc>ClothingItem</span><span class=p>(</span><span class=k>val</span> <span class=py>price</span><span class=p>:</span> <span class=n>Float</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Shoe</span><span class=p>(</span><span class=n>price</span><span class=p>:</span> <span class=n>Float</span><span class=p>,</span> <span class=k>val</span> <span class=py>size</span><span class=p>:</span> <span class=n>Float</span><span class=p>)</span> <span class=p>:</span> <span class=n>ClothingItem</span><span class=p>(</span><span class=n>price</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Jacket</span><span class=p>(</span><span class=n>price</span><span class=p>:</span> <span class=n>Float</span><span class=p>,</span> <span class=k>val</span> <span class=py>hasZipper</span><span class=p>:</span> <span class=n>Boolean</span><span class=p>)</span> <span class=p>:</span> <span class=n>ClothingItem</span><span class=p>(</span><span class=n>price</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// by default, T is invariant
+</span></span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Basket</span><span class=p>&lt;</span><span class=n>T</span> <span class=p>:</span> <span class=n>ClothingItem</span><span class=p>&gt;(</span><span class=k>val</span> <span class=py>firstItem</span><span class=p>:</span> <span class=n>T</span><span class=p>,</span> <span class=k>val</span> <span class=py>secondItem</span><span class=p>:</span> <span class=n>T</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// and thus this method only takes a basket of type ClothingItem
+</span></span></span><span class=line><span class=cl><span class=k>fun</span> <span class=nf>printBasketPrice</span><span class=p>(</span><span class=n>basket</span><span class=p>:</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>ClothingItem</span><span class=p>&gt;)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>val</span> <span class=py>firstPrice</span> <span class=p>=</span> <span class=n>basket</span><span class=p>.</span><span class=n>firstItem</span><span class=p>.</span><span class=n>price</span>
+</span></span><span class=line><span class=cl>    <span class=k>val</span> <span class=py>secondPrice</span> <span class=p>=</span> <span class=n>basket</span><span class=p>.</span><span class=n>secondItem</span><span class=p>.</span><span class=n>price</span>
+</span></span><span class=line><span class=cl>    <span class=k>val</span> <span class=py>total</span> <span class=p>=</span> <span class=n>basket</span><span class=p>.</span><span class=n>firstItem</span><span class=p>.</span><span class=n>price</span> <span class=p>+</span> <span class=n>basket</span><span class=p>.</span><span class=n>secondItem</span><span class=p>.</span><span class=n>price</span>
+</span></span><span class=line><span class=cl>    <span class=n>println</span><span class=p>(</span><span class=s2>&#34;The total price of </span><span class=si>$firstPrice</span><span class=s2> + </span><span class=si>$secondPrice</span><span class=s2> = </span><span class=si>$total</span><span class=s2>.&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>fun</span> <span class=nf>main</span><span class=p>(</span><span class=n>args</span><span class=p>:</span> <span class=n>Array</span><span class=p>&lt;</span><span class=n>String</span><span class=p>&gt;)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>val</span> <span class=py>shoeBasket</span> <span class=p>=</span> <span class=n>Basket</span><span class=p>&lt;</span><span class=n>Shoe</span><span class=p>&gt;(</span><span class=n>Shoe</span><span class=p>(</span><span class=mf>5.5f</span><span class=p>,</span> <span class=mf>37.5f</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=c1>// so this will not compile
+</span></span></span><span class=line><span class=cl>    <span class=n>printBasketPrice</span><span class=p>(</span><span class=n>shoeBasket</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=bottom-line>Bottom Line</h2><p>Covariance and contravariance enable us to provide compile time guarantee for runtime safety.
+The most prominent example for covariance is the <code>Collection</code> interface.
+Though contravariance has fewer use cases, you probably have used that one probably already.
+The <code>Comparator</code> interface is the most prominent candidate where contravariance is used.</p></section><footer class=article-footer><section class=article-tags><a href=/tags/software-engineering/>Software Engineering</a>
+<a href=/tags/kotlin/>Kotlin</a></section><section class=article-copyright><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/2021-teststubs-with-kotlin-extensions/><div class=article-details><h2 class=article-title>Teststubs with Kotlin Extensions</h2></div></a></article><article><a href=/p/2021-spring-boot-with-mongodb/><div class=article-details><h2 class=article-title>Spring Boot with MongoDB</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 revontulet.dev by Matthias Döpmann</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.30.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script><script defer src=https://static.cloudflareinsights.com/beacon.min.js data-cf-beacon='{"token": "ab26ba39e87544c98ce4711525f9a8b8"}'></script></body></html>

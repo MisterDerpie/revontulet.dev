@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>RaspberryPi on revontulet.dev by Matthias Döpmann</title><link>https://revontulet.dev/tags/raspberrypi/</link><description>Recent content in RaspberryPi on revontulet.dev by Matthias Döpmann</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 11 May 2025 08:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/raspberrypi/index.xml" rel="self" type="application/rss+xml"/><item><title>iPhone Ethernet bridge on RaspberryPi with Ubuntu Server</title><link>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</link><pubDate>Sun, 11 May 2025 08:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</guid><description>&lt;p&gt;This post covers how to tether your iPhone via USB to your RaspberryPi, and share the iPhone&amp;rsquo;s network on &lt;code&gt;eth0&lt;/code&gt;.
+Eventually, the RaspberryPi will be connected to a router via ethernet, making the router use the iPhone&amp;rsquo;s internet connection.
+A RaspberryPi 4B is used, but this guide &lt;em&gt;should&lt;/em&gt; work on other models too.&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup.webp"
+width="411"
+height="241"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_8b83f33608668852.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_10beb28f012f694b.webp 1024w"
+loading="lazy"
+alt="iphone-connected-to-rpi-connected-to-router"
+class="gallery-image"
+data-flex-grow="170"
+data-flex-basis="409px"
+&gt;&lt;/p&gt;
+&lt;p&gt;One may wonder why this setup is needed.
+Routing at least DNS traffic through the Pi with the &lt;a class="link" href="https://pi-hole.net/" target="_blank" rel="noopener"
+&gt;Pi-hole&lt;/a&gt; is a common use-case, but all traffic less so.&lt;/p&gt;</description></item><item><title>RaspberryPi 4 as a remote Multimedia Station</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</link><pubDate>Sun, 02 May 2021 17:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-remote-multimedia-station/</guid><description>&lt;h2 id="foreword"&gt;Foreword
+&lt;/h2&gt;&lt;p&gt;Since many years I am using JDownloader as the solution to download things on all my computers.
+The problem with it is though that the files are not synchronized between them.
+Thus I cannot access what I downloaded from any machine different from the original downloader.
+This problem worsens even with the fact that once I am not at home, I cannot access the harddrives the multimedia is on.&lt;/p&gt;</description></item><item><title>Read Temperature &amp; Humidity with RaspberryPi 4 - Docker Setup</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</link><pubDate>Wed, 31 Mar 2021 22:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-dht-docker/</guid><description>&lt;p&gt;In my previous post, I showed how to enable the Raspberry Pi 4 on Ubuntu Server to read out DHT11/DHT22 sensor data. But this is a very hacky solution. Moreover is the Raspberry Pi cluttered with some stuff, that we may need to configure differently for another setup or remove as a whole. It&amp;rsquo;s a nice coincidence that I&amp;rsquo;m currently reading &lt;a class="link" href="https://learning.oreilly.com/library/view/docker-in-action/9781617294761/" target="_blank" rel="noopener"
+&gt;Docker in Action, Second Edition&lt;/a&gt; (Manning, 2019), so I wanted to build a docker image to read out the data. There are some images available for this already, but I still wanted to build my own light-weight image.&lt;/p&gt;</description></item><item><title>Read Temperature &amp; Humidity with RaspberryPi 4</title><link>https://revontulet.dev/p/2021-raspberry-pi-four-dht/</link><pubDate>Sun, 21 Mar 2021 11:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-raspberry-pi-four-dht/</guid><description>&lt;p&gt;I recently bought a RaspberryPi 4 and installed Ubuntu Server 20.04 64 Bit on it. There are many tutorials available how to read the temperature/humidity via Python, unfortunately none of them worked out of the box. It seems to be that they are&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;either for Raspbian OS&lt;/li&gt;
+&lt;li&gt;or for 32 Bit OSes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After some searching I found a way from several sources to make it run. This is a horrible hacky workaround and I&amp;rsquo;d be very happy to see a better way and/or out-of-the-box solution.&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Jekyll on revontulet.dev by Matthias Döpmann</title><link>https://revontulet.dev/tags/jekyll/</link><description>Recent content in Jekyll on revontulet.dev by Matthias Döpmann</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 24 Apr 2021 20:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/jekyll/index.xml" rel="self" type="application/rss+xml"/><item><title>Create a blog using Jekyll and Docker</title><link>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</link><pubDate>Sat, 24 Apr 2021 20:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-create-blog-using-jekyll-and-docker/</guid><description>&lt;h2 id="foreword"&gt;Foreword
+&lt;/h2&gt;&lt;p&gt;&lt;del&gt;This blog is created using &lt;a class="link" href="https://jekyllrb.com/" target="_blank" rel="noopener"
+&gt;Jekyll&lt;/a&gt;.&lt;/del&gt;&lt;/p&gt;
+&lt;p&gt;The striked through sentence above used to be true for the old version of this blog, hosted on [misterderpie.com].
+However, the version at [revontulet.dev] uses GitHub pages and Hugo.&lt;/p&gt;
+&lt;h2 id="original-post"&gt;Original Post
+&lt;/h2&gt;&lt;p&gt;I really like Jekyll, as I don&amp;rsquo;t like frontend development.
+One problem is though, that I currently only have Jekyll installed on one single machine.
+So when I&amp;rsquo;m not at home but want to add a blog post, I would have to install Jekyll on the machine I&amp;rsquo;m travelling with.
+Luckily there is Docker and the &lt;a class="link" href="https://github.com/envygeeks/jekyll-docker" target="_blank" rel="noopener"
+&gt;envygeeks/jekyll-docker&lt;/a&gt; Jekyll Image.
+As I&amp;rsquo;m adding blogposts very rarely, I do not need to have a full build and delivery pipeline for it (despite the fact that at the time of writing I wouldn&amp;rsquo;t even be able to create such).
+A simple container to build the latest version of the site suits my needs.&lt;/p&gt;</description></item></channel></rss>

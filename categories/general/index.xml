@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>General on revontulet.dev by Matthias Döpmann</title><link>https://revontulet.dev/categories/general/</link><description>Recent content in General on revontulet.dev by Matthias Döpmann</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 16 Mar 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/categories/general/index.xml" rel="self" type="application/rss+xml"/><item><title>Hello World</title><link>https://revontulet.dev/p/2025-hello-world/</link><pubDate>Sun, 16 Mar 2025 00:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-hello-world/</guid><description>&lt;img src="https://revontulet.dev/p/2025-hello-world/cover-min.png" alt="Featured image of post Hello World" /&gt;&lt;h1 id="welcome-to-revontuletdev"&gt;Welcome to revontulet.dev!
+&lt;/h1&gt;&lt;p&gt;So &amp;hellip; what is this about?&lt;/p&gt;
+&lt;h2 id="introduction"&gt;Introduction
+&lt;/h2&gt;&lt;p&gt;My name is Matthias Döpmann.
+I&amp;rsquo;m a Software Engineer, originally from Germany, nowadays located at the Arctic Circle in Finland.
+There is no specific content for this blog.
+At the time of writing, I host a couple of articles on &lt;a class="link" href="https://misterderpie.com/" target="_blank" rel="noopener"
+&gt;MisterDerpie.com&lt;/a&gt;, that I intend to migrate over to this blog.&lt;/p&gt;
+&lt;p&gt;There were several reasons I stopped writing on the old blog.
+The first is, that whilst living in Dublin and working for Amazon/Amazon Web Services, I was fairly occupied by work and rarely found motivation to follow up on these topics besides work.
+Second, in 2022, the world at Amazon was still remote, so on top of that I spent a lot of time travelling.
+Moreover, instead of reading computer science/software engineering books, I spent a good chunk studying languages (actual languages, not Programming Languages).
+These days I&amp;rsquo;m taking courses in Finnish, so I am not sure how much time is left to actually dump content here, but let&amp;rsquo;s see!
+Ultimately, the non-integration of the old blog with GitHub Actions or the like set the bar higher to publish contentent.
+Although I dockerized the process of rendering the blog, uploading it to an FTP after the render was still too annoying (&amp;hellip; and yes, whilst I could have automated that, I didn&amp;rsquo;t).
+Checking out a GitHub repository, write down some thought, and then just hit &lt;code&gt;git commmit&lt;/code&gt; and &lt;code&gt;git push&lt;/code&gt; is just a lot more convenient.&lt;/p&gt;</description></item></channel></rss>
