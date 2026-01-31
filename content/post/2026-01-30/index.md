@@ -196,7 +196,7 @@ Essentially, three packages are needed to get a more or less running system.
 
 * `base` - This could simply be called "Arch Linux", as in the core programs, configurations and libraries that make up Arch
 * `linux` - A piece of notorious email threads, the [Linux Kernel](https://wiki.archlinux.org/title/Kernel)
-* `linux-firmware` - [Linux Firmware](https://wiki.archlinux.org/title/Linux_firmware) contains the firmware for hardware like the CPU
+* `linux-firmware` - [Linux Firmware](https://wiki.archlinux.org/title/Linux_firmware) contains the firmware for hardware like the GPU
 
 ```
 pacstrap -K /mnt base linux linux-firmware
