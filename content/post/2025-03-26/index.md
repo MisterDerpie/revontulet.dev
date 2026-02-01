@@ -9,7 +9,7 @@ categories:
     - Tech
 tags:
     - Linux
-    - Arch
+    - Arch Linux
     - Sway
 weight: 1
 ---

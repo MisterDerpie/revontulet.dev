@@ -8,9 +8,10 @@ categories:
     - Tech
 tags:
     - Linux
+    - Arch Linux
 keywords:
     - Linux
-    - Arch
+    - Arch Linux
 weight: 1
 ---
 

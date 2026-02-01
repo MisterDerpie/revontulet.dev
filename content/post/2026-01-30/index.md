@@ -8,10 +8,11 @@ date: 2026-01-30 10:00:00+0000
 categories:
     - Tech
 tags:
+    - Arch Linux
     - Linux
 keywords:
     - Linux
-    - Arch
+    - Arch Linux
 weight: 1
 ---
 
