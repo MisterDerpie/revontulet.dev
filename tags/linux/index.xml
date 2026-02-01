@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Linux on revontulet.dev by Matthias Döpmann</title><link>https://revontulet.dev/tags/linux/</link><description>Recent content in Linux on revontulet.dev by Matthias Döpmann</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 30 Jan 2026 10:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>Installing Arch from Arch onto an External Drive</title><link>https://revontulet.dev/p/2026-installing-arch-from-arch-onto-an-external-drive/</link><pubDate>Fri, 30 Jan 2026 10:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2026-installing-arch-from-arch-onto-an-external-drive/</guid><description>&lt;p&gt;To install Arch Linux, the most common and easiest way is booting it up from an installation media.
+This may not be an option, and instead we want to install it straight onto a drive.
+The Arch Wiki provides a guide to &lt;a class="link" href="https://wiki.archlinux.org/title/Install_Arch_Linux_from_existing_Linux" target="_blank" rel="noopener"
+&gt;Install Arch Linux from existing Linux&lt;/a&gt;, but it took a while to get all pieces right.
+Consider this post to aim for a more noob-friendly and handholding setup on how to &lt;em&gt;install Arch from Arch&lt;/em&gt;.
+For readability, only hyperlinks not referring to &lt;a class="link" href="wiki.archlinux.org" &gt;wiki.archlinux.org&lt;/a&gt; are marked with their source in brackets.&lt;/p&gt;</description></item><item><title>Wayland, Sway, Nvidia DLSS, Unreal Engine and Ghosting</title><link>https://revontulet.dev/p/2025-wayland-sway-nvidia-dlss-unreal-engine-and-ghosting/</link><pubDate>Sat, 15 Nov 2025 10:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-wayland-sway-nvidia-dlss-unreal-engine-and-ghosting/</guid><description>&lt;p&gt;Since January 2023, I&amp;rsquo;m the owner of a Steam Deck.
+Until April 2025, my main computer still had Windows running, but I found that I hardly use it for anything but the browser and games.
+Given the Steam Deck experience, I was confident to ditch Windows and continue playing on Linux from here on.
+Especially as pretty much anything I play is on Steam.
+However, in my setup with an Nvidia RTX 3070 and Sway (thus Wayland), heavy ghosting occurred on games like &lt;em&gt;Hogwarts Legacy&lt;/em&gt;, and one I started most recently, &lt;em&gt;Arc: Raiders&lt;/em&gt;.
+Overall, these problems seem to happen with games that are built in &lt;em&gt;Unreal Engine&lt;/em&gt;, as e.g. &lt;em&gt;RDR2&lt;/em&gt; or &lt;em&gt;GTA V&lt;/em&gt; work flawlessly.&lt;/p&gt;</description></item><item><title>iPhone Ethernet bridge on RaspberryPi with Ubuntu Server</title><link>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</link><pubDate>Sun, 11 May 2025 08:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/</guid><description>&lt;p&gt;This post covers how to tether your iPhone via USB to your RaspberryPi, and share the iPhone&amp;rsquo;s network on &lt;code&gt;eth0&lt;/code&gt;.
+Eventually, the RaspberryPi will be connected to a router via ethernet, making the router use the iPhone&amp;rsquo;s internet connection.
+A RaspberryPi 4B is used, but this guide &lt;em&gt;should&lt;/em&gt; work on other models too.&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup.webp"
+width="411"
+height="241"
+srcset="https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_8b83f33608668852.webp 480w, https://revontulet.dev/p/2025-iphone-ethernet-bridge-rpi-4-ubuntu/setup_hu_10beb28f012f694b.webp 1024w"
+loading="lazy"
+alt="iphone-connected-to-rpi-connected-to-router"
+class="gallery-image"
+data-flex-grow="170"
+data-flex-basis="409px"
+&gt;&lt;/p&gt;
+&lt;p&gt;One may wonder why this setup is needed.
+Routing at least DNS traffic through the Pi with the &lt;a class="link" href="https://pi-hole.net/" target="_blank" rel="noopener"
+&gt;Pi-hole&lt;/a&gt; is a common use-case, but all traffic less so.&lt;/p&gt;</description></item><item><title>Arch and i3 - Hello, Sway! - Install Arch and Sway</title><link>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</link><pubDate>Wed, 26 Mar 2025 18:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</guid><description>&lt;p&gt;Welcome to part one of the three-part series &amp;ldquo;Hello, Sway!&amp;rdquo;
+The series is split into&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;i&gt;Arch &amp;amp; Sway setup using &lt;code&gt;archinstall&lt;/code&gt;&lt;/i&gt;&lt;/li&gt;
+&lt;li&gt;Sway Configuration&lt;/li&gt;
+&lt;li&gt;Linux QoL Tools&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="motivation"&gt;Motivation
+&lt;/h2&gt;&lt;p&gt;For a while already, there has been no real reason for me to keep Windows.
+The doubt started about two years ago, in January 2023, when I got myself a Steam Deck.
+Although the purchase was mostly to emulate console and handheld games, of course the question was
+&amp;ldquo;&lt;a class="link" href="https://knowyourmeme.com/memes/but-can-it-run-crysis" target="_blank" rel="noopener"
+&gt;But Can It Run Crysis?&lt;/a&gt;&amp;rdquo;
+To my surprise, the games I tried performed incredibly well, almost all of them out of the box.
+Thanks to ProtonDB, if there was a title that needed some extra configuration, it is usually there.&lt;/p&gt;</description></item><item><title>Ubuntu with WSL2 and i3 Window Manager GUI</title><link>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</link><pubDate>Sat, 04 Dec 2021 19:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</guid><description>&lt;p&gt;Using &lt;code&gt;i3&lt;/code&gt; and &lt;code&gt;Ubuntu&lt;/code&gt; native is probably best, but you may not get the choice to do so, in case your working machine is running Windows.
+I looked through several guides how to set up Ubuntu with &lt;code&gt;i3&lt;/code&gt; on WSL2, but it took me several hours to get the setup I looked for because things did not work as expected.
+Therefore I&amp;rsquo;m writing this guide.&lt;/p&gt;
+&lt;h2 id="installing-ubuntu-on-wsl2"&gt;Installing Ubuntu on WSL2
+&lt;/h2&gt;&lt;p&gt;There are plenty of tutorials and videos to do so.
+I will refer to the very one that I used to set up the bare, GUIless minimum,
+&lt;a class="link" href="https://www.youtube.com/watch?v=IL7Jd9rjgrM" target="_blank" rel="noopener"
+&gt;WSL2 Ubuntu GUI&lt;/a&gt; by David Bombai.
+Reproduce the steps until &lt;code&gt;Install Ubuntu GUI&lt;/code&gt; (7:25) to get the headless Ubuntu on WSL2 up and running.&lt;/p&gt;</description></item><item><title>Ubuntu and i3 on Lenovo Legion 5 Pro</title><link>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</link><pubDate>Sun, 22 Aug 2021 15:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-lenovo-legion-ubuntu/</guid><description>&lt;p&gt;During my summer vacation, I got myself a Lenovo Legion 5 Pro, powered by an AMD Ryzen 7 5800H and an Nvidia RTX3070.
+Though this post is not about the legion, I have to say it is an awesome laptop.
+What this post is about is how to make Ubuntu with &lt;a class="link" href="https://i3wm.org/" target="_blank" rel="noopener"
+&gt;i3wm&lt;/a&gt; run on the Lenovo Legion.&lt;/p&gt;
+&lt;h2 id="installing-ubuntu"&gt;Installing Ubuntu
+&lt;/h2&gt;&lt;h3 id="create-bootable-usb-media"&gt;Create Bootable USB Media
+&lt;/h3&gt;&lt;p&gt;You need a USB stick as well as a Ubuntu ISO image.
+Plenty of tutorials exist on the web to create a bootable Ubuntu USB stick.
+Ubuntu.com provides official documentation, coming from a device running
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-windows#1-overview" target="_blank" rel="noopener"
+&gt;Windows&lt;/a&gt;,
+&lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-ubuntu#1-overview" target="_blank" rel="noopener"
+&gt;Ubuntu&lt;/a&gt; or &lt;a class="link" href="https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview" target="_blank" rel="noopener"
+&gt;Mac OS X&lt;/a&gt;.&lt;/p&gt;</description></item></channel></rss>

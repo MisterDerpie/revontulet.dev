@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Arch Linux on revontulet.dev by Matthias Döpmann</title><link>https://revontulet.dev/tags/arch-linux/</link><description>Recent content in Arch Linux on revontulet.dev by Matthias Döpmann</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 30 Jan 2026 10:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/arch-linux/index.xml" rel="self" type="application/rss+xml"/><item><title>Installing Arch from Arch onto an External Drive</title><link>https://revontulet.dev/p/2026-installing-arch-from-arch-onto-an-external-drive/</link><pubDate>Fri, 30 Jan 2026 10:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2026-installing-arch-from-arch-onto-an-external-drive/</guid><description>&lt;p&gt;To install Arch Linux, the most common and easiest way is booting it up from an installation media.
+This may not be an option, and instead we want to install it straight onto a drive.
+The Arch Wiki provides a guide to &lt;a class="link" href="https://wiki.archlinux.org/title/Install_Arch_Linux_from_existing_Linux" target="_blank" rel="noopener"
+&gt;Install Arch Linux from existing Linux&lt;/a&gt;, but it took a while to get all pieces right.
+Consider this post to aim for a more noob-friendly and handholding setup on how to &lt;em&gt;install Arch from Arch&lt;/em&gt;.
+For readability, only hyperlinks not referring to &lt;a class="link" href="wiki.archlinux.org" &gt;wiki.archlinux.org&lt;/a&gt; are marked with their source in brackets.&lt;/p&gt;</description></item><item><title>Wayland, Sway, Nvidia DLSS, Unreal Engine and Ghosting</title><link>https://revontulet.dev/p/2025-wayland-sway-nvidia-dlss-unreal-engine-and-ghosting/</link><pubDate>Sat, 15 Nov 2025 10:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-wayland-sway-nvidia-dlss-unreal-engine-and-ghosting/</guid><description>&lt;p&gt;Since January 2023, I&amp;rsquo;m the owner of a Steam Deck.
+Until April 2025, my main computer still had Windows running, but I found that I hardly use it for anything but the browser and games.
+Given the Steam Deck experience, I was confident to ditch Windows and continue playing on Linux from here on.
+Especially as pretty much anything I play is on Steam.
+However, in my setup with an Nvidia RTX 3070 and Sway (thus Wayland), heavy ghosting occurred on games like &lt;em&gt;Hogwarts Legacy&lt;/em&gt;, and one I started most recently, &lt;em&gt;Arc: Raiders&lt;/em&gt;.
+Overall, these problems seem to happen with games that are built in &lt;em&gt;Unreal Engine&lt;/em&gt;, as e.g. &lt;em&gt;RDR2&lt;/em&gt; or &lt;em&gt;GTA V&lt;/em&gt; work flawlessly.&lt;/p&gt;</description></item><item><title>Arch and i3 - Hello, Sway! - Install Arch and Sway</title><link>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</link><pubDate>Wed, 26 Mar 2025 18:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2025-arch-and-i3-hello-sway-install-arch-and-sway/</guid><description>&lt;p&gt;Welcome to part one of the three-part series &amp;ldquo;Hello, Sway!&amp;rdquo;
+The series is split into&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;i&gt;Arch &amp;amp; Sway setup using &lt;code&gt;archinstall&lt;/code&gt;&lt;/i&gt;&lt;/li&gt;
+&lt;li&gt;Sway Configuration&lt;/li&gt;
+&lt;li&gt;Linux QoL Tools&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="motivation"&gt;Motivation
+&lt;/h2&gt;&lt;p&gt;For a while already, there has been no real reason for me to keep Windows.
+The doubt started about two years ago, in January 2023, when I got myself a Steam Deck.
+Although the purchase was mostly to emulate console and handheld games, of course the question was
+&amp;ldquo;&lt;a class="link" href="https://knowyourmeme.com/memes/but-can-it-run-crysis" target="_blank" rel="noopener"
+&gt;But Can It Run Crysis?&lt;/a&gt;&amp;rdquo;
+To my surprise, the games I tried performed incredibly well, almost all of them out of the box.
+Thanks to ProtonDB, if there was a title that needed some extra configuration, it is usually there.&lt;/p&gt;</description></item></channel></rss>

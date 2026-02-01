@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Windows on revontulet.dev by Matthias Döpmann</title><link>https://revontulet.dev/tags/windows/</link><description>Recent content in Windows on revontulet.dev by Matthias Döpmann</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 04 Dec 2021 19:00:00 +0000</lastBuildDate><atom:link href="https://revontulet.dev/tags/windows/index.xml" rel="self" type="application/rss+xml"/><item><title>Ubuntu with WSL2 and i3 Window Manager GUI</title><link>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</link><pubDate>Sat, 04 Dec 2021 19:00:00 +0000</pubDate><guid>https://revontulet.dev/p/2021-ubuntu-gui-wsl2/</guid><description>&lt;p&gt;Using &lt;code&gt;i3&lt;/code&gt; and &lt;code&gt;Ubuntu&lt;/code&gt; native is probably best, but you may not get the choice to do so, in case your working machine is running Windows.
+I looked through several guides how to set up Ubuntu with &lt;code&gt;i3&lt;/code&gt; on WSL2, but it took me several hours to get the setup I looked for because things did not work as expected.
+Therefore I&amp;rsquo;m writing this guide.&lt;/p&gt;
+&lt;h2 id="installing-ubuntu-on-wsl2"&gt;Installing Ubuntu on WSL2
+&lt;/h2&gt;&lt;p&gt;There are plenty of tutorials and videos to do so.
+I will refer to the very one that I used to set up the bare, GUIless minimum,
+&lt;a class="link" href="https://www.youtube.com/watch?v=IL7Jd9rjgrM" target="_blank" rel="noopener"
+&gt;WSL2 Ubuntu GUI&lt;/a&gt; by David Bombai.
+Reproduce the steps until &lt;code&gt;Install Ubuntu GUI&lt;/code&gt; (7:25) to get the headless Ubuntu on WSL2 up and running.&lt;/p&gt;</description></item></channel></rss>

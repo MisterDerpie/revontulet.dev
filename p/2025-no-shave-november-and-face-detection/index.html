@@ -1,0 +1,376 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="It's been No Shave November & Movember. Whilst tracking the beard growth every day, this post shows how we can create a fairly smooth progress GIF. "><meta name=keywords content="Software Engineering,Python,OpenCV"><title>No Shave November Through the Eyes of Face Detection</title><link rel=canonical href=https://revontulet.dev/p/2025-no-shave-november-and-face-detection/><link rel=stylesheet href=/scss/style.min.6a692fd055deae459f2a9767f57f3855ba80cafd5041317f24f7360f6ca47cdf.css><meta property='og:title' content="No Shave November Through the Eyes of Face Detection"><meta property='og:description' content="It's been No Shave November & Movember. Whilst tracking the beard growth every day, this post shows how we can create a fairly smooth progress GIF. "><meta property='og:url' content='https://revontulet.dev/p/2025-no-shave-november-and-face-detection/'><meta property='og:site_name' content='revontulet.dev by Matthias Döpmann'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Software Engineering'><meta property='article:published_time' content='2025-11-30T08:00:00+00:00'><meta property='article:modified_time' content='2025-11-30T08:00:00+00:00'><meta name=twitter:title content="No Shave November Through the Eyes of Face Detection"><meta name=twitter:description content="It's been No Shave November & Movember. Whilst tracking the beard growth every day, this post shows how we can create a fairly smooth progress GIF. "><link rel="shortcut icon" href=/favicon.ico><meta author="Matthias Döpmann"></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu_1a8e49ce50b9ffbc.webp width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🇫🇮</span></figure><div class=site-meta><h1 class=site-name><a href=/>revontulet.dev by Matthias Döpmann</a></h1><h2 class=site-description>A blog about Software Engineering, from the arctic circle. And anything else.</h2></div></header><ol class=menu-social><li><a href=https://github.com/MisterDerpie target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://www.linkedin.com/in/matthias-doepmann/ target=_blank title=LinkedIn rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-linkedin"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 11v5"/><path d="M8 8v.01"/><path d="M12 16v-5"/><path d="M16 16v-3a2 2 0 10-4 0"/><path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4z"/></svg></a></li><li><a href=https://revontulet.dev/index.xml title=RSS rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-rss"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 19m-1 0a1 1 0 102 0 1 1 0 10-2 0"/><path d="M4 4a16 16 0 0116 16"/><path d="M4 11a9 9 0 019 9"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/cv/><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-cv"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 001 1h4"/><path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/><path d="M11 12.5a1.5 1.5.0 00-3 0v3a1.5 1.5.0 003 0"/><path d="M13 11l1.5 6 1.5-6"/></svg>
+<span>About Me</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#motivation-for-this-post>Motivation for this Post</a></li><li><a href=#the-idea>The Idea</a><ol><li><a href=#idea-on-scaling-faces-to-the-same-size>Idea on Scaling Faces to the Same Size</a></li><li><a href=#idea-on-aligning-faces>Idea on Aligning Faces</a></li></ol></li><li><a href=#implementation-using-python-and-opencv>Implementation Using Python and OpenCV</a><ol><li><a href=#detecting-the-face>Detecting the Face</a><ol><li><a href=#first-attempt>First Attempt</a></li><li><a href=#scale-matters>Scale Matters</a></li><li><a href=#second-attempt>Second Attempt</a></li></ol></li><li><a href=#detecting-the-eyes>Detecting the Eyes</a></li><li><a href=#scaling-the-face>Scaling the Face</a><ol><li><a href=#finding-the-center-points>Finding the Center Points</a></li><li><a href=#scaling-to-a-fixed-distance>Scaling to a Fixed Distance</a></li></ol></li><li><a href=#aligning-the-face>Aligning the Face</a></li></ol></li><li><a href=#generating-the-gif>Generating the GIF</a><ol><li><a href=#processing-input-images>Processing Input Images</a></li><li><a href=#creating-a-gif-using-imageio>Creating a GIF using ImageIO</a></li></ol></li><li><a href=#result-and-closing-remarks>Result and Closing Remarks</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/software-engineering/ style=background-color:#2082a6;color:#fff>Software Engineering</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/2025-no-shave-november-and-face-detection/>No Shave November Through the Eyes of Face Detection</a></h2><h3 class=article-subtitle>It's been No Shave November & Movember. Whilst tracking the beard growth every day, this post shows how we can create a fairly smooth progress GIF.</h3></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Nov 30, 2025</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>15 minute read</time></div></footer></div></header><section class=article-content><p>Every year No Shave November and Movember are held to raise funds and spread awareness for Men&rsquo;s Health, particularly cancer research and treatment.
+They are more or less the same, but not exactly.
+<a class=link href=https://www.cursor.tue.nl/opinie/harsh-jethwani/movember-vs-no-shave-november target=_blank rel=noopener>Movember vs No Shave November (tue.nl)</a>
+provides a more detailed view of their differences.
+The idea is simple:
+Do not spend your money on a barber for the whole of November, instead donate it to a good cause.</p><p>You can find more information about either of them at</p><ul><li><a class=link href=https://movember.com/ target=_blank rel=noopener>movember.com</a></li><li><a class=link href=https://no-shave.org/ target=_blank rel=noopener>no-shave.org</a>.</li></ul><h2 id=motivation-for-this-post>Motivation for this Post</h2><p>Year after year, I let my beard grow for the whole November, and at best take one selfie at the end of it, to compare with the previous year.
+This year though, I took one every day, and wanted to create a GIF showing the progress of my measly beard growth.
+As the selfies are not taken on the exact same spot nor with the same angle, the face is slightly off on every picture, and furthermore has a different size.
+To create a GIF where the face is aligned and scaled, I could probably use GIMP, Photoshop or the likes.
+However, why putting in the effort to manually align 30 pictures, when machines could do the job?
+After all, we&rsquo;re not working in the software industry to make our lives harder, but easier.</p><h2 id=the-idea>The Idea</h2><p>Its a rather simple idea (and there are probably better ideas) on how we can align the pictures.
+Our face has several reference points.
+The eyes, the nose, the mouth and ultimately, if we find the outline of our face, we know what to scale.</p><p>As it turns out, the outline is not all too great, because depending on hair and lighting, this can easily be too skewed.
+Also, using the mouth risks that if there is a smile in one, but a rather grim look in another picture, the size is incomparable.
+Maybe the nose could work, however, the eyes turn out to be the perfect reference point(s).</p><p>First and foremost, our eyes don&rsquo;t change (too much).
+The distance between them is always the same in our face.
+Moreover do they have a perfect center, the pupil, which at worst change light due to lighting, yet that is irrelevant to our use case.
+As long as you look straight, its position is quite static.
+Another rather great benefit is that we have a <strong>pair</strong> of eyes, hence two points to rely on.</p><h3 id=idea-on-scaling-faces-to-the-same-size>Idea on Scaling Faces to the Same Size</h3><p><img src=/p/2025-no-shave-november-and-face-detection/eyes.webp width=318 height=238 srcset="/p/2025-no-shave-november-and-face-detection/eyes_hu_6c8773d6e819fb2.webp 480w, /p/2025-no-shave-november-and-face-detection/eyes_hu_e273b3da2d08135b.webp 1024w" loading=lazy alt="Distance between eyes" class=gallery-image data-flex-grow=133 data-flex-basis=320px></p><p>Take a look at the picture above.
+Two different pictures may have the distances <code>x</code> and <code>y</code> between the eyes, respectively.
+Given that the camera is not static, it is sometimes closer, sometimes farther away, and therefore the distance is not the same in each picture.
+Scaling the pictures such that the resulting distance is, say <code>150px</code>, the faces should be more or less the same size in each picture.</p><h3 id=idea-on-aligning-faces>Idea on Aligning Faces</h3><p><img src=/p/2025-no-shave-november-and-face-detection/misaligned_eyes.webp width=341 height=152 srcset="/p/2025-no-shave-november-and-face-detection/misaligned_eyes_hu_d2b5f383876f94cc.webp 480w, /p/2025-no-shave-november-and-face-detection/misaligned_eyes_hu_8f16e5f01d0a84f6.webp 1024w" loading=lazy alt="Misaligned Eyes" class=gallery-image data-flex-grow=224 data-flex-basis=538px></p><p>A second problem to solve is to align the eyes.
+Two pictures may have the eyes in a different position, so at some point, we need to move the eyes to be overlapping.
+As you will see in the implementation, instead of translating the image to move it around, we can achieve this by cropping it.
+This is a lot easier and can save us some headache.</p><h2 id=implementation-using-python-and-opencv>Implementation Using Python and OpenCV</h2><p>Given its stance in computer vision, and ease of programming, we use Python.
+First we have a look into face detection and will see some pitfalls encountered along the way.
+Then we dive into scaling the picture, and afterwards align it.</p><p>On a side note:
+There is a difference between face detection and face recognition.
+The former, and what we do in the post, is simply to find the position of/presence of faces in pictures,
+whilst the latter is about identifying the same face across multiple pictures.</p><h3 id=detecting-the-face>Detecting the Face</h3><p>When you use Google to find out how to detect faces in images, the first hits are OpenCV and the Haar Cascade classifier.
+That may or may not be the best choice, but certainly the easiest available, so we settle with that.
+As this post is rather focused on the actual application, you may want to have a read up on how they work in <a class=link href=https://medium.com/analytics-vidhya/haar-cascades-explained-38210e57970d target=_blank rel=noopener>Haar Cascades Explained (medium.com)</a> by Aditya Mittal.</p><p>Assuming we have Python installed, we need to install OpenCV 2.
+<em>I use Arch, btw</em>, so Python and its packages are managed through pacman, rather than pip.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl><span class=c1># Arch users</span>
+</span></span><span class=line><span class=cl>sudo pacman -S python-opencv
+</span></span></code></pre></td></tr></table></div></div><p>If you&rsquo;re on a system using pip, install the package <a class=link href=https://pypi.org/project/opencv-python/ target=_blank rel=noopener>opencv-python (pip)</a></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl><span class=c1># pip users</span>
+</span></span><span class=line><span class=cl>pip install opencv-python
+</span></span></code></pre></td></tr></table></div></div><p>The first thing we need is our classifier.
+With the OpenCV repository comes a set of public classifiers, which you can download and use.
+See <a class=link href=https://github.com/opencv/opencv/tree/8fb0b7177fc082bc726bb8739dc035baf8393b95/data/haarcascades target=_blank rel=noopener>GitHub/OpenCV/haarcascades</a>.</p><p>Although we want to detect the eyes, we should detect the face first.
+The explanation for that is rather simple.
+Our face is a large structure inside a selfie, but the selfie may have many objects that <em>could</em> be interpreted as eyes.
+We get to see the implication of that in a bit, quite literally.
+However, it is unlikely that a selfie has multiple objects that look face-alike.
+So once we detected it, we can reduce the search space for eyes to be only within the face.</p><p>To detect the face, we are using <a class=link href=https://github.com/opencv/opencv/blob/master/data/haarcascades/haarcascade_frontalface_default.xml target=_blank rel=noopener>Haarcascade Frontalface Default (GitHub)</a>.
+Download the file and place it to where your code is located.</p><h4 id=first-attempt>First Attempt</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>cv2</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Load the face classifier</span>
+</span></span><span class=line><span class=cl><span class=n>face_cascade</span> <span class=o>=</span> <span class=n>cv2</span><span class=o>.</span><span class=n>CascadeClassifier</span><span class=p>(</span><span class=s1>&#39;haarcascade_frontalface_default.xml&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Load the image</span>
+</span></span><span class=line><span class=cl><span class=n>image</span> <span class=o>=</span> <span class=n>cv2</span><span class=o>.</span><span class=n>imread</span><span class=p>(</span><span class=s2>&#34;/path/to/image.png&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Turn image into grayscale</span>
+</span></span><span class=line><span class=cl><span class=n>gray</span> <span class=o>=</span> <span class=n>cv2</span><span class=o>.</span><span class=n>cvtColor</span><span class=p>(</span><span class=n>image</span><span class=p>,</span> <span class=n>cv2</span><span class=o>.</span><span class=n>COLOR_BGR2GRAY</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl><span class=c1># Detect faces</span>
+</span></span><span class=line><span class=cl><span class=n>faces</span> <span class=o>=</span> <span class=n>face_cascade</span><span class=o>.</span><span class=n>detectMultiScale</span><span class=p>(</span><span class=n>gray</span><span class=p>,</span> <span class=mf>1.3</span><span class=p>,</span> <span class=mi>5</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Print the found face</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>faces</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>First we load the classifier, then we load the image.
+Those parts should be clear.
+We then convert the image into grayscale, which is simply to reduce the bit per pixel.
+Whilst a colored image has Red, Green and Blue represented with 8 bit respectively (=> 24 bit/pixel), a grayscale image may only store 8 bit per pixel, indicating how &ldquo;bright&rdquo; it is.
+For further explanation, see <a class=link href=https://blog.roboflow.com/when-to-use-grayscale-as-a-preprocessing-step/ target=_blank rel=noopener>When to Use Grayscale as a Preprocessing Step (roboflow.com)</a>.</p><p>Another point is that the training data for OpenCV&rsquo;s classifiers <em>may</em> has been in grayscale too.
+Unfortunately, I could not find the dataset they used, but this guide on <a class=link href=https://docs.opencv.org/4.x/db/d28/tutorial_cascade_classifier.html target=_blank rel=noopener>Cascade Classifier (opencv.org)</a> uses grayscale images in their examples.</p><p>Last but not least, we run the detection using our Cascade classifier, providing the image, the <em>scale factor</em> and the <em>min neighbors</em>.
+I am unfortunately in no position to explain these, so for curious readers, please read up on them at e.g.
+<a class=link href=https://docs.opencv.org/4.12.0/d1/de5/classcv_1_1CascadeClassifier.html#aaf8181cb63968136476ec4204ffca498 target=_blank rel=noopener>detectMultiScale (opencv.org)</a>,
+<a class=link href=https://answers.opencv.org/question/10654/how-does-the-parameter-scalefactor-in-detectmultiscale-affect-face-detection/ target=_blank rel=noopener>How does the parameter scaleFactor in detectMultiScale affect face detection (opencv.org)</a>
+and
+<a class=link href=https://stackoverflow.com/questions/22249579/opencv-detectmultiscale-minneighbors-parameter target=_blank rel=noopener>OpenCV detectMultiScale() minNeighbors parameter (stackoverflow.com)</a>.</p><p>You may have wondered why the is called <em>face<u>s</u></em>, and not just a single <em>face</em>.
+The Cascade Classifier - ideally - detects all faces in a picture.
+Looking at a selfie with only one face and a wall in the background, it unfortunately finds multiple faces though.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>[[ 610 1155 1465 1465]
+</span></span><span class=line><span class=cl> [  51 2599  151  151]
+</span></span><span class=line><span class=cl> [ 101 1984  166  166]]
+</span></span></code></pre></td></tr></table></div></div><h4 id=scale-matters>Scale Matters</h4><p>Before we go into detail why that is the case, let&rsquo;s add some more code to visualize the found face and draw a rectangle around it.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>for</span> <span class=n>face</span> <span class=ow>in</span> <span class=n>faces</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># Face is stored as the rectangle [x, y, width, height]</span>
+</span></span><span class=line><span class=cl>    <span class=n>x</span> <span class=o>=</span> <span class=n>face</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>y</span> <span class=o>=</span> <span class=n>face</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>w</span> <span class=o>=</span> <span class=n>face</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>h</span> <span class=o>=</span> <span class=n>face</span><span class=p>[</span><span class=mi>3</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1># Draw rectangle around it</span>
+</span></span><span class=line><span class=cl>    <span class=n>cv2</span><span class=o>.</span><span class=n>rectangle</span><span class=p>(</span><span class=n>image</span><span class=p>,</span> <span class=p>(</span><span class=n>x</span><span class=p>,</span><span class=n>y</span><span class=p>),</span> <span class=p>(</span><span class=n>x</span><span class=o>+</span><span class=n>w</span><span class=p>,</span> <span class=n>y</span><span class=o>+</span><span class=n>h</span><span class=p>),</span> <span class=p>(</span><span class=mi>0</span><span class=p>,</span><span class=mi>255</span><span class=p>,</span><span class=mi>0</span><span class=p>),</span><span class=mi>2</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/2025-no-shave-november-and-face-detection/multi_face.webp width=300 height=400 srcset="/p/2025-no-shave-november-and-face-detection/multi_face_hu_a668f3990cd79ed8.webp 480w, /p/2025-no-shave-november-and-face-detection/multi_face_hu_84b8e3c4aea5c074.webp 1024w" loading=lazy alt="Multiple faces detected" class=gallery-image data-flex-grow=75 data-flex-basis=180px></p><p>What&rsquo;s that?
+There is clearly only one face in the picture, however, we seem to detect three.
+The simple answer is that the model has been trained on much, much smaller images.
+My original selfie is 2736x3648 pixels, but oftentimes the training data is (way) less than 500x500 pixels.
+Therefore, within an image that large, it is not all too surprising to detect multiple faces.</p><h4 id=second-attempt>Second Attempt</h4><p>There is an easy fix for that: We scale the image down before we search for a face.
+This should avoid a lot of false-positives, as with smaller images, the amount of details in my towel should vanish, such that only the face will be recognizable as such.
+Going with 1/10th of the original size suffices to be left with only one face.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>image</span> <span class=o>=</span> <span class=n>cv2</span><span class=o>.</span><span class=n>resize</span><span class=p>(</span><span class=n>image</span><span class=p>,</span> <span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=mi>0</span><span class=p>),</span> <span class=n>fx</span><span class=o>=</span><span class=mf>0.1</span><span class=p>,</span> <span class=n>fy</span><span class=o>=</span><span class=mf>0.1</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/2025-no-shave-november-and-face-detection/single_face.webp width=300 height=400 srcset="/p/2025-no-shave-november-and-face-detection/single_face_hu_ece52179d0874432.webp 480w, /p/2025-no-shave-november-and-face-detection/single_face_hu_fbaa9ae3a3132a25.webp 1024w" loading=lazy alt="Single face detected" class=gallery-image data-flex-grow=75 data-flex-basis=180px></p><blockquote><p>Note: In the final code, you will see that I use 1/3rd of the original picture and only consider the first result of the face detection.
+At this input size (~1000x1000) it still is not small enough to be precise.
+However, the multi face detection seems to always return the biggest area first <em>on my machine</em>, and therefore this sufficed my needs.
+The correct approach would be to scale down to find only one face, and then calculate the respective x, y, width and height in the original image, which is to simply multiply the found values by 1/{scaling factor}.</p></blockquote><h3 id=detecting-the-eyes>Detecting the Eyes</h3><p>Now that we found our face, we continue with detecting the eyes.
+The code ia almost identical, except now we have to use the classifier for eye detection.
+If you happen to wear glasses on your pictures, use the <a class=link href=https://github.com/opencv/opencv/blob/master/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml target=_blank rel=noopener>haarcascade_frontalface_default.xml (GitHub)</a>.
+Otherwise, go with <a class=link href=https://github.com/opencv/opencv/blob/master/data/haarcascades/haarcascade_eye.xml target=_blank rel=noopener>haarcascade_eye.xml (GitHub)</a>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=c1># Load eye cascade</span>
+</span></span><span class=line><span class=cl><span class=n>eye_cascade</span> <span class=o>=</span> <span class=n>cv2</span><span class=o>.</span><span class=n>CascadeClassifier</span><span class=p>(</span><span class=s1>&#39;haarcascade_eye_tree_eyeglasses.xml&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Use x, y, width and height from face as search area</span>
+</span></span><span class=line><span class=cl><span class=n>face_img</span> <span class=o>=</span> <span class=n>image</span><span class=p>[</span><span class=n>y</span><span class=p>:</span><span class=n>y</span><span class=o>+</span><span class=n>h</span><span class=p>,</span> <span class=n>x</span><span class=p>:</span><span class=n>x</span><span class=o>+</span><span class=n>w</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Detect eyes</span>
+</span></span><span class=line><span class=cl><span class=n>eyes</span> <span class=o>=</span> <span class=n>eye_cascade</span><span class=o>.</span><span class=n>detectMultiScale</span><span class=p>(</span><span class=n>face_img</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>eyes</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Draw rectangle around the eyes</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>eye</span> <span class=ow>in</span> <span class=n>eyes</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>eye_x</span> <span class=o>=</span> <span class=n>eye</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>eye_y</span> <span class=o>=</span> <span class=n>eye</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>eye_width</span> <span class=o>=</span> <span class=n>eye</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>eye_height</span> <span class=o>=</span> <span class=n>eye</span><span class=p>[</span><span class=mi>3</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>cv2</span><span class=o>.</span><span class=n>rectangle</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>image</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>(</span><span class=n>x</span><span class=o>+</span><span class=n>eye_x</span><span class=p>,</span><span class=n>y</span><span class=o>+</span><span class=n>eye_y</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=p>(</span><span class=n>x</span><span class=o>+</span><span class=n>eye_x</span><span class=o>+</span><span class=n>eye_width</span><span class=p>,</span> <span class=n>y</span><span class=o>+</span><span class=n>eye_y</span><span class=o>+</span><span class=n>eye_height</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=p>(</span><span class=mi>0</span><span class=p>,</span><span class=mi>255</span><span class=p>,</span><span class=mi>0</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=n>thickness</span><span class=o>=</span><span class=mi>5</span>
+</span></span><span class=line><span class=cl>    <span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>Given we already know the face&rsquo;s area, we need not scan the whole image.
+Hence we crop it to the original area of the eyes (the rectangle from the previous picture).
+Again we end up with an array of x, y, width and height.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>[[ 88 134  85  85]
+</span></span><span class=line><span class=cl> [252 122 103 103]]
+</span></span></code></pre></td></tr></table></div></div><p>We need to take into account that these values are relative to the rectangle of the face.
+That is, <code>x=88</code> for the first eye is based 88 pixel of the face&rsquo;s x, <u>not</u> off of the image&rsquo;s root.
+Remember, we cropped our image to reduce the search space, but the classifier does not know that this is part of a bigger image.
+Thus, to get our real coordinates, we need to offset the face&rsquo;s x and y.
+The result looks satisfying.</p><p><img src=/p/2025-no-shave-november-and-face-detection/face_and_eyes.webp width=300 height=400 srcset="/p/2025-no-shave-november-and-face-detection/face_and_eyes_hu_4cab9b76f2880476.webp 480w, /p/2025-no-shave-november-and-face-detection/face_and_eyes_hu_ffc194eed32d8c9.webp 1024w" loading=lazy alt="Face and eyes" class=gallery-image data-flex-grow=75 data-flex-basis=180px></p><p>Note that these rectangles are slightly different in size (roughly 20px, as you can see on the returned array).
+For our use case, that is perfectly fine, as we&rsquo;re interested in the eyes&rsquo; center only.
+Even if we were to scale that rectangle 10x, the center point would only change by a margin of error.</p><h3 id=scaling-the-face>Scaling the Face</h3><p>Let&rsquo;s quickly recap this image from the start of the post.</p><p><img src=/p/2025-no-shave-november-and-face-detection/eyes.webp width=318 height=238 srcset="/p/2025-no-shave-november-and-face-detection/eyes_hu_6c8773d6e819fb2.webp 480w, /p/2025-no-shave-november-and-face-detection/eyes_hu_e273b3da2d08135b.webp 1024w" loading=lazy alt="Distance between eyes" class=gallery-image data-flex-grow=133 data-flex-basis=320px></p><p>Our task is to ensure that the distance between the eyes on all output pictures is the same.
+So if we were to align them one above another, the left and right eye in each picture should perfectly overlap.</p><h4 id=finding-the-center-points>Finding the Center Points</h4><p>This part is fairly simple.
+We have our rectangle, and its center point is precisely x + 1/2 its width, and y + 1/2 its height.
+For better visualization, from here on we stop drawing the rectangles around the face and eyes.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>center_x</span> <span class=o>=</span> <span class=n>x</span> <span class=o>+</span> <span class=n>eye_x</span> <span class=o>+</span> <span class=p>(</span><span class=n>eye_width</span> <span class=o>/</span> <span class=mi>2</span><span class=p>)</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=nb>int</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>center_y</span> <span class=o>=</span> <span class=n>y</span> <span class=o>+</span> <span class=n>eye_y</span> <span class=o>+</span> <span class=p>(</span><span class=n>eye_height</span> <span class=o>/</span> <span class=mi>2</span><span class=p>)</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=nb>int</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>cv2</span><span class=o>.</span><span class=n>circle</span><span class=p>(</span><span class=n>image</span><span class=p>,</span> <span class=n>center</span><span class=o>=</span><span class=p>(</span><span class=n>center_x</span><span class=p>,</span> <span class=n>center_y</span><span class=p>),</span> <span class=n>radius</span><span class=o>=</span><span class=mi>3</span><span class=p>,</span> <span class=n>color</span><span class=o>=</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span><span class=mi>0</span><span class=p>,</span><span class=mi>255</span><span class=p>),</span> <span class=n>thickness</span><span class=o>=</span><span class=mi>25</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/2025-no-shave-november-and-face-detection/eye_center.webp width=300 height=400 srcset="/p/2025-no-shave-november-and-face-detection/eye_center_hu_dd3c54baef73438e.webp 480w, /p/2025-no-shave-november-and-face-detection/eye_center_hu_477e03d662429eeb.webp 1024w" loading=lazy alt="Center of the eyes" class=gallery-image data-flex-grow=75 data-flex-basis=180px></p><h4 id=scaling-to-a-fixed-distance>Scaling to a Fixed Distance</h4><p>Although the eyes are not aligned perfectly on the vertical axis, for simplicity we can ignore that, and only focus on scaling along the horizontal axis.
+To do so, the distance between the two eyes is determined by subtracting the right x from the left x.
+Note that we use the absolute, as we do not care (for now) about which eye is left or right.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=c1># Create a list to append the eye&#39;s center x</span>
+</span></span><span class=line><span class=cl><span class=n>eyes_center_x</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>eye</span> <span class=ow>in</span> <span class=n>eyes</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># ... previous code for detection</span>
+</span></span><span class=line><span class=cl>    <span class=n>eyes_center_x</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>center_x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>eye_distance</span> <span class=o>=</span> <span class=nb>abs</span><span class=p>(</span><span class=n>eyes_center_x</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>-</span> <span class=n>eyes_center_x</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div><p>With my input image (note that it was already scaled that down by 1/3rd), I get 173px to be the distance in this picture.
+From experimenting around a bit, it turns out that an ideal distance for the <em>output</em> picture is 150px.</p><p>The math to scale is fairly simple.
+We&rsquo;re looking for a scaling factor <code>sf</code> such that <code>173px * sf = 150px</code>.
+Applying <em><a class=link href=https://knowyourmeme.com/memes/mans-not-hot target=_blank rel=noopener>two plus two is four minus one that&rsquo;s three quick maths (knowyourmeme.com)</a></em>,
+we get</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=c1># sf = output_distance/actual_eye_distance</span>
+</span></span><span class=line><span class=cl><span class=n>sf</span> <span class=o>=</span> <span class=mi>150</span><span class=o>/</span><span class=n>eye_distance</span>
+</span></span></code></pre></td></tr></table></div></div><p>The last missing step is to resize the image by that scaling factor.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>image</span> <span class=o>=</span> <span class=n>cv2</span><span class=o>.</span><span class=n>resize</span><span class=p>(</span><span class=n>image</span><span class=p>,</span> <span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=mi>0</span><span class=p>),</span> <span class=n>fx</span><span class=o>=</span><span class=n>sf</span><span class=p>,</span> <span class=n>fy</span><span class=o>=</span><span class=n>sf</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=aligning-the-face>Aligning the Face</h3><p>Our face should be aligned based on the left eye.
+For scaling, we did not care which is the left or right eye, for alignment this is important though.
+Luckily, its fairly easy, if we just find the eye with the leftmost x.
+Therefore, we introduce a function that given a pair of eyes returns the center of the left eye.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>left_eye_x_y</span><span class=p>(</span><span class=n>eyes</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>eyes</span><span class=p>[</span><span class=mi>0</span><span class=p>][</span><span class=mi>0</span><span class=p>]</span> <span class=o>&lt;</span> <span class=n>eyes</span><span class=p>[</span><span class=mi>1</span><span class=p>][</span><span class=mi>0</span><span class=p>]:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=p>[(</span><span class=n>eyes</span><span class=p>[</span><span class=mi>0</span><span class=p>][</span><span class=mi>0</span><span class=p>]</span><span class=o>+</span><span class=p>(</span><span class=n>eyes</span><span class=p>[</span><span class=mi>0</span><span class=p>][</span><span class=mi>2</span><span class=p>]</span><span class=o>/</span><span class=mi>2</span><span class=p>))</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=nb>int</span><span class=p>),</span> <span class=p>(</span><span class=n>eyes</span><span class=p>[</span><span class=mi>0</span><span class=p>][</span><span class=mi>1</span><span class=p>]</span><span class=o>+</span><span class=p>(</span><span class=n>eyes</span><span class=p>[</span><span class=mi>0</span><span class=p>][</span><span class=mi>3</span><span class=p>]</span><span class=o>/</span><span class=mi>2</span><span class=p>))</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=nb>int</span><span class=p>)]</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=p>[(</span><span class=n>eyes</span><span class=p>[</span><span class=mi>1</span><span class=p>][</span><span class=mi>0</span><span class=p>]</span><span class=o>+</span><span class=p>(</span><span class=n>eyes</span><span class=p>[</span><span class=mi>1</span><span class=p>][</span><span class=mi>2</span><span class=p>]</span><span class=o>/</span><span class=mi>2</span><span class=p>))</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=nb>int</span><span class=p>),</span> <span class=p>(</span><span class=n>eyes</span><span class=p>[</span><span class=mi>1</span><span class=p>][</span><span class=mi>1</span><span class=p>]</span><span class=o>+</span><span class=p>(</span><span class=n>eyes</span><span class=p>[</span><span class=mi>1</span><span class=p>][</span><span class=mi>3</span><span class=p>]</span><span class=o>/</span><span class=mi>2</span><span class=p>))</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=nb>int</span><span class=p>)]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>left_eye</span> <span class=o>=</span> <span class=n>left_eye_x_y</span><span class=p>(</span><span class=n>eyes</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p><strong>Important:</strong> The position of the eyes is from the <strong>unscaled</strong> image.
+So is the face&rsquo;s position too.
+Before we can proceed, we first need to also &ldquo;scale&rdquo; our coordinates for the left eye.
+This is achieved by multiplying our coordinates with <code>sf</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>left_eye</span> <span class=o>=</span> <span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=p>((</span><span class=n>x</span><span class=o>+</span><span class=n>left_eye</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span><span class=o>*</span><span class=n>sf</span><span class=p>)</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=nb>int</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=p>((</span><span class=n>y</span><span class=o>+</span><span class=n>left_eye</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span><span class=o>*</span><span class=n>sf</span><span class=p>)</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=nb>int</span><span class=p>),</span>
+</span></span><span class=line><span class=cl><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>To align the face, there are at least to ways.
+The first is to translate the image, which means to move it along the axes.
+Image translation with OpenCV is unfortunately not a oneliner of <code>image.move(x, y)</code>,
+see <a class=link href=https://opencv.org/blog/image-rotation-and-translation-using-opencv/#h-image-translation target=_blank rel=noopener>Image Translation (opencv.org)</a>.
+Lucky for us, we can be cheap and just cut off the image at a specific offset.
+This is equal to moving our input image to a specific coordinate.
+In OpenCV, images are stored as an array of the form <code>image[height, width]</code>.
+Let&rsquo;s start by cropping the image to the left eye&rsquo;s center.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>image</span> <span class=o>=</span> <span class=n>image</span><span class=p>[</span><span class=n>left_eye</span><span class=p>[</span><span class=mi>1</span><span class=p>]:,</span> <span class=n>left_eye</span><span class=p>[</span><span class=mi>0</span><span class=p>]:]</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/2025-no-shave-november-and-face-detection/aligned_face.webp width=300 height=343 srcset="/p/2025-no-shave-november-and-face-detection/aligned_face_hu_a29b13f920de3cff.webp 480w, /p/2025-no-shave-november-and-face-detection/aligned_face_hu_5d3f238ed980c3da.webp 1024w" loading=lazy alt="Aligned Face" class=gallery-image data-flex-grow=87 data-flex-basis=209px></p><p>That looks really promising!
+Taking to pictures, after this step they would be perfectly aligned!
+However, we obviously would not like to cut off our face, so we need to get a bit more from the left and the top.
+These values are easiest found by trial & error.
+For my purposes, using an offset of 300px vertically and 150px horizontally sufficed.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>image</span> <span class=o>=</span> <span class=n>image</span><span class=p>[</span><span class=n>left_eye</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span><span class=o>-</span><span class=mi>300</span><span class=p>:,</span> <span class=n>left_eye</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=o>-</span><span class=mi>150</span><span class=p>:]</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/2025-no-shave-november-and-face-detection/aligned_face_offset.webp width=294 height=400 srcset="/p/2025-no-shave-november-and-face-detection/aligned_face_offset_hu_18047de47fabc7c4.webp 480w, /p/2025-no-shave-november-and-face-detection/aligned_face_offset_hu_dc4ba76ea289df0f.webp 1024w" loading=lazy alt="Aligned Face with Offset" class=gallery-image data-flex-grow=73 data-flex-basis=176px></p><p>We don&rsquo;t need to have a look at the whole shoulder or the largest part of the neck.
+So let&rsquo;s also crop the image to the bottom and to the right.
+As before, the values are best determined by trial & error, until it looks good.
+For my case, 630px in height and 475px in width deemed successful.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>image</span> <span class=o>=</span> <span class=n>image</span><span class=p>[</span>
+</span></span><span class=line><span class=cl>    <span class=n>left_eye</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span><span class=o>-</span><span class=mi>300</span><span class=p>:(</span><span class=n>left_eye</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span><span class=o>-</span><span class=mi>300</span><span class=p>)</span><span class=o>+</span><span class=mi>630</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=n>left_eye</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=o>-</span><span class=mi>150</span><span class=p>:(</span><span class=n>left_eye</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=o>-</span><span class=mi>150</span><span class=p>)</span><span class=o>+</span><span class=mi>475</span><span class=p>,</span>
+</span></span><span class=line><span class=cl><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/2025-no-shave-november-and-face-detection/aligned_and_cutout.webp width=302 height=400 srcset="/p/2025-no-shave-november-and-face-detection/aligned_and_cutout_hu_8fe3e7d70fcfa08.webp 480w, /p/2025-no-shave-november-and-face-detection/aligned_and_cutout_hu_cda535a656dd4b22.webp 1024w" loading=lazy alt="Aligned Face with Cutout" class=gallery-image data-flex-grow=75 data-flex-basis=181px></p><p>Take a moment to breathe.
+We&rsquo;re done with all it takes to detect the face, the eyes, scale and align on the left eye, resulting in a nicely cut out image.
+On to our next task, stitching images together &mldr; and stop drawing the red circle in the eye.</p><p>The code up until here is available in <a class=link href=align_and_cutout.py>align_and_cutout.py</a>.</p><h2 id=generating-the-gif>Generating the GIF</h2><p>This section can be read independent of the previous section.
+We will however extend the previous code and add to read the input images, produce the aligned output, and then stitch these output images together.</p><p>To generate the GIFs, we use <a class=link href=https://pypi.org/project/ImageIO/ target=_blank rel=noopener>ImageIO (pypi.org)</a>.
+As with OpenCV, as an Arch user <em>(btw)</em> I use pacman to install it, but if you&rsquo;re using pip to manage your packages, use pip.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl><span class=c1># Arch users</span>
+</span></span><span class=line><span class=cl>sudo pacman -S python-imageio
+</span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl><span class=c1># pip users</span>
+</span></span><span class=line><span class=cl>pip install opencv-python
+</span></span></code></pre></td></tr></table></div></div><h3 id=processing-input-images>Processing Input Images</h3><p>For simplicity, we assume that there are two directories.
+One is <code>input/</code> and one is <code>output/</code>.
+All images in <code>input/</code> are named in a sortable order by their respective date, e.g. <code>20251101</code>, <code>20251102</code>, &mldr;</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>os</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>input_path</span> <span class=o>=</span> <span class=s2>&#34;input/&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>output_path</span> <span class=o>=</span> <span class=s2>&#34;output/&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>files</span> <span class=o>=</span> <span class=n>os</span><span class=o>.</span><span class=n>listdir</span><span class=p>(</span><span class=n>input_path</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>files</span><span class=o>.</span><span class=n>sort</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>input_files</span> <span class=o>=</span> <span class=p>[(</span><span class=n>filename</span><span class=p>,</span> <span class=n>input_path</span> <span class=o>+</span> <span class=n>filename</span><span class=p>,</span> <span class=n>output_path</span> <span class=o>+</span> <span class=n>filename</span><span class=p>)</span> <span class=k>for</span> <span class=n>filename</span> <span class=ow>in</span> <span class=n>files</span><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div><p>Next on, we need to iterate through all files and convert them using our previous code.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>for</span> <span class=n>filename</span><span class=p>,</span> <span class=n>fin</span><span class=p>,</span> <span class=n>fout</span> <span class=ow>in</span> <span class=n>input_files</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># previously: image = cv2.imread(&#34;image.png&#34;)</span>
+</span></span><span class=line><span class=cl>    <span class=n>image</span> <span class=o>=</span> <span class=n>cv2</span><span class=o>.</span><span class=n>imread</span><span class=p>(</span><span class=n>fin</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># . . . find face, eyes, scale, position, crop</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1># previously: cv2.imwrite(&#34;output.png&#34;, image)</span>
+</span></span><span class=line><span class=cl>    <span class=n>cv2</span><span class=o>.</span><span class=n>imwrite</span><span class=p>(</span><span class=n>fout</span><span class=p>,</span> <span class=n>image</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=creating-a-gif-using-imageio>Creating a GIF using ImageIO</h3><p>This is <strong>by far</strong> the easiest part of this post.
+We read all frames, append them to a list that the GIF should be generated from &mldr; and generate it.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>imageio.v2</span> <span class=k>as</span> <span class=nn>imageio</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>frames</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Our main loop from the previous step</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>filename</span><span class=p>,</span> <span class=n>fin</span><span class=p>,</span> <span class=n>fout</span> <span class=ow>in</span> <span class=n>input_files</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># Reading, Processing, ..., and saving</span>
+</span></span><span class=line><span class=cl>    <span class=n>cv2</span><span class=o>.</span><span class=n>imwrite</span><span class=p>(</span><span class=n>fout</span><span class=p>,</span> <span class=n>image</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>frames</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>imageio</span><span class=o>.</span><span class=n>imread</span><span class=p>(</span><span class=n>fout</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>imageio</span><span class=o>.</span><span class=n>mimsave</span><span class=p>(</span><span class=s2>&#34;output.gif&#34;</span><span class=p>,</span> <span class=n>frames</span><span class=p>,</span> <span class=n>fps</span><span class=o>=</span><span class=mi>5</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>The final code can be found in <a class=link href=final_result.py>final_result.py</a></p><h2 id=result-and-closing-remarks>Result and Closing Remarks</h2><p>Of course, here is a result of 30 days not shaving:</p><div class=gallery><video src=output.mp4 controls loop muted></video></div><p>The irony of providing this as an MP4 cannot be overlooked.
+GIFs are way too chunky and would auto load, so I had to embed this as a video &mldr;
+However, the final result of this code is a GIF, <em>trust me bro</em></p><p>This marks the end of my longest post, to date (2025).
+Given I have zero stance in computer vision or machine learning, it&rsquo;s been a refreshing excursion into a different field.</p><p>Once again, I&rsquo;d like to point out that more information around the Movember & No-Shave November can be found on</p><ul><li><a class=link href=https://movember.com/ target=_blank rel=noopener>movember.com</a> and</li><li><a class=link href=https://no-shave.org/ target=_blank rel=noopener>no-shave.org</a>.</li></ul></section><footer class=article-footer><section class=article-tags><a href=/tags/software-engineering/>Software Engineering</a></section><section class=article-copyright><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><div class="article-list--compact links"><article><a href=https://www.geeksforgeeks.org/python/face-detection-using-cascade-classifier-using-opencv-python/ target=_blank rel=noopener><div class=article-details><h2 class=article-title>Face Detection using Cascade Classifier using OpenCV - Python (geeksforgeeks.org)</h2><footer class=article-time>Additional resource used during research for this article.</footer></div></a></article><article><a href=https://pythongeeks.org/face-detection-and-recognition-using-opencv/ target=_blank rel=noopener><div class=article-details><h2 class=article-title>Face Detection and Recognition using OpenCV (pythongeeks.org)</h2><footer class=article-time>Additional resource used during research for this article.</footer></div></a></article><article><a href=https://ashadali.medium.com/image-processing-with-opencv-face-detection-on-images-and-videos-2896f54c8caf target=_blank rel=noopener><div class=article-details><h2 class=article-title>Image Processing with OpenCV — Face Detection on Images and Videos (medium.com)</h2><footer class=article-time>Additional resource used during research for this article.</footer></div></a></article></div><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/2025-dont-let-your-mocks-mock-you/><div class=article-details><h2 class=article-title>Don't Let Your Mocks Mock You!</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 revontulet.dev by Matthias Döpmann</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.30.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script><script defer src=https://static.cloudflareinsights.com/beacon.min.js data-cf-beacon='{"token": "ab26ba39e87544c98ce4711525f9a8b8"}'></script></body></html>
